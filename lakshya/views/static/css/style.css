@@ -4212,6 +4212,14 @@ a, button {
         display: none;
     }
 
+    /* Top emergency strip: hide 3rd pill, keep sync status on one line */
+    .hide-mobile {
+        display: none;
+    }
+    .offline-text {
+        white-space: nowrap;
+    }
+
     /* Flash + footer spacing */
     .flash-container {
         padding-left: 1rem;
