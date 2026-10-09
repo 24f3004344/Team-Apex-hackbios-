@@ -5,6 +5,14 @@ from middleware.auth_middleware import login_required
 triage_bp = Blueprint("triage", __name__)
 
 
+def _safe_int(value, default):
+    """Coerce user input to int; fall back to default instead of 500."""
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 # =====================================================================
 # CLINICAL TRIAGE ROUTES: SCREENER & EVALUATOR
 # =====================================================================
@@ -22,9 +30,9 @@ def api_triage_evaluate():
     data = request.get_json() or {}
     fever = data.get("fever", False)
     breathing = data.get("breathing_difficulty", False)
-    systolic_bp = int(data.get("systolic_bp", 120))
-    maternal_weeks = int(data.get("maternal_weeks", 0))
-    pediatric_age = int(data.get("pediatric_age", 99))
+    systolic_bp = _safe_int(data.get("systolic_bp", 120), 120)
+    maternal_weeks = _safe_int(data.get("maternal_weeks", 0), 0)
+    pediatric_age = _safe_int(data.get("pediatric_age", 99), 99)
 
     if breathing or (maternal_weeks > 20 and systolic_bp >= 160) or (pediatric_age < 5 and fever and breathing):
         tier = "Red - Emergency Escalation"

@@ -1,14 +1,28 @@
 import os
+import secrets
 from flask import Flask, session
 from models import close_db, init_db
 from models import user as user_model
 from controllers import register_routes
 
 
+def _get_secret_key():
+    """SECRET_KEY from env in production; random per-boot fallback for local dev."""
+    key = os.environ.get("SECRET_KEY")
+    if not key:
+        print("WARNING: SECRET_KEY not set — using random per-boot key (set SECRET_KEY env for stable sessions).")
+        return secrets.token_hex(32)
+    return key
+
+
+def _is_debug():
+    return os.environ.get("FLASK_DEBUG", "0") == "1"
+
+
 def create_app():
     """Application factory: models -> controllers wiring with explicit view folders."""
     app = Flask(__name__, template_folder="views/templates", static_folder="views/static")
-    app.secret_key = os.environ.get("SECRET_KEY", "swasthya-setu-secure-secret-key-2026")
+    app.secret_key = _get_secret_key()
 
     # Automatically close database connection when the request ends
     app.teardown_appcontext(close_db)
@@ -38,4 +52,4 @@ app = create_app()
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5050))
     print(f"Starting AarogyaSahay Health Grid on http://127.0.0.1:{port}")
-    app.run(host="127.0.0.1", port=port, debug=True, use_reloader=False)
+    app.run(host="127.0.0.1", port=port, debug=_is_debug(), use_reloader=False)

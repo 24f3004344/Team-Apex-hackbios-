@@ -19,9 +19,9 @@ def get_nearby_hospitals_global(district, exclude_id, limit=5):
 @login_required
 def list_hospitals():
     """List all hospitals with pagination and filtering."""
-    # Get query parameters
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 20, type=int)
+    # Get query parameters (clamped: page>=1, 1<=per_page<=100)
+    page = max(request.args.get('page', 1, type=int), 1)
+    per_page = min(max(request.args.get('per_page', 20, type=int), 1), 100)
     district = request.args.get('district', '')
     hospital_type = request.args.get('type', '')
     search = request.args.get('search', '')

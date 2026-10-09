@@ -33,7 +33,10 @@ def api_medicine_update(med_id):
 
     fields = {}
     if units is not None:
-        units = int(units)
+        try:
+            units = int(units)
+        except (TypeError, ValueError):
+            return jsonify({"success": False, "error": "units must be a number"}), 400
         fields["units"] = units
         # Auto-compute stock_status from units if not explicitly provided
         if not stock_status:

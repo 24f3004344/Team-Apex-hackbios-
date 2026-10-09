@@ -54,9 +54,9 @@ def register():
         password = request.form.get("password", "").strip()
         confirm_password = request.form.get("confirm_password", "").strip()
 
-        # Validate role whitelist
-        if role not in ("frontline", "doctor", "patient", "admin"):
-            flash("Invalid role selected.", "danger")
+        # Validate role whitelist (admin accounts are provisioned out-of-band, never self-registered)
+        if role not in ("frontline", "doctor", "patient"):
+            flash("Invalid role selected. Facility admin accounts are created by the district health office.", "danger")
             return render_template("register.html", form_data=request.form)
 
         if not full_name or not identifier or not password:

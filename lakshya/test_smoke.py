@@ -69,8 +69,32 @@ def test_login_gating():
     assert c.post("/api/triage-evaluate", json={"breathing_difficulty": True}).status_code == 200
 
 
+def test_security_fixes():
+    """Regression: admin self-register blocked, crash guards, no hardcoded secret."""
+    from app import app
+    import models
+    assert app.secret_key != "swasthya-setu-secure-secret-key-2026", "hardcoded SECRET_KEY still in use"
+    c = app.test_client()
+    # 1. admin self-registration must be rejected (re-render, no redirect, no DB row)
+    r = c.post("/register", data={"full_name": "Evil", "identifier": "9999999999",
+                                  "role": "admin", "password": "evil12345",
+                                  "confirm_password": "evil12345"})
+    assert r.status_code == 200, "admin register not blocked"
+    with app.app_context():
+        assert models.user.find_by_identifier("9999999999") is None, "admin row was created!"
+    # 2. triage garbage input -> 200 with evaluated tier, not 500
+    r = c.post("/api/triage-evaluate", json={"systolic_bp": "abc", "maternal_weeks": "x", "pediatric_age": "y"})
+    assert r.status_code == 200, "triage garbage crashed"
+    # 3. per_page=0 -> 200, not 500 (logged in for hospitals page)
+    c.post("/login", data={"identifier": "9876543210", "password": "asha123", "role_tab": "frontline"})
+    assert c.get("/hospitals/?per_page=0").status_code == 200, "per_page=0 crashed"
+    # 4. non-numeric units -> 400, not 500
+    r = c.post("/api/medicine/1/update", json={"units": "abc"})
+    assert r.status_code == 400, f"units garbage gave {r.status_code}"
+
+
 if __name__ == "__main__":
-    for fn in [test_structure, test_url_map, test_routes, test_login_gating]:
+    for fn in [test_structure, test_url_map, test_routes, test_login_gating, test_security_fixes]:
         fn()
         print(f"PASS {fn.__name__}")
     print("ALL SMOKE TESTS PASSED")
