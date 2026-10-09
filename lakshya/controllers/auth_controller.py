@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import user as user_model
+from middleware.csrf import protect, rotate_token
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -12,6 +13,7 @@ auth_bp = Blueprint("auth", __name__)
 # =====================================================================
 
 @auth_bp.route("/login", methods=["GET", "POST"])
+@protect
 def login():
     """Multi-role login with Phone / Email / ABHA ID & Quick-Fill Demo."""
     if request.method == "POST":
@@ -30,6 +32,7 @@ def login():
             session["user_name"] = user["full_name"]
             session["user_role"] = user["role"]
             session["facility_name"] = user["facility_name"]
+            rotate_token()
             flash(f"Welcome back, {user['full_name']}! Connected to {user['facility_name'] or 'National Health Grid'}.", "success")
             return redirect(url_for("dashboard"))
         else:
@@ -40,6 +43,7 @@ def login():
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
+@protect
 def register():
     """Registration page for Frontline Workers, Doctors, Patients & Facility Admins."""
     if request.method == "POST":
@@ -86,6 +90,7 @@ def register():
             session["user_name"] = full_name
             session["user_role"] = role
             session["facility_name"] = facility_name or "Community Health Sub-Centre"
+            rotate_token()
 
             flash(f"Account successfully registered! Your Digital Health Profile (ABHA: {abha_id}) is active.", "success")
             return redirect(url_for("dashboard"))

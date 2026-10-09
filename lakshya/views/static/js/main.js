@@ -110,6 +110,10 @@ function togglePasswordVisibility(inputId, btn) {
 /**
  * Interactive Clinical Triage Screener
  */
+function csrfHeaders() {
+    const tok = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    return { 'Content-Type': 'application/json', 'X-CSRF-Token': tok };
+}
 async function handleTriageSubmit(event) {
     event.preventDefault();
 
@@ -129,7 +133,7 @@ async function handleTriageSubmit(event) {
     try {
         const response = await fetch('/api/triage-evaluate', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: csrfHeaders(),
             body: JSON.stringify({
                 systolic_bp: bp,
                 pediatric_age: age,

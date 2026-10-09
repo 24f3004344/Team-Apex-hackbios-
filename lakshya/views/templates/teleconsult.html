@@ -116,6 +116,7 @@
                     </div>
 
                     <form action="{{ url_for('teleconsult') }}" method="POST" class="quick-queue-form">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                         <div class="form-group">
                             <label class="form-label">Patient Name *</label>
                             <input type="text" name="patient_name" class="form-control" placeholder="e.g. Radhabai Gond" required>

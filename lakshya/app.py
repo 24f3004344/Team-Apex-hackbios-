@@ -4,6 +4,7 @@ from flask import Flask, session
 from models import close_db, init_db
 from models import user as user_model
 from controllers import register_routes
+from middleware.csrf import get_token
 
 
 def _get_secret_key():
@@ -36,7 +37,7 @@ def create_app():
         current_user = None
         if "user_id" in session:
             current_user = user_model.get_by_id(session["user_id"])
-        return dict(current_user=current_user)
+        return dict(current_user=current_user, csrf_token=get_token)
 
     register_routes(app)
     return app

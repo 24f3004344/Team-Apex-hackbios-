@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request, jsonify
 from models import medicine as med_model
 from models import diagnostic as diag_model
 from middleware.auth_middleware import login_required
+from middleware.csrf import protect
 
 inventory_bp = Blueprint("inventory", __name__)
 
@@ -22,6 +23,7 @@ def inventory_page():
 
 @inventory_bp.route("/api/medicine/<int:med_id>/update", methods=["POST"])
 @login_required
+@protect
 def api_medicine_update(med_id):
     """Update medicine stock quantity and status."""
     data = request.get_json() or {}
@@ -60,6 +62,7 @@ def api_medicine_update(med_id):
 
 @inventory_bp.route("/api/medicine/<int:med_id>/delete", methods=["POST"])
 @login_required
+@protect
 def api_medicine_delete(med_id):
     """Delete a medicine entry from inventory."""
     if not med_model.exists(med_id):

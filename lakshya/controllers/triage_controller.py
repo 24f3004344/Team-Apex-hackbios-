@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, jsonify
 from middleware.auth_middleware import login_required
+from middleware.csrf import protect
 
 triage_bp = Blueprint("triage", __name__)
 
@@ -25,6 +26,7 @@ def triage_page():
 
 
 @triage_bp.route("/api/triage-evaluate", methods=["POST"])
+@protect
 def api_triage_evaluate():
     """Evaluate patient clinical signs and return triage tier and escalation actions."""
     data = request.get_json() or {}

@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from models import teleconsult as tc_model
 from middleware.auth_middleware import login_required
+from middleware.csrf import protect
 
 teleconsult_bp = Blueprint("teleconsult", __name__)
 
@@ -12,6 +13,7 @@ teleconsult_bp = Blueprint("teleconsult", __name__)
 
 @teleconsult_bp.route("/teleconsult", methods=["GET", "POST"])
 @login_required
+@protect
 def teleconsult():
     """Assisted Teleconsultation & Tele-OPD Hub."""
     if request.method == "POST":
@@ -46,6 +48,7 @@ def teleconsult():
 
 @teleconsult_bp.route("/api/teleconsult/<int:tc_id>/update", methods=["POST"])
 @login_required
+@protect
 def api_teleconsult_update(tc_id):
     """Update teleconsult status and prescription."""
     data = request.get_json() or {}
@@ -71,6 +74,7 @@ def api_teleconsult_update(tc_id):
 
 @teleconsult_bp.route("/api/teleconsult/<int:tc_id>/delete", methods=["POST"])
 @login_required
+@protect
 def api_teleconsult_delete(tc_id):
     """Remove teleconsult record from queue."""
     if not tc_model.exists(tc_id):
