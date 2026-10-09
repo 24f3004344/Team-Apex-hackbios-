@@ -13,7 +13,7 @@ teleconsult_bp = Blueprint("teleconsult", __name__)
 @teleconsult_bp.route("/teleconsult", methods=["GET", "POST"])
 @role_required("doctor", "frontline")
 def teleconsult():
-    """Assisted Teleconsultation & Tele-OPD Hub."""
+    """Assisted Teleconsultation & Google Meet Hub."""
     if request.method == "POST":
         patient_name = request.form.get("patient_name", "").strip()
         abha_id = request.form.get("abha_id", "").strip()
@@ -42,7 +42,7 @@ def teleconsult():
             chief_complaint, vitals, priority
         ))
         db.commit()
-        flash(f"Patient {patient_name} added to Tele-OPD Queue with priority: {priority}.", "success")
+        flash(f"Patient {patient_name} added to Google Meet Queue with priority: {priority}.", "success")
         return redirect(url_for("teleconsult"))
 
     db = get_db()

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {% if user.role == 'doctor' %}Clinical Tele-OPD Hub | AarogyaSahay
+    {% if user.role == 'doctor' %}Clinical Google Meet Hub | AarogyaSahay
     {% elif user.role == 'frontline' %}Frontline ASHA Operations | AarogyaSahay
     {% elif user.role == 'patient' %}My Health Dashboard | AarogyaSahay
     {% else %}Health Grid Administrator Console | AarogyaSahay{% endif %}
@@ -124,7 +124,7 @@
                         <span class="kpi-badge alert">Active Queue</span>
                     </div>
                     <div class="kpi-val">{{ stats.pending_teleconsults }}</div>
-                    <div class="kpi-title">Pending Tele-OPD</div>
+                    <div class="kpi-title">Pending Google Meet</div>
                     <small class="kpi-sub">Waiting for physician consult</small>
                 </div>
                 <div class="kpi-card">
@@ -162,7 +162,7 @@
                         <span class="kpi-trend up">Assisted Queue</span>
                     </div>
                     <div class="kpi-val">{{ stats.pending_teleconsults }}</div>
-                    <div class="kpi-title">Assisted Tele-OPDs</div>
+                    <div class="kpi-title">Assisted Google Meets</div>
                     <small class="kpi-sub">Patients waiting at Sub-Centre</small>
                 </div>
                 <div class="kpi-card">
@@ -207,7 +207,7 @@
                 <div class="kpi-card">
                     <div class="kpi-header">
                         <span class="kpi-icon emerald"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg></span>
-                        <span class="kpi-trend up">Tele-OPD</span>
+                        <span class="kpi-trend up">Google Meet</span>
                     </div>
                     <div class="kpi-val">{{ stats.total_teleconsults }}</div>
                     <div class="kpi-title">Total Consultations</div>
@@ -340,12 +340,12 @@
         {% elif user.role == 'doctor' %}
             <!-- DOCTOR OPTIMIZED DASHBOARD -->
             <div class="dashboard-main-grid">
-                <!-- Left: Live Tele-OPD Queue for Doctor -->
+                <!-- Left: Live Google Meet Queue for Doctor -->
                 <div class="dash-column queue-col">
                     <div class="panel-card glass-panel">
                         <div class="panel-header-flex">
                             <div class="panel-title-wrap">
-                                <h3>Live Tele-OPD Consultation Queue</h3>
+                                <h3>Live Google Meet Consultation Queue</h3>
                                 <small>Pending patients assisted by ASHA frontline workers</small>
                             </div>
                             <a href="{{ url_for('teleconsult') }}" class="btn btn-xs btn-primary btn-glow">Open Consult Room</a>
@@ -464,12 +464,12 @@
                     </div>
                 </div>
 
-                <!-- Right: Tele-OPD Queue & Sub-Centre Stock -->
+                <!-- Right: Google Meet Queue & Sub-Centre Stock -->
                 <div class="dash-column queue-col">
                     <div class="panel-card glass-panel mb-4">
                         <div class="panel-header-flex">
                             <div class="panel-title-wrap">
-                                <h3>Assisted Tele-OPD Queue</h3>
+                                <h3>Assisted Google Meet Queue</h3>
                                 <small>Patients awaiting doctor tele-consultation</small>
                             </div>
                             <a href="{{ url_for('teleconsult') }}" class="btn btn-xs btn-primary">+ Queue Patient</a>

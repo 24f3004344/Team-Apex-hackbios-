@@ -33,9 +33,9 @@ def api_triage_evaluate():
         facility = "Sub-Divisional Hospital / District Emergency"
     elif systolic_bp >= 140 or fever or (maternal_weeks > 0 and systolic_bp >= 135):
         tier = "Yellow - Priority Tele-Consultation"
-        action = "Schedule Assisted Tele-OPD within 4 hours. Connect with Medical Officer at Primary Health Centre."
+        action = "Schedule Assisted Google Meet within 4 hours. Connect with Medical Officer at Primary Health Centre."
         badge = "urgent"
-        facility = "Primary Health Centre (PHC Tele-OPD)"
+        facility = "Primary Health Centre (PHC Google Meet)"
     else:
         tier = "Green - Routine Primary Care & Counseling"
         action = "Manage at Sub-Centre via ASHA/ANM protocol. Dispense essential supplements and schedule follow-up."

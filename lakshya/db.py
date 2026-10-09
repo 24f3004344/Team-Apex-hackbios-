@@ -135,7 +135,7 @@ def init_db():
     if cursor.fetchone()[0] == 0:
         seed_users = [
             ("Sunita Devi (ASHA)", "9876543210", "frontline", "Rampur Sub-Centre (PHC Bilaspur)", "Bilaspur", "Chhattisgarh", "91-8832-1102-4411", "Hindi", generate_password_hash("asha123")),
-            ("Dr. Rajesh Sharma (MD)", "doctor@swasthya.gov.in", "doctor", "District Hospital & Tele-OPD Hub", "Bilaspur", "Chhattisgarh", "91-4401-9923-8821", "English", generate_password_hash("doctor123")),
+            ("Dr. Rajesh Sharma (MD)", "doctor@swasthya.gov.in", "doctor", "District Hospital & Google Meet Hub", "Bilaspur", "Chhattisgarh", "91-4401-9923-8821", "English", generate_password_hash("doctor123")),
             ("Kamla Bai", "9876543212", "patient", "Rampur Village Sub-Centre", "Bilaspur", "Chhattisgarh", "91-4021-8890-1123", "Hindi", generate_password_hash("patient123")),
             ("Anil Verma (PHC Admin)", "admin@swasthya.gov.in", "admin", "Bilaspur Rural Primary Health Centre", "Bilaspur", "Chhattisgarh", "91-5511-7788-3344", "English", generate_password_hash("admin123"))
         ]

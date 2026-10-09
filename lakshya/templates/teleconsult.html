@@ -1,203 +1,1146 @@
 {% extends "base.html" %}
 
-{% block title %}Assisted Tele-OPD Hub | AarogyaSahay{% endblock %}
+{% block title %}Assisted Tele-OPD | Google Meet Console | AarogyaSahay{% endblock %}
 
-{% block breadcrumbs %}
-<div class="breadcrumb-bar">
-    <div class="container breadcrumb-flex">
-        <a href="{{ url_for('index') }}">Home</a>
-        <span class="breadcrumb-sep">/</span>
-        <span class="breadcrumb-curr">Tele-OPD Hub</span>
-    </div>
-</div>
+{% block extra_head %}
+<style>
+/* ===== Google Meet-Style Teleconsult ===== */
+.teleconsult-page {
+    padding: 0 !important;
+}
+.teleconsult-page .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+}
+.teleconsult-page .page-header-bar {
+    display: none;
+}
+.teleconsult-page .breadcrumb-bar {
+    display: none;
+}
+
+/* Google Meet Full Layout */
+.gmeet-wrapper {
+    display: flex;
+    height: calc(100vh - 90px);
+    background: #202124;
+    color: #e8eaed;
+    font-family: 'Google Sans', 'Outfit', 'Segoe UI', sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ── Meeting Room (Main Area) ── */
+.gmeet-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-width: 0;
+}
+
+/* Top Meeting Info Bar */
+.gmeet-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+.gmeet-meeting-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gmeet-meeting-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #e8eaed;
+    letter-spacing: -0.01em;
+}
+
+.gmeet-meeting-code {
+    font-size: 0.8rem;
+    color: #9aa0a6;
+    font-family: 'Roboto Mono', monospace;
+    background: rgba(255,255,255,0.07);
+    padding: 3px 10px;
+    border-radius: 4px;
+}
+
+.gmeet-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gmeet-top-btn {
+    background: none;
+    border: none;
+    color: #9aa0a6;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.gmeet-top-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #e8eaed;
+}
+
+.gmeet-timer {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.85rem;
+    color: #9aa0a6;
+    padding: 4px 12px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+}
+
+/* ── Participant Video Grid ── */
+.gmeet-video-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 24px 100px 24px;
+    min-height: 0;
+}
+
+.gmeet-video-grid {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    max-width: 1100px;
+    height: 100%;
+    max-height: 600px;
+}
+
+/* 2-person layout */
+.gmeet-video-grid.grid-2 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+}
+
+/* Individual Participant Tile */
+.gmeet-tile {
+    background: #3c4043;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    transition: box-shadow 0.3s;
+}
+
+.gmeet-tile.speaking {
+    box-shadow: 0 0 0 3px #8ab4f8;
+}
+
+.gmeet-tile-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 500;
+    color: #202124;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.gmeet-tile-avatar.doctor-avatar {
+    background: linear-gradient(135deg, #8ab4f8, #669df6);
+}
+
+.gmeet-tile-avatar.patient-avatar {
+    background: linear-gradient(135deg, #81c995, #5bb974);
+}
+
+.gmeet-tile-label {
+    position: absolute;
+    bottom: 12px;
+    left: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gmeet-tile-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #fff;
+    background: rgba(0,0,0,0.55);
+    padding: 4px 12px;
+    border-radius: 6px;
+    backdrop-filter: blur(4px);
+}
+
+.gmeet-tile-mic-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+
+.gmeet-tile-mic-icon svg {
+    width: 14px;
+    height: 14px;
+    color: #fff;
+}
+
+/* Speaking audio wave animation on tile */
+.gmeet-tile .speaking-wave {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    display: flex;
+    gap: 2px;
+    align-items: flex-end;
+    height: 18px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.gmeet-tile.speaking .speaking-wave {
+    opacity: 1;
+}
+
+.speaking-wave span {
+    width: 3px;
+    background: #8ab4f8;
+    border-radius: 2px;
+    animation: gmeetWave 0.8s ease-in-out infinite;
+}
+.speaking-wave span:nth-child(1) { height: 6px; animation-delay: 0s; }
+.speaking-wave span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+.speaking-wave span:nth-child(3) { height: 8px; animation-delay: 0.3s; }
+.speaking-wave span:nth-child(4) { height: 14px; animation-delay: 0.1s; }
+.speaking-wave span:nth-child(5) { height: 6px; animation-delay: 0.25s; }
+
+@keyframes gmeetWave {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+}
+
+/* ── Floating Bottom Control Bar ── */
+.gmeet-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 24px;
+    z-index: 20;
+    pointer-events: none;
+}
+
+.gmeet-controls-center {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: all;
+}
+
+.gmeet-ctrl-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    position: relative;
+}
+
+.gmeet-ctrl-btn svg {
+    width: 22px;
+    height: 22px;
+}
+
+.gmeet-ctrl-btn.ctrl-default {
+    background: #3c4043;
+    color: #e8eaed;
+}
+.gmeet-ctrl-btn.ctrl-default:hover {
+    background: #4a4d51;
+    transform: scale(1.08);
+}
+
+.gmeet-ctrl-btn.ctrl-active {
+    background: #8ab4f8;
+    color: #202124;
+}
+.gmeet-ctrl-btn.ctrl-active:hover {
+    background: #aecbfa;
+    transform: scale(1.08);
+}
+
+.gmeet-ctrl-btn.ctrl-off {
+    background: #ea4335;
+    color: #fff;
+}
+.gmeet-ctrl-btn.ctrl-off:hover {
+    background: #d93025;
+    transform: scale(1.08);
+}
+
+.gmeet-ctrl-btn.ctrl-end {
+    width: 56px;
+    height: 48px;
+    border-radius: 24px;
+    background: #ea4335;
+    color: #fff;
+}
+.gmeet-ctrl-btn.ctrl-end:hover {
+    background: #d93025;
+    transform: scale(1.08);
+}
+
+.gmeet-ctrl-btn .btn-tooltip {
+    position: absolute;
+    bottom: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2d2e30;
+    color: #e8eaed;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.gmeet-ctrl-btn:hover .btn-tooltip {
+    opacity: 1;
+}
+
+/* Side control buttons (left & right of center) */
+.gmeet-controls-left,
+.gmeet-controls-right {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: all;
+}
+
+.gmeet-controls-left {
+    left: 24px;
+}
+
+.gmeet-controls-right {
+    right: 24px;
+}
+
+.gmeet-info-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.08);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: #e8eaed;
+}
+
+.gmeet-info-chip .chip-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #34a853;
+    animation: chipPulse 2s infinite;
+}
+
+@keyframes chipPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* ── Side Panel (Queue / Rx / Chat) ── */
+.gmeet-side-panel {
+    width: 380px;
+    background: #292a2d;
+    border-left: 1px solid #3c4043;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transform: translateX(0);
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1), width 0.3s cubic-bezier(.4,0,.2,1);
+    z-index: 15;
+}
+
+.gmeet-side-panel.collapsed {
+    width: 0;
+    transform: translateX(100%);
+    overflow: hidden;
+    border-left: none;
+}
+
+.gmeet-panel-tabs {
+    display: flex;
+    border-bottom: 1px solid #3c4043;
+    flex-shrink: 0;
+}
+
+.gmeet-panel-tab {
+    flex: 1;
+    padding: 14px 8px;
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #9aa0a6;
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.gmeet-panel-tab:hover {
+    color: #e8eaed;
+}
+
+.gmeet-panel-tab.active {
+    color: #8ab4f8;
+    border-bottom-color: #8ab4f8;
+}
+
+.gmeet-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.gmeet-panel-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.gmeet-panel-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.gmeet-panel-body::-webkit-scrollbar-thumb {
+    background: #3c4043;
+    border-radius: 3px;
+}
+
+/* Panel: People / Queue */
+.gmeet-person-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.gmeet-person-item:hover {
+    background: rgba(255,255,255,0.06);
+}
+
+.gmeet-person-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #202124;
+    flex-shrink: 0;
+}
+
+.gmeet-person-avatar.blue { background: #8ab4f8; }
+.gmeet-person-avatar.green { background: #81c995; }
+.gmeet-person-avatar.orange { background: #fdd663; }
+.gmeet-person-avatar.pink { background: #f28b82; }
+
+.gmeet-person-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.gmeet-person-name {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #e8eaed;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gmeet-person-role {
+    font-size: 0.72rem;
+    color: #9aa0a6;
+}
+
+.gmeet-person-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+.gmeet-person-badge.host { background: rgba(138,180,248,0.2); color: #8ab4f8; }
+.gmeet-person-badge.waiting { background: rgba(251,188,4,0.2); color: #fdd663; }
+.gmeet-person-badge.emergency { background: rgba(234,67,53,0.25); color: #f28b82; }
+.gmeet-person-badge.priority { background: rgba(251,188,4,0.2); color: #fdd663; }
+.gmeet-person-badge.routine { background: rgba(52,168,83,0.2); color: #81c995; }
+
+/* Queue waiting section */
+.gmeet-queue-section {
+    margin-top: 16px;
+}
+
+.gmeet-queue-header {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #9aa0a6;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 8px 12px;
+    margin-bottom: 4px;
+}
+
+.gmeet-queue-item {
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    border-left: 3px solid #3c4043;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.gmeet-queue-item:hover {
+    background: rgba(255,255,255,0.07);
+}
+
+.gmeet-queue-item.q-emergency { border-left-color: #ea4335; }
+.gmeet-queue-item.q-priority { border-left-color: #fbbc04; }
+.gmeet-queue-item.q-routine { border-left-color: #34a853; }
+
+.gmeet-queue-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.gmeet-queue-item-name {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #e8eaed;
+}
+
+.gmeet-queue-complaint {
+    font-size: 0.78rem;
+    color: #9aa0a6;
+    font-style: italic;
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+
+.gmeet-queue-meta {
+    font-size: 0.72rem;
+    color: #71767b;
+    margin-bottom: 10px;
+}
+
+.gmeet-queue-admit-btn {
+    background: #8ab4f8;
+    color: #202124;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.gmeet-queue-admit-btn:hover {
+    background: #aecbfa;
+    transform: scale(1.04);
+}
+
+.gmeet-queue-admit-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Panel: Prescription (Rx) */
+.gmeet-rx-section {
+    display: none;
+}
+
+.gmeet-rx-section.active {
+    display: block;
+}
+
+.gmeet-rx-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.gmeet-rx-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #e8eaed;
+}
+
+.gmeet-rx-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 4px;
+    background: rgba(52,168,83,0.2);
+    color: #81c995;
+}
+
+.gmeet-form-group {
+    margin-bottom: 14px;
+}
+
+.gmeet-form-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #9aa0a6;
+    margin-bottom: 6px;
+}
+
+.gmeet-form-input,
+.gmeet-form-textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid #3c4043;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #e8eaed;
+    font-size: 0.85rem;
+    font-family: inherit;
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.gmeet-form-input:focus,
+.gmeet-form-textarea:focus {
+    border-color: #8ab4f8;
+    background: rgba(255,255,255,0.09);
+}
+
+.gmeet-form-textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.gmeet-rx-submit {
+    width: 100%;
+    background: #8ab4f8;
+    color: #202124;
+    border: none;
+    padding: 12px;
+    border-radius: 20px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 6px;
+}
+
+.gmeet-rx-submit:hover {
+    background: #aecbfa;
+    transform: scale(1.02);
+}
+
+/* Panel: Add Patient */
+.gmeet-add-section {
+    display: none;
+}
+
+.gmeet-add-section.active {
+    display: block;
+}
+
+.gmeet-add-section .gmeet-form-group select {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid #3c4043;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #e8eaed;
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+}
+
+.gmeet-add-section .gmeet-form-group select option {
+    background: #292a2d;
+    color: #e8eaed;
+}
+
+/* ── Bandwidth selector overlay ── */
+.gmeet-bw-selector {
+    position: absolute;
+    top: 12px;
+    right: 24px;
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gmeet-bw-label {
+    font-size: 0.72rem;
+    color: #9aa0a6;
+    font-weight: 500;
+}
+
+.gmeet-bw-select {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid #3c4043;
+    border-radius: 6px;
+    color: #e8eaed;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    outline: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.gmeet-bw-select option {
+    background: #292a2d;
+    color: #e8eaed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .gmeet-wrapper {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 90px);
+    }
+
+    .gmeet-main {
+        min-height: 60vh;
+    }
+
+    .gmeet-side-panel {
+        width: 100% !important;
+        transform: none !important;
+        border-left: none;
+        border-top: 1px solid #3c4043;
+        max-height: 50vh;
+    }
+
+    .gmeet-side-panel.collapsed {
+        max-height: 0;
+        overflow: hidden;
+    }
+
+    .gmeet-video-grid.grid-2 {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+
+    .gmeet-controls-left,
+    .gmeet-controls-right {
+        display: none;
+    }
+
+    .gmeet-video-area {
+        padding: 8px 12px 100px 12px;
+    }
+}
+
+@media (max-width: 600px) {
+    .gmeet-tile-avatar {
+        width: 64px;
+        height: 64px;
+        font-size: 1.5rem;
+    }
+
+    .gmeet-ctrl-btn {
+        width: 42px;
+        height: 42px;
+    }
+
+    .gmeet-ctrl-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+/* ── Animations ── */
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.gmeet-tile {
+    animation: fadeSlideIn 0.5s ease both;
+}
+
+.gmeet-tile:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+/* Subtle ring animation for speaking */
+@keyframes speakRing {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(138,180,248,0.6); }
+    50% { box-shadow: 0 0 0 5px rgba(138,180,248,0.25); }
+}
+
+.gmeet-tile.speaking {
+    animation: speakRing 2s ease-in-out infinite;
+}
+
+/* CC / Subtitles bar */
+.gmeet-cc-bar {
+    position: absolute;
+    bottom: 76px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    font-size: 0.88rem;
+    padding: 8px 20px;
+    border-radius: 8px;
+    max-width: 600px;
+    text-align: center;
+    z-index: 18;
+    backdrop-filter: blur(8px);
+    display: none;
+    line-height: 1.5;
+}
+
+.gmeet-cc-bar.visible {
+    display: block;
+    animation: fadeSlideIn 0.3s ease;
+}
+
+.gmeet-cc-speaker {
+    color: #8ab4f8;
+    font-weight: 600;
+}
+</style>
 {% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
 
 {% block content %}
 <div class="page-wrapper teleconsult-page">
     <div class="container">
-        <!-- Page Header -->
-        <div class="page-header-bar">
-            <div>
-                <span class="badge-tag">Rural Tele-Medicine</span>
-                <h1 class="page-title">Assisted Tele-OPD Consultation Console</h1>
-                <p class="page-sub">Connecting Sub-Centres with Medical Officers and Specialists over
-                    low-bandwidth channels.</p>
-            </div>
-            <div class="bandwidth-control-box">
-                <span class="band-label">Bandwidth Mode:</span>
-                <select id="networkBandwidthSelect" class="form-control band-select"
-                    onchange="updateBandwidthMode(this.value)">
-                    <option value="2g" selected>2G / EDGE (Audio + Low-Fi Vitals Telemetry)</option>
-                    <option value="3g">3G Standard (Compressed Video)</option>
-                    <option value="4g">4G / Broadband (Full HD Video)</option>
-                </select>
-            </div>
-        </div>
+        <div class="gmeet-wrapper">
 
-        <!-- Tele-OPD Main Layout -->
-        <div class="teleconsult-grid">
-            <!-- Left: Video Call Room Simulation & Active Patient File -->
-            <div class="tele-call-container">
-                <div class="video-feed-box glass-panel">
-                    <div class="video-overlay-top">
-                        <span class="live-pill"><span class="pulse-dot green"></span> Live Tele-Consultation (Room
-                            #402)</span>
-                        <span class="call-duration" id="callDuration">04:18</span>
+            <!-- ═══ Main Meeting Room ═══ -->
+            <div class="gmeet-main">
+
+                <!-- Top Bar -->
+                <div class="gmeet-top-bar">
+                    <div class="gmeet-meeting-info">
+                        <div class="gmeet-meeting-title">AarogyaSahay Tele-OPD</div>
+                        <div class="gmeet-meeting-code">opd-rwbq-skj</div>
                     </div>
-
-                    <!-- Split Video Screen (Doctor on top/main, ASHA & Patient in PIP) -->
-                    <div class="video-screens">
-                        <div class="screen-doctor">
-                            <div class="doctor-avatar-circle">
-                                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor"
-                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path
-                                        d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
-                                    <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4" />
-                                    <circle cx="20" cy="10" r="2" />
-                                </svg>
-                            </div>
-                            <div class="screen-label">Dr. Rajesh Sharma, MD (Bilaspur District Hospital)</div>
-                            <span class="audio-wave-anim"><span></span><span></span><span></span><span></span></span>
-                        </div>
-                        <div class="screen-pip-patient">
-                            <div class="pip-avatar">
-                                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="9" cy="7" r="4"></circle>
-                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                                </svg>
-                            </div>
-                            <span class="pip-label">Sunita Devi (ASHA) & Patient Meena Sahu</span>
-                        </div>
-                    </div>
-
-                    <div class="call-controls">
-                        <button class="call-btn btn-mic" onclick="toggleMic(this)" title="Mute/Unmute Audio">Mic
-                            On</button>
-                        <button class="call-btn btn-cam" onclick="toggleCam(this)" title="Camera">Video On</button>
-                        <button class="call-btn btn-screen"
-                            onclick="showToast('Displaying digital vitals and ECG trace to doctor...')">Stream
-                            Vitals</button>
-                        <button class="call-btn btn-end" onclick="endConsultation()">End Session</button>
+                    <div class="gmeet-top-actions">
+                        <div class="gmeet-timer" id="callTimer">00:04:18</div>
+                        <!-- Bandwidth Selector -->
+                        <select class="gmeet-bw-select" id="networkBandwidthSelect" onchange="updateBandwidthMode(this.value)">
+                            <option value="2g" selected>2G / EDGE</option>
+                            <option value="3g">3G Standard</option>
+                            <option value="4g">4G / Broadband</option>
+                        </select>
+                        <button class="gmeet-top-btn" onclick="toggleCC()" title="Turn on captions">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M7 12h2m4 0h4"/><path d="M7 16h10"/></svg>
+                        </button>
+                        <button class="gmeet-top-btn" onclick="toggleFullscreen()" title="Full screen">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Live Digital Prescription Pad -->
-                <div class="glass-panel rx-pad-card mt-3">
-                    <div class="panel-header-flex">
-                        <div>
-                            <h3>Medical Officer Digital Prescription Pad</h3>
-                            <small>Auto-translated to Hindi/Chhattisgarhi voice note for patient</small>
+                <!-- Participant Video Grid -->
+                <div class="gmeet-video-area">
+                    <div class="gmeet-video-grid grid-2" id="videoGrid">
+
+                        <!-- Doctor Tile -->
+                        <div class="gmeet-tile speaking" id="doctorTile">
+                            <div class="gmeet-tile-avatar doctor-avatar">RS</div>
+                            <div class="speaking-wave">
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </div>
+                            <div class="gmeet-tile-label">
+                                <span class="gmeet-tile-name">Dr. Rajesh Sharma</span>
+                                <span class="gmeet-tile-mic-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                </span>
+                            </div>
                         </div>
-                        <span class="badge-status status-consulted">Verified Doctor Digital Signature</span>
+
+                        <!-- Patient / ASHA Tile -->
+                        <div class="gmeet-tile" id="patientTile">
+                            <div class="gmeet-tile-avatar patient-avatar">SD</div>
+                            <div class="speaking-wave">
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </div>
+                            <div class="gmeet-tile-label">
+                                <span class="gmeet-tile-name">Sunita Devi (ASHA) & Patient</span>
+                                <span class="gmeet-tile-mic-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Closed Captions Bar -->
+                <div class="gmeet-cc-bar" id="ccBar">
+                    <span class="gmeet-cc-speaker">Dr. Sharma:</span> Prescribing Amlodipine 5mg once daily. Please monitor BP for 7 days.
+                </div>
+
+                <!-- ═══ Floating Bottom Control Bar ═══ -->
+                <div class="gmeet-controls">
+
+                    <!-- Left info -->
+                    <div class="gmeet-controls-left">
+                        <div class="gmeet-info-chip">
+                            <span class="chip-dot"></span>
+                            <span>Low-Bandwidth Tele-OPD</span>
+                        </div>
                     </div>
 
-                    <form id="rxForm" onsubmit="handlePrescriptionSubmit(event)">
-                        <div class="form-row">
-                            <div class="form-group col-6">
-                                <label class="form-label">Diagnosis / Clinical Impression</label>
-                                <input type="text" id="rxDiagnosis" class="form-control" value="" required>
+                    <!-- Center Controls -->
+                    <div class="gmeet-controls-center">
+
+                        <!-- Mic Toggle -->
+                        <button class="gmeet-ctrl-btn ctrl-default" id="micBtn" onclick="toggleMic()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                            <span class="btn-tooltip">Microphone</span>
+                        </button>
+
+                        <!-- Camera Toggle -->
+                        <button class="gmeet-ctrl-btn ctrl-default" id="camBtn" onclick="toggleCam()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                            <span class="btn-tooltip">Camera</span>
+                        </button>
+
+                        <!-- Captions -->
+                        <button class="gmeet-ctrl-btn ctrl-default" id="ccBtn" onclick="toggleCC()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 12h2m4 0h4"/><path d="M7 16h10"/></svg>
+                            <span class="btn-tooltip">Captions</span>
+                        </button>
+
+                        <!-- Screen share / Stream Vitals -->
+                        <button class="gmeet-ctrl-btn ctrl-default" id="screenBtn" onclick="streamVitals()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3"/><polyline points="8 21 16 21"/><line x1="12" y1="17" x2="12" y2="21"/><path d="M17 8V3l4 4"/></svg>
+                            <span class="btn-tooltip">Stream Vitals</span>
+                        </button>
+
+                        <!-- People / Queue -->
+                        <button class="gmeet-ctrl-btn ctrl-default" id="panelPeopleBtn" onclick="showPanel('people')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <span class="btn-tooltip">People & Queue</span>
+                        </button>
+
+                        <!-- Rx / Prescription -->
+                        <button class="gmeet-ctrl-btn ctrl-default" id="panelRxBtn" onclick="showPanel('rx')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            <span class="btn-tooltip">Prescription Pad</span>
+                        </button>
+
+                        <!-- End Call -->
+                        <button class="gmeet-ctrl-btn ctrl-end" onclick="endConsultation()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 2.59 3.4z"/></svg>
+                            <span class="btn-tooltip">End Session</span>
+                        </button>
+
+                    </div>
+
+                    <!-- Right info -->
+                    <div class="gmeet-controls-right">
+                        <div class="gmeet-info-chip">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                            <span>Room #402 • Bilaspur PHC</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ═══ Side Panel ═══ -->
+            <div class="gmeet-side-panel" id="sidePanel">
+
+                <!-- Panel Tabs -->
+                <div class="gmeet-panel-tabs">
+                    <button class="gmeet-panel-tab active" id="tabPeople" onclick="switchTab('people')">
+                        People & Queue
+                    </button>
+                    <button class="gmeet-panel-tab" id="tabRx" onclick="switchTab('rx')">
+                        Prescription
+                    </button>
+                    <button class="gmeet-panel-tab" id="tabAdd" onclick="switchTab('add')">
+                        + Add Patient
+                    </button>
+                </div>
+
+                <!-- Panel Body -->
+                <div class="gmeet-panel-body">
+
+                    <!-- ── People & Queue Section ── -->
+                    <div class="gmeet-people-section" id="sectionPeople">
+
+                        <!-- In Call -->
+                        <div class="gmeet-queue-header">In this call (2)</div>
+
+                        <div class="gmeet-person-item">
+                            <div class="gmeet-person-avatar blue">RS</div>
+                            <div class="gmeet-person-details">
+                                <div class="gmeet-person-name">Dr. Rajesh Sharma, MD</div>
+                                <div class="gmeet-person-role">Bilaspur District Hospital</div>
                             </div>
-                            <div class="form-group col-6">
-                                <label class="form-label">Medication & Dosage Instructions</label>
-                                <input type="text" id="rxMeds" class="form-control" value="" required>
+                            <span class="gmeet-person-badge host">Host</span>
+                        </div>
+
+                        <div class="gmeet-person-item">
+                            <div class="gmeet-person-avatar green">SD</div>
+                            <div class="gmeet-person-details">
+                                <div class="gmeet-person-name">Sunita Devi (ASHA) & Patient Meena Sahu</div>
+                                <div class="gmeet-person-role">Rampur Sub-Centre</div>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label class="form-label">Specialist Referral / Diagnostic Requisition</label>
-                            <input type="text" id="rxReferral" class="form-control" value="">
+                        <!-- Waiting Queue -->
+                        <div class="gmeet-queue-section">
+                            <div class="gmeet-queue-header">Waiting to join ({{ queue|length }})</div>
+
+                            {% for pt in queue %}
+                            <div class="gmeet-queue-item q-{{ pt.priority|lower }}">
+                                <div class="gmeet-queue-item-top">
+                                    <span class="gmeet-queue-item-name">{{ pt.patient_name }}</span>
+                                    <span class="gmeet-person-badge {{ pt.priority|lower }}">{{ pt.priority }}</span>
+                                </div>
+                                <div class="gmeet-queue-complaint">"{{ pt.chief_complaint }}"</div>
+                                <div class="gmeet-queue-meta">Age: {{ pt.age }} • {{ pt.gender }} • ABHA: {{ pt.abha_id }}</div>
+                                <button class="gmeet-queue-admit-btn" onclick="connectQueuePatient('{{ pt.patient_name }}')">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                                    Admit to meeting
+                                </button>
+                            </div>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+
+                    <!-- ── Prescription (Rx) Section ── -->
+                    <div class="gmeet-rx-section" id="sectionRx">
+                        <div class="gmeet-rx-header">
+                            <span class="gmeet-rx-title">Digital Prescription Pad</span>
+                            <span class="gmeet-rx-badge">✓ Verified Signature</span>
                         </div>
 
-                        <div class="rx-actions-flex">
-                            <button type="submit" class="btn btn-primary btn-glow">
-                                Sign & Issue Prescription to ASHA Tablet
+                        <form id="rxForm" onsubmit="handlePrescriptionSubmit(event)">
+                            <div class="gmeet-form-group">
+                                <label class="gmeet-form-label">Diagnosis / Clinical Impression</label>
+                                <input type="text" id="rxDiagnosis" class="gmeet-form-input" placeholder="e.g. Essential Hypertension, Stage I" required>
+                            </div>
+                            <div class="gmeet-form-group">
+                                <label class="gmeet-form-label">Medication & Dosage Instructions</label>
+                                <textarea id="rxMeds" class="gmeet-form-textarea" rows="3" placeholder="e.g. Tab Amlodipine 5mg OD x 30 days&#10;Tab Ecosprin 75mg OD" required></textarea>
+                            </div>
+                            <div class="gmeet-form-group">
+                                <label class="gmeet-form-label">Specialist Referral / Diagnostic Requisition</label>
+                                <input type="text" id="rxReferral" class="gmeet-form-input" placeholder="e.g. Refer to Cardiologist, Lipid Profile">
+                            </div>
+                            <div class="gmeet-form-group">
+                                <label class="gmeet-form-label">Follow-up Instructions</label>
+                                <input type="text" id="rxFollowup" class="gmeet-form-input" placeholder="e.g. Review in 7 days with BP log">
+                            </div>
+                            <button type="submit" class="gmeet-rx-submit">
+                                Sign & Send Prescription to ASHA Tablet
                             </button>
-                            <!-- <button type="button" class="btn btn-outline" onclick="generateAudioRx()">
-                                Generate Vernacular Audio Instructions
-                            </button> -->
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Right: OPD Patient Queue & Quick Add -->
-            <div class="tele-queue-sidebar">
-                <!-- Add Patient to Queue Card -->
-                <div class="glass-panel mb-3">
-                    <div class="panel-header-flex">
-                        <h4>+ Add Patient to Tele-OPD</h4>
-                        <span class="badge-tag">Village Intake</span>
+                        </form>
                     </div>
 
-                    <form action="{{ url_for('teleconsult') }}" method="POST" class="quick-queue-form">
-                        <div class="form-group">
-                            <label class="form-label">Patient Name *</label>
-                            <input type="text" name="patient_name" class="form-control" placeholder="e.g. Radhabai Gond"
-                                required>
+                    <!-- ── Add Patient Section ── -->
+                    <div class="gmeet-add-section" id="sectionAdd">
+                        <div class="gmeet-rx-header">
+                            <span class="gmeet-rx-title">Add Patient to Queue</span>
+                            <span class="gmeet-rx-badge">Village Intake</span>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group col-6">
-                                <label class="form-label">ABHA ID</label>
-                                <input type="text" name="abha_id" class="form-control" placeholder="91-XXXX-XXXX-XXXX">
+                        <form action="{{ url_for('teleconsult') }}" method="POST">
+                            <div class="gmeet-form-group">
+                                <label class="gmeet-form-label">Patient Name *</label>
+                                <input type="text" name="patient_name" class="gmeet-form-input" placeholder="e.g. Radhabai Gond" required>
                             </div>
-                            <div class="form-group col-6">
-                                <label class="form-label">Priority</label>
-                                <select name="priority" class="form-control">
+                            <div class="gmeet-form-group">
+                                <label class="gmeet-form-label">ABHA ID</label>
+                                <input type="text" name="abha_id" class="gmeet-form-input" placeholder="91-XXXX-XXXX-XXXX">
+                            </div>
+                            <div class="gmeet-form-group">
+                                <label class="gmeet-form-label">Priority</label>
+                                <select name="priority">
                                     <option value="Routine">Routine Care</option>
                                     <option value="Priority" selected>Priority Case</option>
                                     <option value="Emergency">Emergency</option>
                                 </select>
                             </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Chief Complaint & Vitals *</label>
-                            <textarea name="chief_complaint" class="form-control" rows="2"
-                                placeholder="e.g. High fever for 3 days, BP 140/90, severe weakness"
-                                required></textarea>
-                        </div>
-
-                        <button type="submit" class="btn btn-secondary btn-block">Add to Tele-Consult Queue</button>
-                    </form>
-                </div>
-
-                <!-- Active Waiting Queue -->
-                <div class="glass-panel">
-                    <div class="panel-header-flex">
-                        <h4>Waiting Queue ({{ queue|length }})</h4>
-                        <span class="live-pill"><span class="pulse-dot green"></span> Connected</span>
+                            <div class="gmeet-form-group">
+                                <label class="gmeet-form-label">Chief Complaint & Vitals *</label>
+                                <textarea name="chief_complaint" class="gmeet-form-textarea" rows="3" placeholder="e.g. High fever for 3 days, BP 140/90" required></textarea>
+                            </div>
+                            <button type="submit" class="gmeet-rx-submit">
+                                Add to Waiting Queue
+                            </button>
+                        </form>
                     </div>
 
-                    <div class="queue-cards-stream">
-                        {% for pt in queue %}
-                        <div class="queue-card-item priority-{{ pt.priority|lower }}">
-                            <div class="queue-card-top">
-                                <strong>{{ pt.patient_name }}</strong>
-                                <span class="queue-p-badge {{ pt.priority|lower }}">{{ pt.priority }}</span>
-                            </div>
-                            <div class="queue-meta-text">
-                                <span>Age: {{ pt.age }} • {{ pt.gender }}</span>
-                                <span>ABHA: <code>{{ pt.abha_id }}</code></span>
-                            </div>
-                            <p class="queue-complaint">"{{ pt.chief_complaint }}"</p>
-                            <div class="queue-vitals-row">
-                                <small>{{ pt.vitals or 'Vitals captured by ASHA' }}</small>
-                            </div>
-                            <div class="queue-item-actions">
-                                <button class="btn btn-xs btn-primary"
-                                    onclick="connectQueuePatient('{{ pt.patient_name }}')">Start Consultation</button>
-                                <span class="status-chip">{{ pt.status }}</span>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
@@ -205,48 +1148,179 @@
 
 {% block scripts %}
 <script>
-    function updateBandwidthMode(val) {
-        showToast(`Bandwidth adapted: switched to ${val.toUpperCase()} telemetry mode.`);
-    }
+    // ── State ──
+    let micOn = true;
+    let camOn = true;
+    let ccOn = false;
+    let screenSharing = false;
+    let timerSeconds = 258; // start at 4:18
+    let currentTab = 'people';
 
-    function toggleMic(btn) {
-        if (btn.innerText.includes("Mic On")) {
-            btn.innerText = "Mic Muted";
-            btn.style.background = "#EF4444";
+    // ── Timer ──
+    function updateTimer() {
+        timerSeconds++;
+        const mins = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+        const secs = String(timerSeconds % 60).padStart(2, '0');
+        document.getElementById('callTimer').textContent = `00:${mins}:${secs}`;
+    }
+    setInterval(updateTimer, 1000);
+
+    // ── Speaking simulation ──
+    function simulateSpeaking() {
+        const doctorTile = document.getElementById('doctorTile');
+        const patientTile = document.getElementById('patientTile');
+        
+        setInterval(() => {
+            const rand = Math.random();
+            if (rand < 0.45) {
+                doctorTile.classList.add('speaking');
+                patientTile.classList.remove('speaking');
+            } else if (rand < 0.75) {
+                patientTile.classList.add('speaking');
+                doctorTile.classList.remove('speaking');
+            } else {
+                doctorTile.classList.remove('speaking');
+                patientTile.classList.remove('speaking');
+            }
+        }, 3000);
+    }
+    simulateSpeaking();
+
+    // ── Control Buttons ──
+    function toggleMic() {
+        micOn = !micOn;
+        const btn = document.getElementById('micBtn');
+        if (micOn) {
+            btn.className = 'gmeet-ctrl-btn ctrl-default';
+            btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg><span class="btn-tooltip">Microphone</span>`;
         } else {
-            btn.innerText = "Mic On";
-            btn.style.background = "";
+            btn.className = 'gmeet-ctrl-btn ctrl-off';
+            btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2c0 .76-.12 1.5-.35 2.18"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg><span class="btn-tooltip">Microphone off</span>`;
         }
     }
 
-    function toggleCam(btn) {
-        if (btn.innerText.includes("Video On")) {
-            btn.innerText = "Video Off";
+    function toggleCam() {
+        camOn = !camOn;
+        const btn = document.getElementById('camBtn');
+        if (camOn) {
+            btn.className = 'gmeet-ctrl-btn ctrl-default';
+            btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg><span class="btn-tooltip">Camera</span>`;
         } else {
-            btn.innerText = "Video On";
+            btn.className = 'gmeet-ctrl-btn ctrl-off';
+            btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M21 21H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"/><polygon points="23 7 16 12 23 17 23 7"/></svg><span class="btn-tooltip">Camera off</span>`;
         }
     }
 
+    function toggleCC() {
+        ccOn = !ccOn;
+        const ccBar = document.getElementById('ccBar');
+        const ccBtn = document.getElementById('ccBtn');
+
+        if (ccOn) {
+            ccBar.classList.add('visible');
+            ccBtn.className = 'gmeet-ctrl-btn ctrl-active';
+        } else {
+            ccBar.classList.remove('visible');
+            ccBtn.className = 'gmeet-ctrl-btn ctrl-default';
+        }
+    }
+
+    function streamVitals() {
+        screenSharing = !screenSharing;
+        const btn = document.getElementById('screenBtn');
+        if (screenSharing) {
+            btn.className = 'gmeet-ctrl-btn ctrl-active';
+            showToast('Streaming digital vitals and ECG trace to doctor...', 'info');
+        } else {
+            btn.className = 'gmeet-ctrl-btn ctrl-default';
+            showToast('Vitals stream stopped.', 'info');
+        }
+    }
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.querySelector('.gmeet-wrapper').requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    // ── Side Panel ──
+    function showPanel(tab) {
+        const panel = document.getElementById('sidePanel');
+        if (panel.classList.contains('collapsed')) {
+            panel.classList.remove('collapsed');
+        }
+        switchTab(tab);
+
+        // Update control button active state
+        document.getElementById('panelPeopleBtn').className = tab === 'people' ? 'gmeet-ctrl-btn ctrl-active' : 'gmeet-ctrl-btn ctrl-default';
+        document.getElementById('panelRxBtn').className = tab === 'rx' ? 'gmeet-ctrl-btn ctrl-active' : 'gmeet-ctrl-btn ctrl-default';
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+        // Update tabs
+        document.getElementById('tabPeople').classList.toggle('active', tab === 'people');
+        document.getElementById('tabRx').classList.toggle('active', tab === 'rx');
+        document.getElementById('tabAdd').classList.toggle('active', tab === 'add');
+
+        // Show/hide sections
+        document.getElementById('sectionPeople').style.display = tab === 'people' ? 'block' : 'none';
+        const rxSection = document.getElementById('sectionRx');
+        const addSection = document.getElementById('sectionAdd');
+        rxSection.className = tab === 'rx' ? 'gmeet-rx-section active' : 'gmeet-rx-section';
+        addSection.className = tab === 'add' ? 'gmeet-add-section active' : 'gmeet-add-section';
+
+        // Update control btn highlights
+        document.getElementById('panelPeopleBtn').className = tab === 'people' ? 'gmeet-ctrl-btn ctrl-active' : 'gmeet-ctrl-btn ctrl-default';
+        document.getElementById('panelRxBtn').className = tab === 'rx' ? 'gmeet-ctrl-btn ctrl-active' : 'gmeet-ctrl-btn ctrl-default';
+    }
+
+    // ── Consultation Actions ──
     function endConsultation() {
         if (confirm("End active tele-OPD session and save clinical encounter?")) {
-            showToast("Tele-OPD session successfully completed. Records updated in ABHA repository.");
+            showToast("Google Meet session completed. Records updated in ABHA repository.", "success");
         }
     }
 
     function handlePrescriptionSubmit(e) {
         e.preventDefault();
-        showToast("Digital prescription cryptographically signed and sent to Rampur Sub-Centre tablet!", "success");
-    }
-
-    function generateAudioRx() {
-        showToast("Generating regional audio dosage guide in Chhattisgarhi/Hindi...");
-        setTimeout(() => {
-            showToast("Audio pill reminder ready. Transmitted to patient mobile via IVR.", "success");
-        }, 1000);
+        showToast("Digital prescription signed and sent to Rampur Sub-Centre tablet!", "success");
     }
 
     function connectQueuePatient(name) {
-        showToast(`Connecting live encrypted Tele-OPD stream for ${name}...`);
+        showToast(`Admitting ${name} to the meeting...`, 'info');
+        setTimeout(() => {
+            showToast(`${name} has joined the Tele-OPD consultation.`, 'success');
+        }, 1500);
     }
+
+    function updateBandwidthMode(val) {
+        const labels = { '2g': '2G/EDGE (Audio + Low-Fi Telemetry)', '3g': '3G (Compressed Video)', '4g': '4G (Full HD Video)' };
+        showToast(`Bandwidth adapted: ${labels[val] || val}`, 'info');
+    }
+
+    // ── CC subtitle cycling ──
+    const ccMessages = [
+        { speaker: 'Dr. Sharma', text: 'BP is reading 150/95. Let us start on Amlodipine 5mg daily.' },
+        { speaker: 'Sunita (ASHA)', text: 'Doctor sahab, patient is also complaining of dizziness since morning.' },
+        { speaker: 'Dr. Sharma', text: 'Noted. Please check blood sugar fasting tomorrow morning and report.' },
+        { speaker: 'Sunita (ASHA)', text: 'Ji doctor, I will send the reading through the app.' },
+        { speaker: 'Dr. Sharma', text: 'Good. Please ensure she takes the medicine after breakfast, not empty stomach.' },
+    ];
+    let ccIndex = 0;
+
+    function cycleCC() {
+        if (!ccOn) return;
+        const bar = document.getElementById('ccBar');
+        const msg = ccMessages[ccIndex % ccMessages.length];
+        bar.innerHTML = `<span class="gmeet-cc-speaker">${msg.speaker}:</span> ${msg.text}`;
+        ccIndex++;
+    }
+    setInterval(cycleCC, 5000);
+
+    // Initialize — show People tab by default
+    switchTab('people');
 </script>
 {% endblock %}
