@@ -23,7 +23,7 @@
                 <p class="page-sub">Connecting village Sub-Centres with Medical Officers and District Specialists over low-bandwidth channels.</p>
             </div>
             <div class="bandwidth-control-box">
-                <span class="band-label">📶 Bandwidth Mode:</span>
+                <span class="band-label">Bandwidth Mode:</span>
                 <select id="networkBandwidthSelect" class="form-control band-select" onchange="updateBandwidthMode(this.value)">
                     <option value="2g" selected>2G / EDGE (Audio + Low-Fi Vitals Telemetry)</option>
                     <option value="3g">3G Standard (Compressed Video)</option>
@@ -45,21 +45,25 @@
                     <!-- Split Video Screen (Doctor on top/main, ASHA & Patient in PIP) -->
                     <div class="video-screens">
                         <div class="screen-doctor">
-                            <div class="doctor-avatar-circle">👨‍⚕️</div>
+                            <div class="doctor-avatar-circle">
+                                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+                            </div>
                             <div class="screen-label">Dr. Rajesh Sharma, MD (Bilaspur District Hospital)</div>
                             <span class="audio-wave-anim"><span></span><span></span><span></span><span></span></span>
                         </div>
                         <div class="screen-pip-patient">
-                            <div class="pip-avatar">👩🏽‍⚕️ 👥</div>
+                            <div class="pip-avatar">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </div>
                             <span class="pip-label">Sunita Devi (ASHA) & Patient Meena Sahu</span>
                         </div>
                     </div>
 
                     <div class="call-controls">
-                        <button class="call-btn btn-mic" onclick="toggleMic(this)" title="Mute/Unmute Audio">🎤 Mic On</button>
-                        <button class="call-btn btn-cam" onclick="toggleCam(this)" title="Camera">📷 Video On</button>
-                        <button class="call-btn btn-screen" onclick="showToast('Displaying digital vitals and ECG trace to doctor...')">📊 Stream Vitals</button>
-                        <button class="call-btn btn-end" onclick="endConsultation()">❌ End Session</button>
+                        <button class="call-btn btn-mic" onclick="toggleMic(this)" title="Mute/Unmute Audio">Mic On</button>
+                        <button class="call-btn btn-cam" onclick="toggleCam(this)" title="Camera">Video On</button>
+                        <button class="call-btn btn-screen" onclick="showToast('Displaying digital vitals and ECG trace to doctor...')">Stream Vitals</button>
+                        <button class="call-btn btn-end" onclick="endConsultation()">End Session</button>
                     </div>
                 </div>
 
@@ -67,7 +71,7 @@
                 <div class="glass-panel rx-pad-card mt-3">
                     <div class="panel-header-flex">
                         <div>
-                            <h3>📝 Medical Officer Digital Prescription Pad</h3>
+                            <h3>Medical Officer Digital Prescription Pad</h3>
                             <small>Auto-translated to Hindi/Chhattisgarhi voice note for patient</small>
                         </div>
                         <span class="badge-status status-consulted">Verified Doctor Digital Signature</span>
@@ -92,10 +96,10 @@
 
                         <div class="rx-actions-flex">
                             <button type="submit" class="btn btn-primary btn-glow">
-                                <span>✍️</span> Sign & Issue Prescription to ASHA Tablet
+                                Sign & Issue Prescription to ASHA Tablet
                             </button>
                             <button type="button" class="btn btn-outline" onclick="generateAudioRx()">
-                                <span>🗣️</span> Generate Vernacular Audio Instructions
+                                Generate Vernacular Audio Instructions
                             </button>
                         </div>
                     </form>
@@ -144,7 +148,7 @@
                 <!-- Active Waiting Queue -->
                 <div class="glass-panel">
                     <div class="panel-header-flex">
-                        <h4>📋 Waiting Queue ({{ queue|length }})</h4>
+                        <h4>Waiting Queue ({{ queue|length }})</h4>
                         <span class="live-pill"><span class="pulse-dot green"></span> Connected</span>
                     </div>
 
@@ -161,7 +165,7 @@
                                 </div>
                                 <p class="queue-complaint">"{{ pt.chief_complaint }}"</p>
                                 <div class="queue-vitals-row">
-                                    <small>🩺 {{ pt.vitals or 'Vitals captured by ASHA' }}</small>
+                                    <small>{{ pt.vitals or 'Vitals captured by ASHA' }}</small>
                                 </div>
                                 <div class="queue-item-actions">
                                     <button class="btn btn-xs btn-primary" onclick="connectQueuePatient('{{ pt.patient_name }}')">Start Consultation</button>
@@ -185,19 +189,19 @@
 
     function toggleMic(btn) {
         if (btn.innerText.includes("Mic On")) {
-            btn.innerText = "🔇 Mic Muted";
+            btn.innerText = "Mic Muted";
             btn.style.background = "#EF4444";
         } else {
-            btn.innerText = "🎤 Mic On";
+            btn.innerText = "Mic On";
             btn.style.background = "";
         }
     }
 
     function toggleCam(btn) {
         if (btn.innerText.includes("Video On")) {
-            btn.innerText = "📷 Video Off";
+            btn.innerText = "Video Off";
         } else {
-            btn.innerText = "📷 Video On";
+            btn.innerText = "Video On";
         }
     }
 
@@ -209,13 +213,13 @@
 
     function handlePrescriptionSubmit(e) {
         e.preventDefault();
-        showToast("✓ Digital prescription cryptographically signed and sent to Rampur Sub-Centre tablet!");
+        showToast("Digital prescription cryptographically signed and sent to Rampur Sub-Centre tablet!", "success");
     }
 
     function generateAudioRx() {
-        showToast("🗣️ Generating regional audio dosage guide in Chhattisgarhi/Hindi...");
+        showToast("Generating regional audio dosage guide in Chhattisgarhi/Hindi...");
         setTimeout(() => {
-            showToast("✓ Audio pill reminder ready. Transmitted to patient mobile via IVR.");
+            showToast("Audio pill reminder ready. Transmitted to patient mobile via IVR.", "success");
         }, 1000);
     }
 

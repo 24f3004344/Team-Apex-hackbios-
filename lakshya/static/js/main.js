@@ -100,10 +100,10 @@ function togglePasswordVisibility(inputId, btn) {
     if (!input) return;
     if (input.type === 'password') {
         input.type = 'text';
-        btn.innerText = '🔒';
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
     } else {
         input.type = 'password';
-        btn.innerText = '👁️';
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
     }
 }
 
@@ -199,6 +199,7 @@ function renderTriageResult(data) {
     pill.innerText = data.badge.toUpperCase();
 
     card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (window.localizeDynamicContent) window.localizeDynamicContent(card);
 }
 
 function resetTriageForm() {
@@ -252,6 +253,7 @@ async function searchMedicines() {
                 </tr>
             `;
         }
+        if (window.localizeDynamicContent) window.localizeDynamicContent(tbody);
     } catch (e) {
         console.error("Medicine search error:", e);
     }
@@ -262,37 +264,22 @@ function escapeHtml(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-/**
- * Language Switcher Simulation
- */
-const VERNACULAR_NOTICES = {
-    hi: "भाषा हिन्दी पर सेट की गई। ग्रामीण स्वास्थ्य सहायता प्रणाली सक्रिय है।",
-    bn: "ভাষা বাংলায় পরিবর্তিত হয়েছে। গ্রামীণ স্বাস্থ্য গ্রিড সক্রিয়।",
-    te: "భాష తెలుగులోకి మార్చబడింది. గ్రామీణ ఆరోగ్య సహాయం అందుబాటులో ఉంది.",
-    mr: "भाषा मराठीवर सेट केली आहे. ग्रामीण आरोग्य सहाय्य प्रणाली सक्रिय.",
-    ta: "மொழி தமிழுக்கு மாற்றப்பட்டது. கிராமப்புற சுகாதார கட்டமைப்பு தயார்.",
-    en: "Interface set to English. Rural Public Health Grid active."
-};
-
-function switchLanguage(langCode) {
-    const notice = VERNACULAR_NOTICES[langCode] || VERNACULAR_NOTICES.en;
-    showToast(notice);
-}
+// Note: Whole-site language localization is handled by translations.js
 
 /**
  * Field Data Synchronization & Offline Simulation
  */
 function syncFieldData() {
-    showToast("🔄 Syncing field consultations & ABHA records with District Grid...");
+    showToast("Syncing field consultations & ABHA records with District Grid...", "info");
     setTimeout(() => {
-        showToast("✓ Successfully synchronized 14 offline records. Zero conflicts.");
+        showToast("Successfully synchronized 14 offline records. Zero conflicts.", "success");
         const lastSync = document.getElementById('lastSyncTime');
         if (lastSync) lastSync.innerText = new Date().toLocaleTimeString();
     }, 1200);
 }
 
 function simulateTeleConsultModal() {
-    showToast("📹 Initializing Low-Bandwidth Tele-OPD Video Link with Bilaspur Medical Officer...");
+    showToast("Initializing Low-Bandwidth Tele-OPD Video Link with Bilaspur Medical Officer...", "info");
 }
 
 /**
@@ -310,14 +297,15 @@ function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `app-toast toast-${type} animate-fade-in`;
     
-    let icon = 'ℹ️';
-    if (type === 'success' || message.includes('✓')) icon = '✓';
-    else if (type === 'danger' || message.includes('🚨') || message.includes('⚠')) icon = '⚠';
-    else if (message.includes('📹')) icon = '📹';
-    else if (message.includes('🔄')) icon = '🔄';
+    let iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+    if (type === 'success' || message.toLowerCase().includes('success') || message.toLowerCase().includes('confirmed')) {
+        iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+    } else if (type === 'danger' || message.toLowerCase().includes('emergency') || message.toLowerCase().includes('alert') || message.toLowerCase().includes('error')) {
+        iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+    }
 
     toast.innerHTML = `
-        <span class="toast-icon">${icon}</span>
+        <span class="toast-icon">${iconSvg}</span>
         <div class="toast-body">${message}</div>
         <button type="button" class="toast-close" onclick="this.parentElement.remove()">×</button>
     `;
@@ -346,7 +334,11 @@ function toggleTheme() {
 function updateThemeUI(theme) {
     const icon = document.getElementById('themeIcon');
     const label = document.getElementById('themeLabel');
-    if (icon) icon.innerText = theme === 'dark' ? '🌙' : '☀️';
+    if (icon) {
+        icon.innerHTML = theme === 'dark'
+            ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
+            : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+    }
     if (label) label.innerText = theme === 'dark' ? 'Dark' : 'Light';
 }
 

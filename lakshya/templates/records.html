@@ -34,10 +34,12 @@
         <div class="glass-panel patient-id-card mb-4">
             <div class="patient-id-grid">
                 <div class="pt-avatar-block">
-                    <div class="pt-avatar">👩🏽</div>
+                    <div class="pt-avatar">
+                        <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
                     <div class="pt-basic">
                         <h2>Meena Sahu</h2>
-                        <span class="pt-abha-badge">💳 ABHA ID: <strong>{{ active_abha }}</strong></span>
+                        <span class="pt-abha-badge">ABHA ID: <strong>{{ active_abha }}</strong></span>
                         <small>Linked to Aadhaar (Verified) • Rampur Gram Panchayat, Bilaspur</small>
                     </div>
                 </div>
@@ -62,7 +64,7 @@
                 </div>
 
                 <div class="pt-consent-status">
-                    <span class="status-chip in-stock">✓ ABDM Consent: Active (24h Window)</span>
+                    <span class="status-chip in-stock">ABDM Consent: Active (24h Window)</span>
                     <button class="btn btn-xs btn-outline mt-2" onclick="showToast('ABHA QR Health Card downloaded to local storage.')">Download ABHA Card</button>
                 </div>
             </div>
@@ -74,7 +76,7 @@
             <div class="records-timeline-column">
                 <div class="glass-panel">
                     <div class="panel-header-flex">
-                        <h3>🏥 Cross-Facility Continuum of Care</h3>
+                        <h3>Cross-Facility Continuum of Care</h3>
                         <span class="live-pill"><span class="pulse-dot green"></span> Synchronized</span>
                     </div>
 
@@ -109,8 +111,8 @@
                                 <div class="event-details-box">
                                     <p><strong>Treatment Done:</strong> 200mg IV Iron Sucrose administered over 2 hours under observation. Obstetric USG performed: Single live intrauterine fetus, cephalic presentation, liquor adequate (AFI 12cm). Estimated fetal weight: 1.85 kg.</p>
                                     <div class="event-docs-row">
-                                        <button class="btn btn-xs btn-outline" onclick="showToast('Displaying USG Scan Report #USG-88219')">📄 View USG Scan</button>
-                                        <button class="btn btn-xs btn-outline" onclick="showToast('Displaying Day-Care Discharge Summary')">📄 Discharge Note</button>
+                                        <button class="btn btn-xs btn-outline" onclick="showToast('Displaying USG Scan Report #USG-88219')">View USG Scan</button>
+                                        <button class="btn btn-xs btn-outline" onclick="showToast('Displaying Day-Care Discharge Summary')">Discharge Note</button>
                                     </div>
                                 </div>
                             </div>
@@ -157,7 +159,7 @@
                 <!-- Lab Diagnostic Reports -->
                 <div class="glass-panel mb-3">
                     <div class="panel-header-flex">
-                        <h4>🔬 Diagnostic Lab Reports</h4>
+                        <h4>Diagnostic Lab Reports</h4>
                         <span class="badge-tag">Verified</span>
                     </div>
 
@@ -208,8 +210,8 @@
                 <!-- Active Medications -->
                 <div class="glass-panel">
                     <div class="panel-header-flex">
-                        <h4>💊 Active Medication Regimen</h4>
-                        <button class="btn btn-xs btn-outline" onclick="playMedicationAudio()">🗣️ Audio Guide</button>
+                        <h4>Active Medication Regimen</h4>
+                        <button class="btn btn-xs btn-outline" onclick="playMedicationAudio()">Audio Guide</button>
                     </div>
 
                     <div class="meds-active-list">
@@ -239,7 +241,7 @@
 {% block scripts %}
 <script>
     function playMedicationAudio() {
-        showToast("🗣️ Playing audio medication instructions in Chhattisgarhi/Hindi...");
+        showToast("Playing audio medication instructions in Chhattisgarhi/Hindi...");
     }
 </script>
 {% endblock %}

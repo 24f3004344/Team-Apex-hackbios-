@@ -38,7 +38,7 @@
                     <small>Sub-Centre / PHC Triage</small>
                 </div>
             </div>
-            <div class="stage-arrow">➔</div>
+            <div class="stage-arrow">&rarr;</div>
             <div class="stage-step active">
                 <span class="stage-num">2</span>
                 <div>
@@ -46,7 +46,7 @@
                     <small>108 / 102 Transport Assigned</small>
                 </div>
             </div>
-            <div class="stage-arrow">➔</div>
+            <div class="stage-arrow">&rarr;</div>
             <div class="stage-step active">
                 <span class="stage-num">3</span>
                 <div>
@@ -55,7 +55,7 @@
                     <small>Specialist Hospital</small>
                 </div>
             </div>
-            <div class="stage-arrow">➔</div>
+            <div class="stage-arrow">&rarr;</div>
             <div class="stage-step current">
                 <span class="stage-num">4</span>
                 <div>
@@ -70,7 +70,7 @@
             <div class="referrals-list-column">
                 <div class="glass-panel">
                     <div class="panel-header-flex">
-                        <h3>📋 Active Inter-Facility Referrals ({{ referrals|length }})</h3>
+                        <h3>Active Inter-Facility Referrals ({{ referrals|length }})</h3>
                         <div class="filter-pills">
                             <button class="btn btn-xs btn-outline" onclick="filterReferrals('all')">All</button>
                             <button class="btn btn-xs btn-outline" onclick="filterReferrals('emergency')">Emergency</button>
@@ -96,7 +96,7 @@
                                     </div>
                                     <div class="route-connector">
                                         <span>{{ ref.urgency }} Handoff</span>
-                                        <div class="arrow-line">➔</div>
+                                        <div class="arrow-line">&rarr;</div>
                                     </div>
                                     <div class="route-node destination">
                                         <small>Target Hospital:</small>
@@ -105,7 +105,7 @@
                                 </div>
 
                                 <div class="rc-notes-box">
-                                    <span class="specialty-chip">🩺 {{ ref.specialty }}</span>
+                                    <span class="specialty-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>{{ ref.specialty }}</span>
                                     <p class="notes-text">"{{ ref.notes }}"</p>
                                 </div>
 
@@ -184,7 +184,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-block btn-lg btn-glow">
-                            <span>🚀</span> Transmit Inter-Facility Referral
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Transmit Inter-Facility Referral
                         </button>
                     </form>
                 </div>

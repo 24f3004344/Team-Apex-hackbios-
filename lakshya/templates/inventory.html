@@ -24,7 +24,7 @@
             </div>
             <div>
                 <button class="btn btn-primary btn-sm btn-glow" onclick="raiseRestockIndent()">
-                    <span>📦</span> Raise Restocking Indent
+                    Raise Restocking Indent
                 </button>
             </div>
         </div>
@@ -33,7 +33,9 @@
         <div class="dashboard-kpis mb-4">
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <span class="kpi-icon teal">💊</span>
+                    <span class="kpi-icon teal">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
+                    </span>
                     <span class="kpi-trend up">96% Available</span>
                 </div>
                 <div class="kpi-val">{{ medicines|length }}</div>
@@ -43,7 +45,9 @@
 
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <span class="kpi-icon amber">⚠️</span>
+                    <span class="kpi-icon amber">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </span>
                     <span class="kpi-badge warning">Needs Attention</span>
                 </div>
                 <div class="kpi-val">2</div>
@@ -53,7 +57,9 @@
 
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <span class="kpi-icon red">🚨</span>
+                    <span class="kpi-icon red">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </span>
                     <span class="kpi-badge alert">Stockout</span>
                 </div>
                 <div class="kpi-val">1</div>
@@ -63,7 +69,9 @@
 
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <span class="kpi-icon emerald">🔬</span>
+                    <span class="kpi-icon emerald">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2v17.5c0 1.4-1.1 2.5-2.5 2.5s-2.5-1.1-2.5-2.5V2"/><path d="M8.5 2h7"/><path d="M9 16h6"/></svg>
+                    </span>
                     <span class="kpi-trend up">100% Free NHM</span>
                 </div>
                 <div class="kpi-val">{{ diagnostics|length }}</div>
@@ -75,10 +83,10 @@
         <!-- Tab Switcher between Medicines and Diagnostics -->
         <div class="category-tabs-row mb-4">
             <button type="button" class="cat-tab active" onclick="switchInventoryTab('meds', this)">
-                <span>💊</span> Essential Medicines Inventory
+                Essential Medicines Inventory
             </button>
             <button type="button" class="cat-tab" onclick="switchInventoryTab('diags', this)">
-                <span>🔬</span> Diagnostic Tests & Point-of-Care Labs
+                Diagnostic Tests & Point-of-Care Labs
             </button>
         </div>
 
@@ -86,7 +94,9 @@
         <div id="medsSection" class="glass-panel">
             <div class="panel-header-flex">
                 <div class="search-input-wrap" style="max-width: 450px;">
-                    <span class="search-icon">🔍</span>
+                    <span class="search-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
                     <input type="text" id="liveMedSearch" class="form-control" placeholder="Search drug name or category..." oninput="filterMedsTable(this.value)">
                 </div>
                 <span class="live-pill"><span class="pulse-dot green"></span> District DVDMS Grid Connected</span>
@@ -134,7 +144,9 @@
         <div id="diagsSection" class="glass-panel" style="display: none;">
             <div class="panel-header-flex">
                 <div class="search-input-wrap" style="max-width: 450px;">
-                    <span class="search-icon">🔍</span>
+                    <span class="search-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
                     <input type="text" class="form-control" placeholder="Search lab test (e.g. Hb, USG, Sputum, CBC)...">
                 </div>
                 <span class="live-pill"><span class="pulse-dot teal"></span> National Free Diagnostic Initiative</span>
@@ -195,7 +207,7 @@
     }
 
     function raiseRestockIndent() {
-        showToast("📦 Indent #IND-2026-9921 generated! Transmitted to Bilaspur District Drug Warehouse.");
+        showToast("Indent #IND-2026-9921 generated. Transmitted to Bilaspur District Drug Warehouse.", "success");
     }
 </script>
 {% endblock %}
