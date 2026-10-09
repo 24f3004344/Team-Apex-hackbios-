@@ -92,6 +92,9 @@
                 <a href="{{ url_for('high_risk_page') }}" class="nav-link {% if request.endpoint in ('high_risk_page', 'high_risk.high_risk_page') %}active{% endif %}">
                     <span class="nav-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg></span><span>High-Risk Care</span>
                 </a>
+                <a href="{{ url_for('hospitals.list_hospitals') }}" class="nav-link {% if request.endpoint in ('hospitals.list_hospitals', 'hospitals') %}active{% endif %}">
+                    <span class="nav-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path><path d="M2 22V8a2 2 0 0 1 2-2h2"></path><path d="M22 11V6a2 2 0 0 1-2-2v0a2 2 0 0 1-2 2v0"></path><path d="M10 22H8a2 2 0 0 1-2-2v0a2 2 0 0 1 2-2h0"></path><path d="M10 6v6a4 4 0 0 1 4 4v0"></path></svg></span><span>Hospitals</span>
+                </a>
                 <a href="{{ url_for('analytics_page') }}" class="nav-link {% if request.endpoint in ('analytics_page', 'main.analytics_page') %}active{% endif %}">
                     <span class="nav-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span>Analytics</span>
                 </a>

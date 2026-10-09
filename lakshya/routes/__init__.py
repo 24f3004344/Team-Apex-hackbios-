@@ -5,6 +5,7 @@ from .referrals import referrals_bp
 from .inventory import inventory_bp
 from .high_risk import high_risk_bp
 from .triage import triage_bp
+from .hospitals import hospitals_bp
 
 
 def register_routes(app):
@@ -20,6 +21,7 @@ def register_routes(app):
     app.register_blueprint(inventory_bp)
     app.register_blueprint(high_risk_bp)
     app.register_blueprint(triage_bp)
+    app.register_blueprint(hospitals_bp)
 
     # Automatically create endpoint aliases for short endpoint names
     # (e.g., allows url_for('login') and url_for('auth.login') to both work identically)
@@ -44,5 +46,6 @@ __all__ = [
     "inventory_bp",
     "high_risk_bp",
     "triage_bp",
+    "hospitals_bp",
 ]
 

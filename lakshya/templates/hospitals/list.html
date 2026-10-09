@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Government Hospitals | AarogyaSahay{% endblock %}
+
+{% block breadcrumbs %}
+<div class="container breadcrumbs-bar">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="{{ url_for('index') }}">Home</a>
+        <span class="breadcrumb-sep" aria-hidden="true">/</span>
+        <span class="breadcrumb-current" aria-current="page">Government Hospitals</span>
+    </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+    <header class="page-header">
+        <h1 class="page-title">Government Hospitals of Chhattisgarh</h1>
+        <p class="page-subtitle">Comprehensive directory of 1,700+ public and private hospitals across all districts</p>
+    </header>
+
+    <!-- Filters -->
+    <div class="filters-card card">
+        <div class="filters-header">
+            <h2 class="filters-title">Filters</h2>
+            <a href="{{ url_for('hospitals.list_hospitals') }}" class="btn btn-ghost btn-sm">Clear All</a>
+        </div>
+        <form method="GET" class="filters-form">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="search" class="filter-label">Search</label>
+                    <input type="text" id="search" name="search" class="filter-input" 
+                           placeholder="Search by hospital name, address..." value="{{ search }}">
+                </div>
+                <div class="filter-group">
+                    <label for="district" class="filter-label">District</label>
+                    <select id="district" name="district" class="filter-select">
+                        <option value="">All Districts</option>
+                        {% for d in districts %}
+                        <option value="{{ d }}" {% if d == current_district %}selected{% endif %}>{{ d }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="type" class="filter-label">Hospital Type</label>
+                    <select id="type" name="type" class="filter-select">
+                        <option value="">All Types</option>
+                        {% for t in types %}
+                        <option value="{{ t }}" {% if t == current_type %}selected{% endif %}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group filter-actions">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="results-summary">
+        <span class="results-count">{{ total }} hospital{{ 's' if total != 1 else '' }} found</span>
+        {% if current_district or current_type or search %}
+        <span class="results-filters">
+            {% if current_district %}<span class="filter-tag">District: {{ current_district }}</span>{% endif %}
+            {% if current_type %}<span class="filter-tag">Type: {{ current_type }}</span>{% endif %}
+            {% if search %}<span class="filter-tag">Search: "{{ search }}"</span>{% endif %}
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Hospitals Table -->
+    <div class="table-responsive card">
+        <table class="data-table hospitals-table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Hospital Name</th>
+                    <th scope="col">District</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Address</th>
+                    <th scope="col">Phone</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for hospital in hospitals %}
+                <tr>
+                    <td>{{ hospital['sno'] }}</td>
+                    <td>
+                        <strong>{{ hospital['hospital_name'] }}</strong>
+                    </td>
+                    <td>
+                        <span class="district-badge">{{ hospital['district'] }}</span>
+                    </td>
+                    <td>
+                        <span class="type-badge type-{{ hospital['hospital_type']|lower }}">{{ hospital['hospital_type'] }}</span>
+                    </td>
+                    <td class="address-cell">{{ hospital['address'][:100] }}{% if hospital['address']|length > 100 %}...{% endif %}</td>
+                    <td>
+                        {% if hospital['phone1'] %}
+                        <a href="tel:{{ hospital['phone1'] }}" class="phone-link">{{ hospital['phone1'] }}</a>
+                        {% endif %}
+                        {% if hospital['phone2'] %}
+                        <br><a href="tel:{{ hospital['phone2'] }}" class="phone-link">{{ hospital['phone2'] }}</a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if hospital['email'] %}
+                        <a href="mailto:{{ hospital['email'] }}" class="email-link">{{ hospital['email'] }}</a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('hospitals.hospital_detail', hospital_id=hospital['id']) }}" 
+                           class="btn btn-outline btn-sm">View Details</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="no-results">No hospitals found matching your criteria.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <nav class="pagination" aria-label="Pagination">
+        {% if page > 1 %}
+        <a href="{{ url_for('hospitals.list_hospitals', page=page-1, per_page=per_page, district=current_district, type=current_type, search=search) }}" 
+           class="btn btn-outline btn-sm pagination-btn" rel="prev">Previous</a>
+        {% endif %}
+        
+        <span class="pagination-info">Page {{ page }} of {{ total_pages }}</span>
+        
+        {% if page < total_pages %}
+        <a href="{{ url_for('hospitals.list_hospitals', page=page+1, per_page=per_page, district=current_district, type=current_type, search=search) }}" 
+           class="btn btn-outline btn-sm pagination-btn" rel="next">Next</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    <!-- Stats Summary -->
+    <div class="stats-grid card" style="margin-top: 2rem;">
+        <h3 class="stats-title">Quick Statistics</h3>
+        <div class="stats-cards">
+            <div class="stat-card">
+                <span class="stat-value">{{ total }}</span>
+                <span class="stat-label">Total Hospitals</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">{{ districts|length }}</span>
+                <span class="stat-label">Districts Covered</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">{{ types|length }}</span>
+                <span class="stat-label">Hospital Types</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
