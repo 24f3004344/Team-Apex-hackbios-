@@ -24,6 +24,10 @@ def create_app():
     """Application factory: models -> controllers wiring with explicit view folders."""
     app = Flask(__name__, template_folder="views/templates", static_folder="views/static")
     app.secret_key = _get_secret_key()
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    # Secure cookie only over HTTPS (opt-in: SESSION_COOKIE_SECURE=1 in production)
+    app.config["SESSION_COOKIE_SECURE"] = os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"
 
     # Automatically close database connection when the request ends
     app.teardown_appcontext(close_db)
@@ -40,6 +44,14 @@ def create_app():
         return dict(current_user=current_user, csrf_token=get_token)
 
     register_routes(app)
+
+    @app.after_request
+    def set_security_headers(response):
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
     return app
 
 

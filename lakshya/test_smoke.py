@@ -147,6 +147,23 @@ def test_rbac():
     assert r.status_code == 404, f"admin delete gave {r.status_code}"
 
 
+def test_headers_and_cookies():
+    """Security headers on every response; session cookie HttpOnly + SameSite=Lax."""
+    from app import app
+    c = app.test_client()
+    r = c.get("/")
+    assert r.headers.get("X-Content-Type-Options") == "nosniff"
+    assert r.headers.get("X-Frame-Options") == "DENY"
+    assert "strict-origin" in r.headers.get("Referrer-Policy", "")
+    tok = _form_token(c, "/login")
+    r = c.post("/login", data={"identifier": "9876543210", "password": "asha123",
+                               "role_tab": "frontline", "_csrf_token": tok})
+    assert r.status_code == 302, "login broke"
+    sc = r.headers.get("Set-Cookie", "")
+    assert "HttpOnly" in sc, f"session cookie not HttpOnly: {sc}"
+    assert "SameSite=Lax" in sc, f"session cookie not SameSite=Lax: {sc}"
+
+
 def test_ratelimit():
     """5 wrong passwords -> 6th attempt gets 429 lockout."""
     from app import app
@@ -179,7 +196,7 @@ def test_csrf():
 
 
 if __name__ == "__main__":
-    for fn in [test_structure, test_url_map, test_routes, test_login_gating, test_security_fixes, test_rbac, test_ratelimit, test_csrf]:
+    for fn in [test_structure, test_url_map, test_routes, test_login_gating, test_security_fixes, test_rbac, test_ratelimit, test_headers_and_cookies, test_csrf]:
         fn()
         print(f"PASS {fn.__name__}")
     print("ALL SMOKE TESTS PASSED")
