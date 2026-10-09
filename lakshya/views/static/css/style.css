@@ -3373,7 +3373,7 @@ a {
         display: none;
         flex-direction: column;
         position: absolute;
-        top: 72px;
+        top: 100%;
         left: 0;
         right: 0;
         background: var(--bg-surface);
@@ -4099,6 +4099,68 @@ a, button {
     white-space: nowrap;
 }
 
+/* ==========================================================================
+   Nav "Modules" dropdown (declutters 8 module links into one menu)
+   ========================================================================== */
+.nav-dropdown {
+    position: relative;
+}
+.dropdown-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}
+.dropdown-caret {
+    font-size: 0.7rem;
+    margin-left: 0.15rem;
+}
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 0;
+    min-width: 250px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 0.4rem;
+    z-index: 200;
+}
+.dropdown-menu.open {
+    display: block;
+}
+.dropdown-menu .nav-link {
+    display: flex;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-sm);
+}
+.dropdown-menu .nav-link:hover {
+    background: var(--bg-surface-elevated);
+}
+@media (max-width: 1120px) {
+    .nav-dropdown {
+        position: static;
+        width: 100%;
+    }
+    .dropdown-toggle {
+        display: none;
+    }
+    .dropdown-menu {
+        display: flex;
+        flex-direction: column;
+        position: static;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        min-width: 0;
+        background: transparent;
+    }
+}
+
 @media (max-width: 768px) {
     /* 1. No iOS auto-zoom on input focus (needs >=16px) */
     input, select, textarea, .form-control {
@@ -4215,6 +4277,25 @@ a, button {
     /* Header brand compacts */
     .brand-subtitle {
         display: none;
+    }
+    .nav-container {
+        height: auto;
+        min-height: 64px;
+        flex-wrap: wrap;
+        row-gap: 0.5rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+    .brand-title {
+        font-size: 1.1rem;
+    }
+    .nav-actions {
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
+    .nav-actions .btn {
+        padding: 0.45rem 0.65rem;
+        font-size: 0.78rem;
     }
 
     /* Top emergency strip: hide 3rd pill, keep sync status on one line */

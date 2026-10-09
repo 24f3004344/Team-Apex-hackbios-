@@ -364,4 +364,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Modules dropdown (desktop nav declutter)
+    const modBtn = document.getElementById('modulesToggle');
+    const modMenu = document.getElementById('modulesMenu');
+    if (modBtn && modMenu) {
+        modBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const open = modMenu.classList.toggle('open');
+            modBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+        document.addEventListener('click', (e) => {
+            if (!modMenu.contains(e.target)) {
+                modMenu.classList.remove('open');
+                modBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') modMenu.classList.remove('open');
+        });
+    }
 });
