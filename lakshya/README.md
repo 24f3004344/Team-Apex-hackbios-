@@ -31,10 +31,13 @@ From your terminal in the workspace:
 
 ```bash
 cd /Users/lakshyaparakh/Documents/Team-Apex-hackbios-/lakshya
-python3 app.py
+python run.py
 ```
 
 Open your browser and navigate to: **`http://127.0.0.1:5050`**
+
+> Codebase layout is strict MVC: `models/` (SQLite schema + domain queries),
+> `views/` (templates + static), `controllers/` (Flask blueprints), `middleware/` (auth).
 
 ---
 
@@ -53,25 +56,25 @@ Open your browser and navigate to: **`http://127.0.0.1:5050`**
 
 ```
 lakshya/
-├── app.py                      # Flask routes, SQLite models, database initialization & seed data
-├── requirements.txt            # Dependencies
-├── swasthya.db                 # SQLite database storing users, referrals, medicines, teleconsults, high-risk cases
-├── templates/
-│   ├── base.html               # Shared layout, emergency hotline strip, navigation & footer
-│   ├── index.html              # Landing page
-│   ├── login.html              # Login page with 1-click test credentials
-│   ├── register.html           # Multi-role registration page
-│   ├── dashboard.html          # Care coordination dashboard
-│   ├── teleconsult.html        # Assisted Tele-OPD consultation room & digital Rx pad
-│   ├── triage.html             # Clinical triage screener & 108 Emergency SOS console
-│   ├── records.html            # Longitudinal ABHA electronic health records timeline
-│   ├── referrals.html          # Closed-loop inter-facility referral tracker
-│   ├── inventory.html          # Essential medicines & diagnostic tests availability
-│   ├── high_risk.html          # High-risk maternal, child & chronic disease registry
-│   └── analytics.html          # District health quality & outcome analytics
-└── static/
-    ├── css/
-    │   └── style.css           # Modern healthcare design system (Vanilla CSS, Glassmorphism)
-    └── js/
-        └── main.js             # Client-side interactivity, triage evaluator, medicine search & offline sync
+├── run.py                    # Entrypoint: python run.py (http://127.0.0.1:5050)
+├── app.py                    # create_app() factory + global template context
+├── models/                   # M — SQLite schema, seeds & domain queries
+│   ├── database.py           # get_db/close_db + generic row helpers
+│   ├── schema.py             # init_db() tables + seed data
+│   └── user.py, teleconsult.py, referral.py, medicine.py,
+│       diagnostic.py, high_risk_case.py, hospital.py
+├── controllers/              # C — Flask blueprints (auth, main, teleconsult,
+│   │                           referrals, inventory, high_risk, triage, hospitals)
+│   └── __init__.py           # register_routes() + endpoint aliases
+├── middleware/               # login_required decorator
+│   └── auth_middleware.py
+├── views/                    # V
+│   ├── templates/            # 17 Jinja pages (base, index, login, register,
+│   │                         # dashboard, teleconsult, triage, records, referrals,
+│   │                         # inventory, high_risk, analytics, hospitals/*)
+│   └── static/               # css/style.css, js (main, translations, hospital-map)
+├── requirements.txt          # Dependencies
+├── swasthya.db               # SQLite database storing users, referrals, medicines, teleconsults, high-risk cases
+├── import_hospitals.py       # One-shot hospital data import script
+└── geocode_hospitals.py      # One-shot hospital geocoding script
 ```

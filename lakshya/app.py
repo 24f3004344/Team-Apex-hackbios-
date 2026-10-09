@@ -1,39 +1,34 @@
 import os
 from flask import Flask, session
-from db import init_db, close_db, get_db, DATABASE
-from auth_middleware import login_required
-from routes import register_routes
-
-# Initialize Flask application
-app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "swasthya-setu-secure-secret-key-2026")
-
-# Automatically close database connection when the request ends
-app.teardown_appcontext(close_db)
-
-# Initialize database schema and demo seed data upon launch
-init_db()
+from models import close_db, init_db
+from models import user as user_model
+from controllers import register_routes
 
 
-# =====================================================================
-# GLOBAL TEMPLATE CONTEXT
-# =====================================================================
+def create_app():
+    """Application factory: models -> controllers wiring with explicit view folders."""
+    app = Flask(__name__, template_folder="views/templates", static_folder="views/static")
+    app.secret_key = os.environ.get("SECRET_KEY", "swasthya-setu-secure-secret-key-2026")
 
-@app.context_processor
-def inject_global_data():
-    """Inject current_user into all templates (uses per-request DB)."""
-    current_user = None
-    if "user_id" in session:
-        db = get_db()
-        current_user = db.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
-    return dict(current_user=current_user)
+    # Automatically close database connection when the request ends
+    app.teardown_appcontext(close_db)
+
+    # Initialize database schema and demo seed data upon launch
+    init_db()
+
+    @app.context_processor
+    def inject_global_data():
+        """Inject current_user into all templates (uses per-request DB)."""
+        current_user = None
+        if "user_id" in session:
+            current_user = user_model.get_by_id(session["user_id"])
+        return dict(current_user=current_user)
+
+    register_routes(app)
+    return app
 
 
-# =====================================================================
-# MODULAR BLUEPRINT ROUTES REGISTRATION
-# =====================================================================
-
-register_routes(app)
+app = create_app()
 
 
 # =====================================================================
