@@ -3866,6 +3866,157 @@ a {
     margin-top: 0.5rem;
 }
 
+/* Map Section Styles */
+.map-table-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.map-card {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.map-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-surface-elevated);
+}
+
+.map-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.map-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.map-container {
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    overflow: hidden;
+}
+
+.map-legend {
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-subtle);
+}
+
+.map-info-window {
+    font-family: inherit;
+}
+
+.map-btn {
+    white-space: nowrap;
+}
+
+/* Responsive map section */
+@media (max-width: 1024px) {
+    .map-table-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .map-card {
+        order: -1; /* Show map first on mobile */
+    }
+}
+
+@media (max-width: 768px) {
+    .map-container {
+        height: 300px !important;
+    }
+    
+    .map-card .card-header {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+    
+    .map-controls {
+        width: 100%;
+    }
+    
+    .map-controls .btn {
+        flex: 1;
+    }
+}
+
+/* Hospital Detail Map */
+#hospital-detail-map {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+/* Loading state for maps */
+.map-container.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    border: 3px solid var(--border-subtle);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Info window styles */
+.gm-style-iw {
+    padding: 0 !important;
+}
+
+.gm-style-iw-d {
+    overflow: hidden !important;
+}
+
+.gm-ui-hover-effect {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Map placeholder when no coordinates */
+.map-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: var(--bg-surface-elevated);
+    border: 2px dashed var(--border-medium);
+    border-radius: var(--radius-md);
+}
+
+.map-icon {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.map-text {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.map-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .filters-row {

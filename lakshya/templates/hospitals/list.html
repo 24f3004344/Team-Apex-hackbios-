@@ -69,7 +69,96 @@
         {% endif %}
     </div>
 
-    <!-- Hospitals Table -->
+    <!-- Map & Table Section -->
+    <div class="map-table-section">
+        <!-- Hospital Map -->
+        <div class="map-card card">
+            <div class="card-header">
+                <h2 class="card-title">Hospital Locations Map</h2>
+                <div class="map-controls">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="toggleMapLayer()" id="toggleMapBtn" style="padding: 6px 12px; font-size: 12px;">Show All</button>
+                </div>
+            </div>
+            <div class="map-container" style="height: 400px; width: 100%;">
+                <div id="hospital-map" style="width: 100%; height: 100%;"></div>
+            </div>
+            <div class="map-legend" style="padding: 1rem; font-size: 12px; color: #666;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #10B981; border: 2px solid white;"></div>
+                    <span>Public Hospital</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #3B82F6;"></div>
+                    <span>Private Hospital</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: white; border: 2px solid #4285F4;"></div>
+                    <span>Your Location</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hospitals Table -->
+        <div class="table-responsive card">
+            <table class="data-table hospitals-table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Hospital Name</th>
+                        <th scope="col">District</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Address</th>
+                        <th scope="col">Phone</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Map</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hospital in hospitals %}
+                    <tr>
+                        <td>{{ hospital['sno'] }}</td>
+                        <td>
+                            <strong>{{ hospital['hospital_name'] }}</strong>
+                        </td>
+                        <td>
+                            <span class="district-badge">{{ hospital['district'] }}</span>
+                        </td>
+                        <td>
+                            <span class="type-badge type-{{ hospital['hospital_type']|lower }}">{{ hospital['hospital_type'] }}</span>
+                        </td>
+                        <td class="address-cell">{{ hospital['address'][:80] }}{% if hospital['address']|length > 80 %}...{% endif %}</td>
+                        <td>
+                            {% if hospital['phone1'] %}
+                            <a href="tel:{{ hospital['phone1'] }}" class="phone-link">{{ hospital['phone1'] }}</a>
+                            {% endif %}
+                            {% if hospital['phone2'] %}
+                            <br><a href="tel:{{ hospital['phone2'] }}" class="phone-link">{{ hospital['phone2'] }}</a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if hospital['email'] %}
+                            <a href="mailto:{{ hospital['email'] }}" class="email-link">{{ hospital['email'] }}</a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-outline btn-sm map-btn" 
+                                    onclick="showHospitalMapDetail({{ hospital['id'] }})"
+                                    style="padding: 6px 12px; font-size: 12px; min-width: 80px;">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18L5 12a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4l-4 4"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="3" y1="21" x2="21" y2="21"></line></svg> View on Map
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="no-results">No hospitals found matching your criteria.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
     <div class="table-responsive card">
         <table class="data-table hospitals-table">
             <thead>
@@ -161,4 +250,48 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/hospital-map.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize map with hospital data
+    const hospitalData = {{ hospitals|tojson }};
+    
+    // Wait for Google Maps to load
+    function waitForMaps() {
+        if (typeof google !== 'undefined' && google.maps && window.hospitalMap) {
+            // Convert hospital data to array with lat/lng
+            const hospitalsWithCoords = hospitalData
+                .filter(h => h.latitude && h.longitude)
+                .map(h => ({
+                    id: h.id,
+                    hospital_name: h.hospital_name,
+                    district: h.district,
+                    hospital_type: h.hospital_type,
+                    address: h.address,
+                    phone1: h.phone1,
+                    phone2: h.phone2,
+                    email: h.email,
+                    latitude: parseFloat(h.latitude),
+                    longitude: parseFloat(h.longitude)
+                }));
+            
+            if (hospitalsWithCoords.length > 0) {
+                addHospitalMarkers(hospitalsWithCoords);
+            }
+        } else {
+            setTimeout(waitForMaps, 100);
+        }
+    }
+    
+    waitForMaps();
+});
+
+// Show hospital map detail (opens detail page)
+function showHospitalMapDetail(hospitalId) {
+    window.location.href = '/hospitals/' + hospitalId;
+}
+</script>
 {% endblock %}

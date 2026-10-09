@@ -62,12 +62,15 @@ def list_hospitals():
     
     hospitals = db.execute(query, params).fetchall()
     
+    # Convert Row objects to dicts for JSON serialization
+    hospitals_list = [dict(h) for h in hospitals]
+    
     # Get unique districts and types for filters
     districts = db.execute("SELECT DISTINCT district FROM hospitals ORDER BY district").fetchall()
     types = db.execute("SELECT DISTINCT hospital_type FROM hospitals ORDER BY hospital_type").fetchall()
     
     return render_template('hospitals/list.html',
-                           hospitals=hospitals,
+                           hospitals=hospitals_list,
                            districts=[d['district'] for d in districts],
                            types=[t['hospital_type'] for t in types],
                            current_district=district,
@@ -88,13 +91,16 @@ def hospital_detail(hospital_id):
     if not hospital:
         return "Hospital not found", 404
     
+    # Convert to dict for JSON serialization
+    hospital_dict = dict(hospital)
+    
     # Get nearby hospitals in the same district
     nearby = db.execute(
         "SELECT id, hospital_name, hospital_type, phone1 FROM hospitals WHERE district = ? AND id != ? ORDER BY hospital_name LIMIT 5",
         (hospital['district'], hospital_id)
     ).fetchall()
     
-    return render_template('hospitals/detail.html', hospital=hospital, nearby_hospitals=nearby)
+    return render_template('hospitals/detail.html', hospital=hospital_dict, nearby_hospitals=nearby)
 
 
 @hospitals_bp.route('/api')
