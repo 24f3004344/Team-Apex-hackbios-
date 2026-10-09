@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
     <meta name="description" content="Integrated care-access and quality support platform for rural, underserved communities. Assisted teleconsultation, digital triage, referral tracking, medicine availability and longitudinal health records.">
     {% block extra_head %}{% endblock %}
     <!-- Immediate Theme & Language Application Script -->
@@ -64,9 +65,7 @@
         <div class="container nav-container">
             <a href="{{ url_for('index') }}" class="brand-logo">
                 <div class="logo-symbol">
-                    <svg viewBox="0 0 32 32" class="heart-pulse-svg" fill="none" stroke="currentColor">
-                        <path d="M4 16h5l3-8 6 16 4-10 3 4h7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AarogyaSahay Logo" class="brand-logo-img">
                 </div>
                 <div class="brand-text">
                     <span class="brand-title">Aarogya<span class="brand-accent">Sahay</span></span>
@@ -165,9 +164,7 @@
             <div class="footer-col brand-col">
                 <div class="brand-logo footer-logo">
                     <div class="logo-symbol small">
-                        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor">
-                            <path d="M4 16h5l3-8 6 16 4-10 3 4h7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AarogyaSahay Logo" class="brand-logo-img">
                     </div>
                     <span class="brand-title">Aarogya<span class="brand-accent">Sahay</span></span>
                 </div>
