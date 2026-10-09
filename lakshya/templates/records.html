@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Longitudinal Patient Records (ABHA) | AarogyaSahay{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb-bar">
+    <div class="container breadcrumb-flex">
+        <a href="{{ url_for('index') }}">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-curr">Longitudinal ABHA Records</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper records-page">
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header-bar">
+            <div>
+                <span class="badge-tag">Ayushman Bharat Digital Mission (ABDM) Aligned</span>
+                <h1 class="page-title">Longitudinal Electronic Health Records (EHR)</h1>
+                <p class="page-sub">Unbroken medical continuity across Sub-Centres, PHCs, CHCs, and District Hospitals. Eliminates lost paper records.</p>
+            </div>
+            <div class="abha-lookup-box">
+                <form action="{{ url_for('records_page') }}" method="GET" class="lookup-form">
+                    <input type="text" name="abha" class="form-control" placeholder="Search by ABHA (e.g. 91-3321-4451-0982)" value="{{ active_abha }}">
+                    <button type="submit" class="btn btn-primary btn-sm">Fetch EHR</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Patient Master Identity Card -->
+        <div class="glass-panel patient-id-card mb-4">
+            <div class="patient-id-grid">
+                <div class="pt-avatar-block">
+                    <div class="pt-avatar">👩🏽</div>
+                    <div class="pt-basic">
+                        <h2>Meena Sahu</h2>
+                        <span class="pt-abha-badge">💳 ABHA ID: <strong>{{ active_abha }}</strong></span>
+                        <small>Linked to Aadhaar (Verified) • Rampur Gram Panchayat, Bilaspur</small>
+                    </div>
+                </div>
+
+                <div class="pt-clinical-vitals-grid">
+                    <div class="pt-vital-box">
+                        <span class="v-label">Age / Gender</span>
+                        <span class="v-val">28 Yrs • Female</span>
+                    </div>
+                    <div class="pt-vital-box">
+                        <span class="v-label">Gestational Age</span>
+                        <span class="v-val text-amber">32 Wks (Primi)</span>
+                    </div>
+                    <div class="pt-vital-box">
+                        <span class="v-label">Blood Group</span>
+                        <span class="v-val text-teal">B Positive</span>
+                    </div>
+                    <div class="pt-vital-box">
+                        <span class="v-label">Risk Category</span>
+                        <span class="v-val text-rose">High-Risk Pregnancy</span>
+                    </div>
+                </div>
+
+                <div class="pt-consent-status">
+                    <span class="status-chip in-stock">✓ ABDM Consent: Active (24h Window)</span>
+                    <button class="btn btn-xs btn-outline mt-2" onclick="showToast('ABHA QR Health Card downloaded to local storage.')">Download ABHA Card</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Longitudinal Journey Timeline -->
+        <div class="records-grid-layout">
+            <!-- Timeline Stream -->
+            <div class="records-timeline-column">
+                <div class="glass-panel">
+                    <div class="panel-header-flex">
+                        <h3>🏥 Cross-Facility Continuum of Care</h3>
+                        <span class="live-pill"><span class="pulse-dot green"></span> Synchronized</span>
+                    </div>
+
+                    <div class="timeline-stream">
+                        <!-- Step 4: Home Follow-up -->
+                        <div class="timeline-event current">
+                            <div class="event-marker green"></div>
+                            <div class="event-content">
+                                <div class="event-header">
+                                    <span class="event-tier">Village Sub-Centre Level</span>
+                                    <span class="event-date">Today, 08:30 AM</span>
+                                </div>
+                                <h4 class="event-title">Post-Discharge ASHA Home Visit & Adherence Verification</h4>
+                                <p class="event-facility">Conducted by Sunita Devi (ASHA) • Rampur Village</p>
+                                <div class="event-details-box">
+                                    <p><strong>Clinical Status:</strong> Blood pressure stabilized at 128/84 mmHg. Patient adhering to Tab. Labetalol. Fetal movements vigorous. Dispensed 30-day IFA supplements.</p>
+                                    <span class="status-chip in-stock">Protocol Completed</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: District Hospital Intervention -->
+                        <div class="timeline-event">
+                            <div class="event-marker blue"></div>
+                            <div class="event-content">
+                                <div class="event-header">
+                                    <span class="event-tier">Tertiary / District Hospital</span>
+                                    <span class="event-date">3 Days Ago</span>
+                                </div>
+                                <h4 class="event-title">Specialist Consult & Day-Care IV Iron Sucrose Infusion</h4>
+                                <p class="event-facility">Dr. Sunayana Sen (Consultant OBGYN) • Bilaspur District Hospital</p>
+                                <div class="event-details-box">
+                                    <p><strong>Treatment Done:</strong> 200mg IV Iron Sucrose administered over 2 hours under observation. Obstetric USG performed: Single live intrauterine fetus, cephalic presentation, liquor adequate (AFI 12cm). Estimated fetal weight: 1.85 kg.</p>
+                                    <div class="event-docs-row">
+                                        <button class="btn btn-xs btn-outline" onclick="showToast('Displaying USG Scan Report #USG-88219')">📄 View USG Scan</button>
+                                        <button class="btn btn-xs btn-outline" onclick="showToast('Displaying Day-Care Discharge Summary')">📄 Discharge Note</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: PHC Tele-OPD -->
+                        <div class="timeline-event">
+                            <div class="event-marker yellow"></div>
+                            <div class="event-content">
+                                <div class="event-header">
+                                    <span class="event-tier">Primary Health Centre (PHC)</span>
+                                    <span class="event-date">5 Days Ago</span>
+                                </div>
+                                <h4 class="event-title">Assisted Tele-OPD Consultation & Diagnostic Orders</h4>
+                                <p class="event-facility">Dr. Rajesh Sharma (Medical Officer) • Bilaspur Rural PHC</p>
+                                <div class="event-details-box">
+                                    <p><strong>Finding:</strong> Gestational hypertension (BP 155/100) and severe nutritional anemia (Hb 7.2 g/dL). Started Tab. Labetalol 100mg BD. Requisitioned CBC, Sputum, and Urgent District Hospital Referral.</p>
+                                    <span class="status-chip low-stock">Urgent Referral Triggered</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 1: Initial Village Screening -->
+                        <div class="timeline-event">
+                            <div class="event-marker gray"></div>
+                            <div class="event-content">
+                                <div class="event-header">
+                                    <span class="event-tier">Sub-Centre / Doorstep</span>
+                                    <span class="event-date">6 Days Ago</span>
+                                </div>
+                                <h4 class="event-title">Routine Village Antenatal Screening (ANC-3)</h4>
+                                <p class="event-facility">Sunita Devi (ASHA) & ANM Suman • Rampur Sub-Centre</p>
+                                <div class="event-details-box">
+                                    <p><strong>Observation:</strong> Patient presented with severe pedal edema and headache. Digital triage flagged YELLOW/RED danger signs.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Lab Diagnostics & Medication History -->
+            <div class="records-sidebar-column">
+                <!-- Lab Diagnostic Reports -->
+                <div class="glass-panel mb-3">
+                    <div class="panel-header-flex">
+                        <h4>🔬 Diagnostic Lab Reports</h4>
+                        <span class="badge-tag">Verified</span>
+                    </div>
+
+                    <div class="lab-reports-list">
+                        <div class="lab-report-card">
+                            <div class="lr-top">
+                                <strong>Complete Blood Count (CBC)</strong>
+                                <span class="lr-date">Bilaspur PHC Lab</span>
+                            </div>
+                            <div class="lr-val-row">
+                                <span>Hemoglobin (Hb):</span>
+                                <strong class="text-rose">7.2 g/dL (Severe Anemia)</strong>
+                            </div>
+                            <div class="lr-val-row">
+                                <span>Platelet Count:</span>
+                                <strong>210,000 /mcL (Normal)</strong>
+                            </div>
+                        </div>
+
+                        <div class="lab-report-card">
+                            <div class="lr-top">
+                                <strong>Urine Routine & Albumin</strong>
+                                <span class="lr-date">Rampur Sub-Centre</span>
+                            </div>
+                            <div class="lr-val-row">
+                                <span>Proteinuria Dipstick:</span>
+                                <strong class="text-amber">Positive (++)</strong>
+                            </div>
+                            <div class="lr-val-row">
+                                <span>Urine Sugar:</span>
+                                <strong>Nil / Normal</strong>
+                            </div>
+                        </div>
+
+                        <div class="lab-report-card">
+                            <div class="lr-top">
+                                <strong>Rapid Malaria Antigen (RDT)</strong>
+                                <span class="lr-date">Sub-Centre Point-of-Care</span>
+                            </div>
+                            <div class="lr-val-row">
+                                <span>Pv / Pf Antigen:</span>
+                                <strong class="text-teal">Negative</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Medications -->
+                <div class="glass-panel">
+                    <div class="panel-header-flex">
+                        <h4>💊 Active Medication Regimen</h4>
+                        <button class="btn btn-xs btn-outline" onclick="playMedicationAudio()">🗣️ Audio Guide</button>
+                    </div>
+
+                    <div class="meds-active-list">
+                        <div class="active-med-pill">
+                            <strong>Tab. Labetalol 100mg</strong>
+                            <small>1 Tablet Twice Daily (Morning & Night) after meals</small>
+                            <span class="adherence-badge">Adherence: 100%</span>
+                        </div>
+                        <div class="active-med-pill">
+                            <strong>Tab. Iron & Folic Acid (IFA - Red)</strong>
+                            <small>1 Tablet Once Daily at bedtime with lemon water</small>
+                            <span class="adherence-badge">Adherence: 95%</span>
+                        </div>
+                        <div class="active-med-pill">
+                            <strong>Tab. Calcium Carbonate 500mg</strong>
+                            <small>1 Tablet Once Daily in the afternoon (do not take with iron)</small>
+                            <span class="adherence-badge">Adherence: 90%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function playMedicationAudio() {
+        showToast("🗣️ Playing audio medication instructions in Chhattisgarhi/Hindi...");
+    }
+</script>
+{% endblock %}

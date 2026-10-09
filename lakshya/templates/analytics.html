@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Public Health Impact & Quality Analytics | AarogyaSahay{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb-bar">
+    <div class="container breadcrumb-flex">
+        <a href="{{ url_for('index') }}">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-curr">Quality & Impact Analytics</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper analytics-page">
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header-bar">
+            <div>
+                <span class="badge-tag">Public Health Performance & Accountability</span>
+                <h1 class="page-title">Rural Health Quality & Outcome Analytics</h1>
+                <p class="page-sub">Evidence-based performance indicators tracking timely access, continuity, quality, and healthcare strengthening across tiers.</p>
+            </div>
+            <div>
+                <button class="btn btn-outline btn-sm" onclick="showToast('Exporting District Health Quality Report (PDF/Excel)...')">
+                    <span>📊</span> Export CMHO Report
+                </button>
+            </div>
+        </div>
+
+        <!-- High-Level Expected Outcomes Grid (Directly from Problem Statement) -->
+        <div class="dashboard-kpis mb-4">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-icon teal">⏱️</span>
+                    <span class="kpi-trend up">78% Reduction</span>
+                </div>
+                <div class="kpi-val">8.4 min</div>
+                <div class="kpi-title">Average Waiting Time</div>
+                <small class="kpi-sub">Reduced from 210 mins at crowded physical OPDs</small>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-icon emerald">🛣️</span>
+                    <span class="kpi-trend up">Saved 38 km</span>
+                </div>
+                <div class="kpi-val">42 min</div>
+                <div class="kpi-title">Travel Time Saved / Visit</div>
+                <small class="kpi-sub">Care delivered within 5km of village doorstep</small>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-icon blue">🔄</span>
+                    <span class="kpi-trend up">+58.2% Increase</span>
+                </div>
+                <div class="kpi-val">89.4%</div>
+                <div class="kpi-title">Referral Completion Rate</div>
+                <small class="kpi-sub">Compared to 31.2% historical drop-out rate</small>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-icon amber">💊</span>
+                    <span class="kpi-trend up">95.9% Available</span>
+                </div>
+                <div class="kpi-val">4.1%</div>
+                <div class="kpi-title">Essential Drug Stockouts</div>
+                <small class="kpi-sub">Down from 28.5% unmonitored stockout baseline</small>
+            </div>
+        </div>
+
+        <!-- Comparative Quality Matrix -->
+        <div class="analytics-grid-two mb-4">
+            <!-- Outcome Benchmark Visuals -->
+            <div class="glass-panel">
+                <div class="panel-header-flex">
+                    <h3>📈 System Strengthening Outcomes</h3>
+                    <span class="badge-tag">Baseline vs. AarogyaSahay</span>
+                </div>
+
+                <div class="benchmark-bars-list mt-3">
+                    <div class="bench-item">
+                        <div class="bench-label-row">
+                            <span>Referral Handover Completion</span>
+                            <strong>89.4% (Target: 90%)</strong>
+                        </div>
+                        <div class="bench-bar-track">
+                            <div class="bench-bar-fill fill-emerald" style="width: 89.4%;"></div>
+                            <div class="bench-bar-baseline" style="left: 31.2%;" title="Pre-network baseline: 31.2%"></div>
+                        </div>
+                        <small class="text-muted">Pre-network baseline: 31.2% • Current network: 89.4%</small>
+                    </div>
+
+                    <div class="bench-item mt-3">
+                        <div class="bench-label-row">
+                            <span>High-Risk Maternal Institutional Delivery</span>
+                            <strong>98.7% (Target: 95%)</strong>
+                        </div>
+                        <div class="bench-bar-track">
+                            <div class="bench-bar-fill fill-teal" style="width: 98.7%;"></div>
+                            <div class="bench-bar-baseline" style="left: 64%;" title="Pre-network baseline: 64%"></div>
+                        </div>
+                        <small class="text-muted">Pre-network baseline: 64.0% • Current network: 98.7%</small>
+                    </div>
+
+                    <div class="bench-item mt-3">
+                        <div class="bench-label-row">
+                            <span>Essential Drug Availability (EDL)</span>
+                            <strong>95.9% (Target: 95%)</strong>
+                        </div>
+                        <div class="bench-bar-track">
+                            <div class="bench-bar-fill fill-blue" style="width: 95.9%;"></div>
+                            <div class="bench-bar-baseline" style="left: 71.5%;" title="Pre-network baseline: 71.5%"></div>
+                        </div>
+                        <small class="text-muted">Pre-network baseline: 71.5% • Current network: 95.9%</small>
+                    </div>
+
+                    <div class="bench-item mt-3">
+                        <div class="bench-label-row">
+                            <span>Zero-Connectivity Offline Sync Success</span>
+                            <strong>99.8% (Target: 99%)</strong>
+                        </div>
+                        <div class="bench-bar-track">
+                            <div class="bench-bar-fill fill-amber" style="width: 99.8%;"></div>
+                        </div>
+                        <small class="text-muted">Zero record loss across 14,800+ frontline ASHA field tablets</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tier-wise Facility Performance Breakdown -->
+            <div class="glass-panel">
+                <div class="panel-header-flex">
+                    <h3>🏛️ Primary to Tertiary Continuum Breakdown</h3>
+                    <span class="live-pill"><span class="pulse-dot green"></span> Connected</span>
+                </div>
+
+                <div class="facility-tier-list mt-3">
+                    <div class="tier-card-item">
+                        <div class="tier-icon">🏡</div>
+                        <div class="tier-meta">
+                            <strong>Sub-Centres / Health & Wellness Centres</strong>
+                            <span>12,480 Linked • 98.2% Active Tele-Readiness</span>
+                        </div>
+                        <span class="tier-score text-teal">Tier 1</span>
+                    </div>
+
+                    <div class="tier-card-item">
+                        <div class="tier-icon">🏥</div>
+                        <div class="tier-meta">
+                            <strong>Primary Health Centres (PHC Hubs)</strong>
+                            <span>1,840 Linked • 24x7 MO Tele-OPD Coverage</span>
+                        </div>
+                        <span class="tier-score text-emerald">Tier 2</span>
+                    </div>
+
+                    <div class="tier-card-item">
+                        <div class="tier-icon">🏬</div>
+                        <div class="tier-meta">
+                            <strong>Community Health Centres (CHC First Referral Units)</strong>
+                            <span>420 Linked • Specialist Obstetric & Pediatric Cover</span>
+                        </div>
+                        <span class="tier-score text-blue">Tier 3</span>
+                    </div>
+
+                    <div class="tier-card-item">
+                        <div class="tier-icon">🏙️</div>
+                        <div class="tier-meta">
+                            <strong>District Hospitals & Medical Colleges</strong>
+                            <span>64 Linked • Emergency Trauma & Tertiary Hubs</span>
+                        </div>
+                        <span class="tier-score text-amber">Tier 4</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

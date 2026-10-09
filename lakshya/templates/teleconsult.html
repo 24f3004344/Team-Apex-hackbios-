@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Assisted Tele-OPD Hub | AarogyaSahay{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb-bar">
+    <div class="container breadcrumb-flex">
+        <a href="{{ url_for('index') }}">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-curr">Tele-OPD Hub</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper teleconsult-page">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header-bar">
+            <div>
+                <span class="badge-tag">Rural Tele-Medicine</span>
+                <h1 class="page-title">Assisted Tele-OPD Consultation Console</h1>
+                <p class="page-sub">Connecting village Sub-Centres with Medical Officers and District Specialists over low-bandwidth channels.</p>
+            </div>
+            <div class="bandwidth-control-box">
+                <span class="band-label">📶 Bandwidth Mode:</span>
+                <select id="networkBandwidthSelect" class="form-control band-select" onchange="updateBandwidthMode(this.value)">
+                    <option value="2g" selected>2G / EDGE (Audio + Low-Fi Vitals Telemetry)</option>
+                    <option value="3g">3G Standard (Compressed Video)</option>
+                    <option value="4g">4G / Broadband (Full HD Video)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tele-OPD Main Layout -->
+        <div class="teleconsult-grid">
+            <!-- Left: Video Call Room Simulation & Active Patient File -->
+            <div class="tele-call-container">
+                <div class="video-feed-box glass-panel">
+                    <div class="video-overlay-top">
+                        <span class="live-pill"><span class="pulse-dot green"></span> Live Tele-Consultation (Room #402)</span>
+                        <span class="call-duration" id="callDuration">04:18</span>
+                    </div>
+
+                    <!-- Split Video Screen (Doctor on top/main, ASHA & Patient in PIP) -->
+                    <div class="video-screens">
+                        <div class="screen-doctor">
+                            <div class="doctor-avatar-circle">👨‍⚕️</div>
+                            <div class="screen-label">Dr. Rajesh Sharma, MD (Bilaspur District Hospital)</div>
+                            <span class="audio-wave-anim"><span></span><span></span><span></span><span></span></span>
+                        </div>
+                        <div class="screen-pip-patient">
+                            <div class="pip-avatar">👩🏽‍⚕️ 👥</div>
+                            <span class="pip-label">Sunita Devi (ASHA) & Patient Meena Sahu</span>
+                        </div>
+                    </div>
+
+                    <div class="call-controls">
+                        <button class="call-btn btn-mic" onclick="toggleMic(this)" title="Mute/Unmute Audio">🎤 Mic On</button>
+                        <button class="call-btn btn-cam" onclick="toggleCam(this)" title="Camera">📷 Video On</button>
+                        <button class="call-btn btn-screen" onclick="showToast('Displaying digital vitals and ECG trace to doctor...')">📊 Stream Vitals</button>
+                        <button class="call-btn btn-end" onclick="endConsultation()">❌ End Session</button>
+                    </div>
+                </div>
+
+                <!-- Live Digital Prescription Pad -->
+                <div class="glass-panel rx-pad-card mt-3">
+                    <div class="panel-header-flex">
+                        <div>
+                            <h3>📝 Medical Officer Digital Prescription Pad</h3>
+                            <small>Auto-translated to Hindi/Chhattisgarhi voice note for patient</small>
+                        </div>
+                        <span class="badge-status status-consulted">Verified Doctor Digital Signature</span>
+                    </div>
+
+                    <form id="rxForm" onsubmit="handlePrescriptionSubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label class="form-label">Diagnosis / Clinical Impression</label>
+                                <input type="text" id="rxDiagnosis" class="form-control" value="Gestational Hypertension (32 Wks) + Nutritional Anemia" required>
+                            </div>
+                            <div class="form-group col-6">
+                                <label class="form-label">Medication & Dosage Instructions</label>
+                                <input type="text" id="rxMeds" class="form-control" value="Tab. Labetalol 100mg (BD), Tab. IFA (OD after meal), High protein diet" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Specialist Referral / Diagnostic Requisition</label>
+                            <input type="text" id="rxReferral" class="form-control" value="Refer to Bilaspur District Hospital for Obstetric Ultrasound & CBC test within 48h.">
+                        </div>
+
+                        <div class="rx-actions-flex">
+                            <button type="submit" class="btn btn-primary btn-glow">
+                                <span>✍️</span> Sign & Issue Prescription to ASHA Tablet
+                            </button>
+                            <button type="button" class="btn btn-outline" onclick="generateAudioRx()">
+                                <span>🗣️</span> Generate Vernacular Audio Instructions
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right: OPD Patient Queue & Quick Add -->
+            <div class="tele-queue-sidebar">
+                <!-- Add Patient to Queue Card -->
+                <div class="glass-panel mb-3">
+                    <div class="panel-header-flex">
+                        <h4>+ Add Patient to Tele-OPD</h4>
+                        <span class="badge-tag">Village Intake</span>
+                    </div>
+
+                    <form action="{{ url_for('teleconsult') }}" method="POST" class="quick-queue-form">
+                        <div class="form-group">
+                            <label class="form-label">Patient Name *</label>
+                            <input type="text" name="patient_name" class="form-control" placeholder="e.g. Radhabai Gond" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label class="form-label">ABHA ID</label>
+                                <input type="text" name="abha_id" class="form-control" placeholder="91-XXXX-XXXX-XXXX">
+                            </div>
+                            <div class="form-group col-6">
+                                <label class="form-label">Priority</label>
+                                <select name="priority" class="form-control">
+                                    <option value="Routine">Routine Care</option>
+                                    <option value="Priority" selected>Priority Case</option>
+                                    <option value="Emergency">Emergency</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Chief Complaint & Vitals *</label>
+                            <textarea name="chief_complaint" class="form-control" rows="2" placeholder="e.g. High fever for 3 days, BP 140/90, severe weakness" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-secondary btn-block">Add to Tele-Consult Queue</button>
+                    </form>
+                </div>
+
+                <!-- Active Waiting Queue -->
+                <div class="glass-panel">
+                    <div class="panel-header-flex">
+                        <h4>📋 Waiting Queue ({{ queue|length }})</h4>
+                        <span class="live-pill"><span class="pulse-dot green"></span> Connected</span>
+                    </div>
+
+                    <div class="queue-cards-stream">
+                        {% for pt in queue %}
+                            <div class="queue-card-item priority-{{ pt.priority|lower }}">
+                                <div class="queue-card-top">
+                                    <strong>{{ pt.patient_name }}</strong>
+                                    <span class="queue-p-badge {{ pt.priority|lower }}">{{ pt.priority }}</span>
+                                </div>
+                                <div class="queue-meta-text">
+                                    <span>Age: {{ pt.age }} • {{ pt.gender }}</span>
+                                    <span>ABHA: <code>{{ pt.abha_id }}</code></span>
+                                </div>
+                                <p class="queue-complaint">"{{ pt.chief_complaint }}"</p>
+                                <div class="queue-vitals-row">
+                                    <small>🩺 {{ pt.vitals or 'Vitals captured by ASHA' }}</small>
+                                </div>
+                                <div class="queue-item-actions">
+                                    <button class="btn btn-xs btn-primary" onclick="connectQueuePatient('{{ pt.patient_name }}')">Start Consultation</button>
+                                    <span class="status-chip">{{ pt.status }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function updateBandwidthMode(val) {
+        showToast(`Bandwidth adapted: switched to ${val.toUpperCase()} telemetry mode.`);
+    }
+
+    function toggleMic(btn) {
+        if (btn.innerText.includes("Mic On")) {
+            btn.innerText = "🔇 Mic Muted";
+            btn.style.background = "#EF4444";
+        } else {
+            btn.innerText = "🎤 Mic On";
+            btn.style.background = "";
+        }
+    }
+
+    function toggleCam(btn) {
+        if (btn.innerText.includes("Video On")) {
+            btn.innerText = "📷 Video Off";
+        } else {
+            btn.innerText = "📷 Video On";
+        }
+    }
+
+    function endConsultation() {
+        if (confirm("End active tele-OPD session and save clinical encounter?")) {
+            showToast("Tele-OPD session successfully completed. Records updated in ABHA repository.");
+        }
+    }
+
+    function handlePrescriptionSubmit(e) {
+        e.preventDefault();
+        showToast("✓ Digital prescription cryptographically signed and sent to Rampur Sub-Centre tablet!");
+    }
+
+    function generateAudioRx() {
+        showToast("🗣️ Generating regional audio dosage guide in Chhattisgarhi/Hindi...");
+        setTimeout(() => {
+            showToast("✓ Audio pill reminder ready. Transmitted to patient mobile via IVR.");
+        }, 1000);
+    }
+
+    function connectQueuePatient(name) {
+        showToast(`Connecting live encrypted Tele-OPD stream for ${name}...`);
+    }
+</script>
+{% endblock %}

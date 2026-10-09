@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}Register | AarogyaSahay Rural Public Health Network{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb-bar">
+    <div class="container breadcrumb-flex">
+        <a href="{{ url_for('index') }}">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-curr">Register Facility or Citizen</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper register-wrapper">
+    <div class="container auth-container register-container">
+        <div class="auth-card register-card glass-panel animate-fade-in">
+            <!-- Header -->
+            <div class="auth-header text-center">
+                <div class="auth-logo-badge bg-emerald">
+                    <span>📝</span>
+                </div>
+                <h1 class="auth-title">Join AarogyaSahay Network</h1>
+                <p class="auth-sub">Interoperable National Digital Health Ecosystem for Underserved Communities</p>
+            </div>
+
+            <form action="{{ url_for('register') }}" method="POST" class="auth-form" id="registerForm">
+                <!-- Step 1: Role Selection Cards -->
+                <div class="form-section-title">
+                    <span class="step-num">1</span> Select Your Role in the Healthcare Grid
+                </div>
+                
+                <div class="role-cards-grid">
+                    <label class="role-select-card selected" onclick="chooseRole('patient', this)">
+                        <input type="radio" name="role" value="patient" checked class="role-radio">
+                        <div class="role-icon">👥</div>
+                        <div class="role-meta">
+                            <strong>Patient / Citizen</strong>
+                            <small>Access tele-OPD, ABHA records, medicine availability & reminders</small>
+                        </div>
+                    </label>
+
+                    <label class="role-select-card" onclick="chooseRole('frontline', this)">
+                        <input type="radio" name="role" value="frontline" class="role-radio">
+                        <div class="role-icon">👩🏽‍⚕️</div>
+                        <div class="role-meta">
+                            <strong>Frontline ASHA / ANM</strong>
+                            <small>Assisted tele-consultations, digital triage, maternal & child tracker</small>
+                        </div>
+                    </label>
+
+                    <label class="role-select-card" onclick="chooseRole('doctor', this)">
+                        <input type="radio" name="role" value="doctor" class="role-radio">
+                        <div class="role-icon">👨‍⚕️</div>
+                        <div class="role-meta">
+                            <strong>Medical Officer / Doctor</strong>
+                            <small>Review digital triage, conduct tele-OPDs, electronic prescriptions</small>
+                        </div>
+                    </label>
+
+                    <label class="role-select-card" onclick="chooseRole('admin', this)">
+                        <input type="radio" name="role" value="admin" class="role-radio">
+                        <div class="role-icon">🏛️</div>
+                        <div class="role-meta">
+                            <strong>PHC / Facility Admin</strong>
+                            <small>Inventory tracking, referral loop monitoring, facility queue oversight</small>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Step 2: Personal & Contact Information -->
+                <div class="form-section-title">
+                    <span class="step-num">2</span> Personal & Identity Details
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="fullName" class="form-label">Full Name *</label>
+                        <div class="input-icon-wrap">
+                            <span class="input-icon">👤</span>
+                            <input 
+                                type="text" 
+                                id="fullName" 
+                                name="full_name" 
+                                class="form-control" 
+                                placeholder="e.g. Rekha Bai / Dr. Amit Verma" 
+                                value="{{ form_data.full_name if form_data else '' }}" 
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label for="regIdentifier" class="form-label">Mobile Number *</label>
+                        <div class="input-icon-wrap">
+                            <span class="input-icon">📱</span>
+                            <input 
+                                type="tel" 
+                                id="regIdentifier" 
+                                name="identifier" 
+                                class="form-control" 
+                                placeholder="10-digit mobile number" 
+                                value="{{ form_data.identifier if form_data else '' }}" 
+                                pattern="[0-9]{10}"
+                                required
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Role-Specific Section -->
+                <div id="roleSpecificSection">
+                    <!-- Patient specific details -->
+                    <div id="patientFields">
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="regAbha" class="form-label">ABHA Health ID (Ayushman Bharat)</label>
+                                <div class="input-icon-wrap">
+                                    <span class="input-icon">💳</span>
+                                    <input 
+                                        type="text" 
+                                        id="regAbha" 
+                                        name="abha_id" 
+                                        class="form-control" 
+                                        placeholder="14-digit ABHA (leave blank to auto-create)"
+                                    >
+                                </div>
+                                <small class="form-helper">If you do not have an ABHA, we will generate a verified virtual ID.</small>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="healthTag" class="form-label">Care Category Focus</label>
+                                <select id="healthTag" class="form-control">
+                                    <option value="routine">General / Routine Primary Care</option>
+                                    <option value="maternal">Maternal Care (Pregnant / Lactating Mother)</option>
+                                    <option value="child">Child Health & Immunization (<5 Yrs)</option>
+                                    <option value="chronic">Chronic Care (Diabetes / Hypertension / TB)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Frontline ASHA specific details -->
+                    <div id="frontlineFields" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="ashaFacility" class="form-label">Assigned Sub-Centre / Health Post *</label>
+                                <input type="text" id="ashaFacility" name="facility_name" class="form-control" placeholder="e.g. Rampur Sub-Centre, Bilaspur">
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="ashaVillage" class="form-label">Gram Panchayat / Village Ward</label>
+                                <input type="text" id="ashaVillage" class="form-control" placeholder="e.g. Rampur Village, Ward 3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Doctor specific details -->
+                    <div id="doctorFields" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="docRegNo" class="form-label">Medical Council Registration No. *</label>
+                                <input type="text" id="docRegNo" class="form-control" placeholder="e.g. MCI-2018-99234">
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="docSpecialty" class="form-label">Clinical Specialty</label>
+                                <select id="docSpecialty" class="form-control">
+                                    <option value="General Medicine">General Medicine / MBBS</option>
+                                    <option value="Obstetrics & Gynaecology">Obstetrics & Gynaecology (Maternal)</option>
+                                    <option value="Pediatrics">Pediatrics & Neonatology</option>
+                                    <option value="Community Medicine">Community & Family Medicine</option>
+                                    <option value="AYUSH">AYUSH / Holistic Health</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin specific details -->
+                    <div id="adminFields" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="adminFacility" class="form-label">Facility Name *</label>
+                                <input type="text" id="adminFacility" class="form-control" placeholder="e.g. Bilaspur Rural Primary Health Centre">
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="facilityType" class="form-label">Facility Tier</label>
+                                <select id="facilityType" class="form-control">
+                                    <option value="PHC">Primary Health Centre (PHC)</option>
+                                    <option value="CHC">Community Health Centre (CHC)</option>
+                                    <option value="SDH">Sub-Divisional Hospital (SDH)</option>
+                                    <option value="DH">District Hospital (DH)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Location & Vernacular Language -->
+                <div class="form-section-title">
+                    <span class="step-num">3</span> Geographic Binding & Language Preference
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-4">
+                        <label for="regState" class="form-label">State</label>
+                        <select name="state" id="regState" class="form-control">
+                            <option value="Chhattisgarh" selected>Chhattisgarh</option>
+                            <option value="Madhya Pradesh">Madhya Pradesh</option>
+                            <option value="Odisha">Odisha</option>
+                            <option value="Jharkhand">Jharkhand</option>
+                            <option value="Rajasthan">Rajasthan</option>
+                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option value="Bihar">Bihar</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-4">
+                        <label for="regDistrict" class="form-label">District</label>
+                        <input type="text" name="district" id="regDistrict" class="form-control" value="Bilaspur" required>
+                    </div>
+
+                    <div class="form-group col-4">
+                        <label for="regLanguage" class="form-label">Preferred Regional Dialect</label>
+                        <select name="language" id="regLanguage" class="form-control">
+                            <option value="Hindi" selected>हिन्दी (Hindi)</option>
+                            <option value="Chhattisgarhi">छत्तीसगढ़ी (Chhattisgarhi)</option>
+                            <option value="Odia">ଓଡ଼ିଆ (Odia)</option>
+                            <option value="Bengali">বাংলা (Bengali)</option>
+                            <option value="English">English</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Step 4: Security Credentials -->
+                <div class="form-section-title">
+                    <span class="step-num">4</span> Security & Access Passcode
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="regPassword" class="form-label">Create Password *</label>
+                        <div class="input-icon-wrap">
+                            <span class="input-icon">🔒</span>
+                            <input 
+                                type="password" 
+                                name="password" 
+                                id="regPassword" 
+                                class="form-control" 
+                                placeholder="Minimum 6 characters" 
+                                required
+                            >
+                            <button type="button" class="pw-toggle-btn" onclick="togglePasswordVisibility('regPassword', this)">👁️</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-6">
+                        <label for="regConfirmPassword" class="form-label">Confirm Password *</label>
+                        <div class="input-icon-wrap">
+                            <span class="input-icon">🔒</span>
+                            <input 
+                                type="password" 
+                                name="confirm_password" 
+                                id="regConfirmPassword" 
+                                class="form-control" 
+                                placeholder="Re-type password" 
+                                required
+                            >
+                            <button type="button" class="pw-toggle-btn" onclick="togglePasswordVisibility('regConfirmPassword', this)">👁️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" required checked>
+                        <span class="checkmark"></span>
+                        I consent to ABDM health data guidelines, longitudinal record linkage, and local offline device caching.
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg btn-glow">
+                    Register & Activate Digital Health Profile
+                </button>
+            </form>
+
+            <div class="auth-footer text-center">
+                <p>Already registered on the network? <a href="{{ url_for('login') }}" class="accent-link">Sign In to Your Account</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function chooseRole(roleName, cardElement) {
+        // Update selection UI
+        document.querySelectorAll('.role-select-card').forEach(c => c.classList.remove('selected'));
+        cardElement.classList.add('selected');
+        
+        // Hide all specific role fields
+        document.getElementById('patientFields').style.display = 'none';
+        document.getElementById('frontlineFields').style.display = 'none';
+        document.getElementById('doctorFields').style.display = 'none';
+        document.getElementById('adminFields').style.display = 'none';
+
+        // Show selected role fields
+        if (roleName === 'patient') {
+            document.getElementById('patientFields').style.display = 'block';
+        } else if (roleName === 'frontline') {
+            document.getElementById('frontlineFields').style.display = 'block';
+        } else if (roleName === 'doctor') {
+            document.getElementById('doctorFields').style.display = 'block';
+        } else if (roleName === 'admin') {
+            document.getElementById('adminFields').style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}

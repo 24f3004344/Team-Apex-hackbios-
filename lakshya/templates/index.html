@@ -1,0 +1,606 @@
+{% extends "base.html" %}
+
+{% block title %}AarogyaSahay | Integrated Rural Care & Quality Support Grid{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+    <div class="container hero-container">
+        <div class="hero-content">
+            <div class="hero-badge animate-fade-in">
+                <span class="badge-icon">🌿</span>
+                <span class="badge-text">Strengthening Public Health Infrastructure</span>
+                <span class="badge-pill">ABDM & ABHA Aligned</span>
+            </div>
+
+            <h1 class="hero-title animate-fade-in">
+                Timely, Continuous & Quality Healthcare for <span class="gradient-text">Every Rural Community</span>
+            </h1>
+
+            <p class="hero-desc animate-fade-in">
+                Bridging geographical distance, specialist shortages, and low connectivity. An assisted teleconsultation, digital clinical triage, real-time medicine inventory, and referral continuity network empowering frontline workers and patients.
+            </p>
+
+            <div class="hero-cta-group animate-fade-in">
+                <a href="{{ url_for('login') }}?role=frontline" class="btn btn-primary btn-lg btn-glow">
+                    <span class="btn-icon">🩺</span> Frontline Worker Portal
+                </a>
+                <a href="#triage" class="btn btn-secondary btn-lg">
+                    <span class="btn-icon">⚡</span> Run Digital Triage
+                </a>
+                <a href="#inventory" class="btn btn-outline btn-lg">
+                    <span class="btn-icon">💊</span> Check Medicine Stock
+                </a>
+            </div>
+
+            <!-- Offline & Low-connectivity Banner -->
+            <div class="connectivity-banner">
+                <div class="conn-icon">📶</div>
+                <div class="conn-details">
+                    <strong>Zero-Connectivity Resilience:</strong> Frontline workers can capture patient vitals, triage, and records fully offline. Automatic bidirectional sync triggers as soon as 2G/Wi-Fi is detected.
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-visual">
+            <div class="glass-card hero-dashboard-preview">
+                <div class="card-header-bar">
+                    <div class="traffic-dots"><span></span><span></span><span></span></div>
+                    <span class="preview-title">Live Rural Tele-OPD & Triage Grid</span>
+                    <span class="live-tag"><span class="pulse-dot green"></span> Active</span>
+                </div>
+
+                <div class="preview-metric-row">
+                    <div class="mini-metric">
+                        <span class="m-val text-teal">12,480+</span>
+                        <span class="m-lbl">Sub-Centres Linked</span>
+                    </div>
+                    <div class="mini-metric">
+                        <span class="m-val text-emerald">89.4%</span>
+                        <span class="m-lbl">Referral Closure Rate</span>
+                    </div>
+                    <div class="mini-metric">
+                        <span class="m-val text-amber">42 min</span>
+                        <span class="m-lbl">Avg. Travel Time Saved</span>
+                    </div>
+                </div>
+
+                <div class="preview-stream-list">
+                    <div class="stream-item urgent">
+                        <div class="stream-badge">URGENT</div>
+                        <div class="stream-info">
+                            <strong>High-Risk Pregnancy (32 Wks)</strong>
+                            <small>Rampur Sub-Centre → Bilaspur Dist. Hospital</small>
+                        </div>
+                        <span class="stream-action">Tele-OPD Linked</span>
+                    </div>
+                    <div class="stream-item emergency">
+                        <div class="stream-badge">RED ALERT</div>
+                        <div class="stream-info">
+                            <strong>Severe Acute Malnutrition + Fever</strong>
+                            <small>Kotra Village → NRC Bilaspur (108 Dispatched)</small>
+                        </div>
+                        <span class="stream-action">En Route</span>
+                    </div>
+                    <div class="stream-item routine">
+                        <div class="stream-badge">NCD FOLLOWUP</div>
+                        <div class="stream-info">
+                            <strong>Hypertension & Diabetes Refill</strong>
+                            <small>Hirri PHC | Amlodipine & Metformin Ready</small>
+                        </div>
+                        <span class="stream-action">Dispensed</span>
+                    </div>
+                </div>
+
+                <div class="preview-footer-stats">
+                    <span>⚡ 2.4s Tele-connection latency</span>
+                    <span>🔒 End-to-end Encrypted ABHA</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Impact Metric Strip -->
+<section class="stats-strip">
+    <div class="container stats-grid">
+        <div class="stat-card">
+            <div class="stat-num">4.8M+</div>
+            <div class="stat-label">Assisted Tele-Consults</div>
+            <div class="stat-sub">Patients treated within 5km of home</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num">89%</div>
+            <div class="stat-label">Referral Completion</div>
+            <div class="stat-sub">Compared to 31% baseline drop-outs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num">3,200+</div>
+            <div class="stat-label">Specialists On Grid</div>
+            <div class="stat-sub">Obstetrics, Pediatrics, Medicine & AYUSH</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num">98.2%</div>
+            <div class="stat-label">Offline Sync Reliability</div>
+            <div class="stat-sub">Zero data loss across remote terrain</div>
+        </div>
+    </div>
+</section>
+
+<!-- Problem & Solution Matrix -->
+<section class="section section-matrix" id="pillars">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="section-tag">Public Health Transformation</span>
+            <h2 class="section-title">Strengthening Primary Care Without Replacing It</h2>
+            <p class="section-desc">
+                Addressing core structural bottlenecks in rural delivery through an integrated, continuous, and accountable digital health mesh.
+            </p>
+        </div>
+
+        <div class="solution-grid">
+            <!-- Pillar 1 -->
+            <div class="pillar-card">
+                <div class="pillar-icon-box bg-emerald">
+                    <span>🩺</span>
+                </div>
+                <h3 class="pillar-title">Assisted Teleconsultation</h3>
+                <p class="pillar-text">
+                    Patients lack smartphones and digital literacy. Frontline ASHA and ANM workers use guided tablets to connect patients with district hospital doctors and specialists in seconds.
+                </p>
+                <ul class="pillar-bullets">
+                    <li>Bandwidth-adaptive audio/video (operates on 2G/EDGE)</li>
+                    <li>Digital stethoscope and vitals input</li>
+                    <li>Instant vernacular prescription generation</li>
+                </ul>
+            </div>
+
+            <!-- Pillar 2 -->
+            <div class="pillar-card">
+                <div class="pillar-icon-box bg-teal">
+                    <span>⚡</span>
+                </div>
+                <h3 class="pillar-title">Digital Triage & Escalation</h3>
+                <p class="pillar-text">
+                    Standardized clinical decision support identifies red flags in maternal, infant, and acute cases. Automatic direct escalation to 108 emergency medical dispatch.
+                </p>
+                <ul class="pillar-bullets">
+                    <li>Validated color-coded triaging (Green / Yellow / Red)</li>
+                    <li>Maternal pre-eclampsia & hemorrhage protocols</li>
+                    <li>Automated SMS/IVR alert to District Chief Medical Officer</li>
+                </ul>
+            </div>
+
+            <!-- Pillar 3 -->
+            <div class="pillar-card">
+                <div class="pillar-icon-box bg-blue">
+                    <span>📁</span>
+                </div>
+                <h3 class="pillar-title">Longitudinal ABHA Records</h3>
+                <p class="pillar-text">
+                    Eliminates lost paper slips. When a patient moves from a Sub-Centre to a PHC and then to a District Hospital, all vitals, lab reports, and medications remain unified under their ABHA ID.
+                </p>
+                <ul class="pillar-bullets">
+                    <li>ABDM / Ayushman Bharat Digital Mission aligned</li>
+                    <li>Biometric or OTP-based consent architecture</li>
+                    <li>Offline cryptographic record caching</li>
+                </ul>
+            </div>
+
+            <!-- Pillar 4 -->
+            <div class="pillar-card">
+                <div class="pillar-icon-box bg-amber">
+                    <span>💊</span>
+                </div>
+                <h3 class="pillar-title">Real-Time Medicine & Lab Visibility</h3>
+                <p class="pillar-text">
+                    Prevents patients travelling 30 km only to find essential medicines out of stock. Live inventory tracking across Sub-Centres, PHCs, and CHCs with automatic reorder triggers.
+                </p>
+                <ul class="pillar-bullets">
+                    <li>Essential Drug List (EDL) compliance monitor</li>
+                    <li>Diagnostic test availability by facility</li>
+                    <li>Community stockout transparency</li>
+                </ul>
+            </div>
+
+            <!-- Pillar 5 -->
+            <div class="pillar-card">
+                <div class="pillar-icon-box bg-purple">
+                    <span>🔄</span>
+                </div>
+                <h3 class="pillar-title">Closed-Loop Referral Tracking</h3>
+                <p class="pillar-text">
+                    Ensures no patient falls through the cracks. Tracks referred patients until consultation is done, with post-discharge home visit reminders sent straight to their local ASHA worker.
+                </p>
+                <ul class="pillar-bullets">
+                    <li>Two-way facility referral handshake</li>
+                    <li>Automated reminder calls in regional dialects</li>
+                    <li>High-risk pregnancy delivery tracking</li>
+                </ul>
+            </div>
+
+            <!-- Pillar 6 -->
+            <div class="pillar-card">
+                <div class="pillar-icon-box bg-rose">
+                    <span>🗣️</span>
+                </div>
+                <h3 class="pillar-title">Multilingual & Voice Assistance</h3>
+                <p class="pillar-text">
+                    Breaks literacy barriers. Frontline workers and villagers receive voice-guided health summaries, dosage reminders, and emergency instructions in local languages.
+                </p>
+                <ul class="pillar-bullets">
+                    <li>Hindi, Bengali, Telugu, Marathi, Tamil support</li>
+                    <li>Audio instructions for low-literacy patients</li>
+                    <li>Pictorial dosage schedule charts</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Interactive Digital Clinical Triage Tool -->
+<section class="section section-triage" id="triage">
+    <div class="container">
+        <div class="triage-wrapper glass-panel">
+            <div class="triage-intro">
+                <span class="badge-tag">Clinical Decision Support</span>
+                <h2 class="triage-title">Interactive Digital Triage Screener</h2>
+                <p class="triage-subtitle">
+                    Experience how frontline ASHA and ANM workers screen patients at village Sub-Centres to determine immediate emergency escalation vs. primary care management.
+                </p>
+                <div class="triage-legend">
+                    <span class="legend-item"><span class="dot green"></span> Green: Local Sub-Centre Care</span>
+                    <span class="legend-item"><span class="dot yellow"></span> Yellow: Assisted Tele-OPD</span>
+                    <span class="legend-item"><span class="dot red"></span> Red: 108 Emergency Escalation</span>
+                </div>
+            </div>
+
+            <div class="triage-form-box">
+                <form id="triageForm" onsubmit="handleTriageSubmit(event)">
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="triageAge" class="form-label">Patient Age (Years)</label>
+                            <input type="number" id="triageAge" class="form-control" value="28" min="0" max="100" required>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="triageBP" class="form-label">Systolic Blood Pressure (mmHg)</label>
+                            <input type="number" id="triageBP" class="form-control" value="145" min="70" max="250" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="maternalWeeks" class="form-label">Gestational Age (0 if not pregnant)</label>
+                            <input type="number" id="maternalWeeks" class="form-control" value="32" min="0" max="42">
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="triagePulse" class="form-label">Pulse Rate (bpm)</label>
+                            <input type="number" id="triagePulse" class="form-control" value="98" min="40" max="200">
+                        </div>
+                    </div>
+
+                    <div class="symptoms-checklist">
+                        <label class="form-label">Key Danger Signs Observed:</label>
+                        <div class="checkbox-grid">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="checkFever" checked>
+                                <span class="checkmark"></span>
+                                High Fever (>101°F)
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="checkBreathing">
+                                <span class="checkmark"></span>
+                                Respiratory Distress / Fast Breathing
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="checkBleeding">
+                                <span class="checkmark"></span>
+                                Severe Vaginal Bleeding / Convulsions
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="checkVomiting">
+                                <span class="checkmark"></span>
+                                Inability to drink / persistent vomiting
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" id="triageSubmitBtn">
+                        <span class="btn-text">Evaluate Clinical Triage & Pathway</span>
+                        <span class="spinner" id="triageSpinner" style="display:none;"></span>
+                    </button>
+                </form>
+
+                <!-- Triage Output Result Card -->
+                <div class="triage-result-card" id="triageResultCard" style="display:none;">
+                    <div class="result-badge-row">
+                        <span class="result-status-pill" id="resultStatusPill">Processing...</span>
+                        <span class="result-time" id="resultTime"></span>
+                    </div>
+                    <h3 class="result-tier-title" id="resultTierTitle">Triage Result</h3>
+                    <p class="result-action-text" id="resultActionText">Recommended Action</p>
+                    <div class="result-facility-box">
+                        <span class="facility-icon">🏥</span>
+                        <div class="facility-text">
+                            <small>Recommended Facility Level:</small>
+                            <strong id="resultFacility">Primary Health Centre</strong>
+                        </div>
+                    </div>
+                    <div class="result-footer-actions">
+                        <a href="{{ url_for('login') }}?role=frontline" class="btn btn-sm btn-outline">Log in as ASHA to Dispatch</a>
+                        <button type="button" class="btn btn-sm btn-ghost" onclick="resetTriageForm()">Reset Screener</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Live Medicine & Diagnostic Stock Explorer -->
+<section class="section section-inventory" id="inventory">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="section-tag">Essential Drug Availability</span>
+            <h2 class="section-title">Live Primary Medicine & Diagnostic Availability</h2>
+            <p class="section-desc">
+                Eliminating travel wastage. Patients and ASHA workers can verify medicine stock at nearby Sub-Centres and PHCs before travelling.
+            </p>
+        </div>
+
+        <div class="inventory-search-bar">
+            <div class="search-input-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="medSearchInput" class="med-search-input" placeholder="Search medicine (e.g. Iron, Amoxicillin, Metformin, ORS, Oxytocin)..." oninput="debounceMedicineSearch()">
+            </div>
+            <div class="filter-select-wrap">
+                <select id="districtFilter" class="district-select" onchange="searchMedicines()">
+                    <option value="">All Facilities in District</option>
+                    <option value="Bilaspur" selected>Bilaspur District Hub</option>
+                    <option value="Rampur">Rampur Rural Block</option>
+                    <option value="Hirri">Hirri PHC Cluster</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Medicine Results Grid -->
+        <div class="inventory-table-wrap glass-panel">
+            <table class="inventory-table">
+                <thead>
+                    <tr>
+                        <th>Essential Medicine / Test</th>
+                        <th>Care Category</th>
+                        <th>Health Facility Location</th>
+                        <th>Stock Level</th>
+                        <th>Status</th>
+                        <th>Last Verified</th>
+                    </tr>
+                </thead>
+                <tbody id="medicineTableBody">
+                    <tr>
+                        <td><strong>Iron & Folic Acid Tablets (IFA)</strong></td>
+                        <td><span class="cat-pill">Maternal Health</span></td>
+                        <td>Rampur Sub-Centre</td>
+                        <td>450 Units</td>
+                        <td><span class="stock-badge in-stock">Available</span></td>
+                        <td>Today, 08:30 AM</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Amoxicillin Dispersible 250mg</strong></td>
+                        <td><span class="cat-pill">Child Health / Antibiotics</span></td>
+                        <td>Rampur Sub-Centre</td>
+                        <td>40 Units</td>
+                        <td><span class="stock-badge low-stock">Low Stock</span></td>
+                        <td>Yesterday</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Metformin 500mg</strong></td>
+                        <td><span class="cat-pill">NCD / Chronic Care</span></td>
+                        <td>Bilaspur Rural PHC</td>
+                        <td>1,200 Units</td>
+                        <td><span class="stock-badge in-stock">Available</span></td>
+                        <td>Today, 09:15 AM</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Oral Rehydration Salts (ORS)</strong></td>
+                        <td><span class="cat-pill">Child Diarrhea Protocol</span></td>
+                        <td>Hirri PHC</td>
+                        <td>680 Packets</td>
+                        <td><span class="stock-badge in-stock">Available</span></td>
+                        <td>Today, 10:00 AM</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Amlodipine 5mg</strong></td>
+                        <td><span class="cat-pill">Hypertension Management</span></td>
+                        <td>Rampur Sub-Centre</td>
+                        <td>0 Units</td>
+                        <td><span class="stock-badge out-stock">Stockout Alert</span></td>
+                        <td>Auto-Indent Raised</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="inventory-footnote text-center">
+            <small>✓ Data synced directly with District Drug Warehouse & DVDMS Portal. Automated restocking indents triggered at 20% threshold.</small>
+        </div>
+    </div>
+</section>
+
+<!-- Continuous Referral Loop Workflow -->
+<section class="section section-workflow" id="referrals">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="section-tag">Continuity of Care</span>
+            <h2 class="section-title">End-to-End Referral Loop Tracking</h2>
+            <p class="section-desc">
+                Patients no longer drop out between rural clinics and district hospitals. Complete digital handover with closed-loop feedback.
+            </p>
+        </div>
+
+        <div class="workflow-steps-grid">
+            <div class="step-card">
+                <div class="step-number">01</div>
+                <div class="step-icon">🏡</div>
+                <h4 class="step-title">Village Identification</h4>
+                <p class="step-desc">
+                    ASHA/ANM worker screens patient at village doorstep or Sub-Centre. Flags danger signs using digital triage.
+                </p>
+                <span class="step-tag">Sub-Centre Level</span>
+            </div>
+
+            <div class="step-divider">➔</div>
+
+            <div class="step-card">
+                <div class="step-number">02</div>
+                <div class="step-icon">💻</div>
+                <h4 class="step-title">Assisted Tele-OPD</h4>
+                <p class="step-desc">
+                    Frontline worker initiates tele-consultation with Medical Officer at Primary Health Centre. Digital prescription generated.
+                </p>
+                <span class="step-tag">PHC Tele-Hub</span>
+            </div>
+
+            <div class="step-divider">➔</div>
+
+            <div class="step-card">
+                <div class="step-number">03</div>
+                <div class="step-icon">🏥</div>
+                <h4 class="step-title">Specialist Referral</h4>
+                <p class="step-desc">
+                    If advanced care is needed, appointment is pre-booked at District Hospital. Records transferred instantly under ABHA.
+                </p>
+                <span class="step-tag">District Hospital</span>
+            </div>
+
+            <div class="step-divider">➔</div>
+
+            <div class="step-card highlight">
+                <div class="step-number">04</div>
+                <div class="step-icon">🔄</div>
+                <h4 class="step-title">Closed-Loop Follow-up</h4>
+                <p class="step-desc">
+                    Discharge note automatically routes back to village ASHA worker for home visits, medication adherence, and recovery monitoring.
+                </p>
+                <span class="step-tag">Village Re-integration</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Frontline Worker Empowerment Spotlight -->
+<section class="section section-frontline" id="frontline">
+    <div class="container frontline-split">
+        <div class="frontline-content">
+            <span class="section-tag">Frontline Empowerment</span>
+            <h2 class="section-title">Designed for ASHA & ANM Heroes</h2>
+            <p class="section-desc">
+                Frontline workers are the backbone of rural healthcare. AarogyaSahay equips them with an intuitive, assisted workflow designed for low digital literacy and tough field environments.
+            </p>
+
+            <div class="feature-checklist">
+                <div class="feature-item">
+                    <div class="f-icon">🎙️</div>
+                    <div class="f-text">
+                        <strong>Vernacular Voice Guidance:</strong> Step-by-step audio prompts in local dialects ensure accurate vital recording and counseling.
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="f-icon">📶</div>
+                    <div class="f-text">
+                        <strong>True Offline-First Mode:</strong> Records save locally on tablets. Works during heavy monsoons and power outages without data loss.
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="f-icon">🤰</div>
+                    <div class="f-text">
+                        <strong>High-Risk Maternal & Child Registry:</strong> Automated color-coded calendars for ANC checkups, immunization, and high-risk pregnancy follow-ups.
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="f-icon">⚡</div>
+                    <div class="f-text">
+                        <strong>Single-Click 108 Emergency Link:</strong> Direct GPS dispatch link with ambulance tracking for acute obstetric and trauma emergencies.
+                    </div>
+                </div>
+            </div>
+
+            <div class="frontline-actions">
+                <a href="{{ url_for('login') }}?role=frontline" class="btn btn-primary btn-glow">Launch ASHA Field Console</a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline">Register Health Worker</a>
+            </div>
+        </div>
+
+        <div class="frontline-card-preview">
+            <div class="worker-card glass-panel">
+                <div class="worker-header">
+                    <div class="worker-avatar">👩🏽‍⚕️</div>
+                    <div class="worker-info">
+                        <h4>Sunita Devi</h4>
+                        <span>Accredited Social Health Activist (ASHA)</span>
+                        <small>Rampur Sub-Centre • Sector 4, Bilaspur</small>
+                    </div>
+                    <span class="status-online">Online</span>
+                </div>
+
+                <div class="worker-stats">
+                    <div class="w-stat">
+                        <strong>142</strong>
+                        <span>Families Covered</span>
+                    </div>
+                    <div class="w-stat">
+                        <strong>18</strong>
+                        <span>Active ANCs</span>
+                    </div>
+                    <div class="w-stat">
+                        <strong>4</strong>
+                        <span>High-Risk (Tracked)</span>
+                    </div>
+                </div>
+
+                <div class="today-tasks">
+                    <h5>Today's Priority Actions:</h5>
+                    <div class="task-pill urgent">
+                        <span>🚨 10:30 AM:</span> ANC Checkup - Meena Sahu (Severe Anemia)
+                    </div>
+                    <div class="task-pill routine">
+                        <span>👶 02:00 PM:</span> Pentavalent Vaccine Drive - Village Anganwadi
+                    </div>
+                    <div class="task-pill follow-up">
+                        <span>💊 04:30 PM:</span> Metformin Refill Check - Ramesh Gond
+                    </div>
+                </div>
+
+                <div class="worker-cta">
+                    <span class="pulse-text">⚡ 2 Tele-Consults scheduled with PHC Doctor today</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="section section-cta">
+    <div class="container text-center">
+        <div class="cta-box glass-panel">
+            <span class="badge-tag">Get Started Today</span>
+            <h2 class="cta-title">Join the Integrated Rural Public Health Network</h2>
+            <p class="cta-desc">
+                Whether you are a frontline ASHA worker, medical officer, specialist, or rural citizen, access quality healthcare and continuity of records without geographic limits.
+            </p>
+            <div class="cta-button-group">
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg btn-glow">Register Account / ABHA ID</a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg">Sign In to Dashboard</a>
+            </div>
+            <div class="cta-assurance">
+                <span>🛡️ Free & Government Public Health Aligned</span>
+                <span>🔒 Strict Data Privacy & ABHA Consent</span>
+                <span>📶 Works on 2G & Offline</span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

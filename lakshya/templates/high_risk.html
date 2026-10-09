@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}High-Risk Patient Follow-up | AarogyaSahay{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb-bar">
+    <div class="container breadcrumb-flex">
+        <a href="{{ url_for('index') }}">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-curr">High-Risk Patient Registry</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper high-risk-page">
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header-bar">
+            <div>
+                <span class="badge-tag">Maternal, Child & Chronic Vulnerability Registry</span>
+                <h1 class="page-title">High-Risk Longitudinal Patient Registry</h1>
+                <p class="page-sub">Targeted follow-up surveillance for vulnerable mothers, malnourished infants, and chronic patients to prevent preventable mortality.</p>
+            </div>
+            <div>
+                <button class="btn btn-primary btn-sm btn-glow" onclick="showToast('Dispatching automated voice reminders in Chhattisgarhi to all patients due today...')">
+                    <span>📢</span> Broadcast Dialect Reminders
+                </button>
+            </div>
+        </div>
+
+        <!-- Cohort Summary Metric Cards -->
+        <div class="dashboard-kpis mb-4">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-icon rose">🤰</span>
+                    <span class="kpi-badge alert">Surveillance</span>
+                </div>
+                <div class="kpi-val">18</div>
+                <div class="kpi-title">High-Risk Pregnancies (HRP)</div>
+                <small class="kpi-sub">Tracked across Bilaspur Sub-Centres</small>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-icon amber">👶</span>
+                    <span class="kpi-badge warning">Nutrition</span>
+                </div>
+                <div class="kpi-val">6</div>
+                <div class="kpi-title">Severe Acute Malnutrition (SAM)</div>
+                <small class="kpi-sub">MUAC < 115mm under active ASHA monitoring</small>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-icon teal">🩺</span>
+                    <span class="kpi-trend up">94% Adherence</span>
+                </div>
+                <div class="kpi-val">42</div>
+                <div class="kpi-title">Chronic NCD Patients</div>
+                <small class="kpi-sub">Hypertension & Type 2 Diabetes Refill</small>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-icon emerald">🏡</span>
+                    <span class="kpi-trend up">100% On Schedule</span>
+                </div>
+                <div class="kpi-val">24</div>
+                <div class="kpi-title">Home Visits Completed</div>
+                <small class="kpi-sub">By ASHA & ANM field workers this week</small>
+            </div>
+        </div>
+
+        <!-- Cases Table -->
+        <div class="glass-panel">
+            <div class="panel-header-flex">
+                <div class="panel-title-wrap">
+                    <h3>🎯 Priority Follow-up Registry</h3>
+                    <small>Real-time surveillance feeds from frontline ASHA field tablets</small>
+                </div>
+                <div class="filter-pills">
+                    <button class="btn btn-xs btn-outline" onclick="filterCohort('all')">All Cohorts</button>
+                    <button class="btn btn-xs btn-outline" onclick="filterCohort('maternal')">Maternal HRP</button>
+                    <button class="btn btn-xs btn-outline" onclick="filterCohort('pediatric')">Child SAM</button>
+                    <button class="btn btn-xs btn-outline" onclick="filterCohort('chronic')">Chronic NCD</button>
+                </div>
+            </div>
+
+            <div class="table-responsive mt-3">
+                <table class="inventory-table" id="highRiskTable">
+                    <thead>
+                        <tr>
+                            <th>Patient Identity</th>
+                            <th>Vulnerability Cohort</th>
+                            <th>Critical Clinical Risk Factors</th>
+                            <th>Sub-Centre / Facility</th>
+                            <th>Assigned ASHA Worker</th>
+                            <th>Next Action Due</th>
+                            <th>Status</th>
+                            <th>Intervention</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in cases %}
+                            <tr class="cohort-row cohort-{{ c.category|lower|replace(' ', '-') }}">
+                                <td>
+                                    <strong>{{ c.patient_name }}</strong>
+                                    <small class="d-block text-muted">ABHA: {{ c.abha_id }}</small>
+                                </td>
+                                <td>
+                                    <span class="cat-pill">{{ c.category }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-rose font-weight-bold">{{ c.risk_factors }}</span>
+                                </td>
+                                <td>{{ c.facility_name }}</td>
+                                <td><strong>{{ c.asha_worker }}</strong></td>
+                                <td><span class="text-amber">{{ c.next_action_date }}</span></td>
+                                <td>
+                                    <span class="badge-status {% if c.status == 'Critical' %}status-in-transit{% elif c.status == 'Due Today' %}status-initiated{% else %}status-consulted{% endif %}">
+                                        {{ c.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-xs btn-primary" onclick="showToast('Home visit scheduled for {{ c.patient_name }}. ASHA task assigned.')">
+                                        Action Visit
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function filterCohort(cohort) {
+        showToast(`Filtered cohort list by: ${cohort.toUpperCase()}`);
+    }
+</script>
+{% endblock %}

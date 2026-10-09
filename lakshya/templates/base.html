@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AarogyaSahay | Integrated Rural & Primary Care Grid{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="description" content="Integrated care-access and quality support platform for rural, underserved communities. Assisted teleconsultation, digital triage, referral tracking, medicine availability and longitudinal health records.">
+    <!-- Immediate Theme Application Script -->
+    <script>
+        (function() {
+            var theme = localStorage.getItem('aarogya_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+</head>
+<body>
+    <!-- Top Emergency & Accessibility Strip -->
+    <div class="top-emergency-bar">
+        <div class="container top-bar-content">
+            <div class="emergency-contacts">
+                <a href="tel:108" class="emergency-pill"><span class="pulse-dot red"></span> <strong>108</strong> Rural SOS</a>
+                <a href="tel:104" class="emergency-pill"><span class="pulse-dot teal"></span> <strong>104</strong> Maternal Helpline</a>
+                <a href="tel:14416" class="emergency-pill hide-mobile"><span class="pulse-dot green"></span> <strong>14416</strong> Tele-MANAS</a>
+            </div>
+            <div class="top-utilities">
+                <div class="offline-indicator" id="offlineIndicator" title="Offline-resilient caching enables field workers to operate without active internet">
+                    <span class="status-dot green"></span>
+                    <span class="offline-text">Field Sync: <strong>Active (Offline-Ready)</strong></span>
+                </div>
+                <div class="lang-selector-wrap">
+                    <span class="lang-icon">🌐</span>
+                    <select id="languageSelect" class="lang-dropdown" aria-label="Select Interface Language" onchange="switchLanguage(this.value)">
+                        <option value="en" selected>English</option>
+                        <option value="hi">हिन्दी (Hindi)</option>
+                        <option value="bn">বাংলা (Bengali)</option>
+                        <option value="te">తెలుగు (Telugu)</option>
+                        <option value="mr">मराठी (Marathi)</option>
+                        <option value="ta">தமிழ் (Tamil)</option>
+                    </select>
+                </div>
+                <!-- Theme Mode Toggle -->
+                <button type="button" class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Switch between Light & Dark Mode">
+                    <span class="theme-icon" id="themeIcon">☀️</span>
+                    <span class="theme-label" id="themeLabel">Light</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="{{ url_for('index') }}" class="brand-logo">
+                <div class="logo-symbol">
+                    <svg viewBox="0 0 32 32" class="heart-pulse-svg" fill="none" stroke="currentColor">
+                        <path d="M4 16h5l3-8 6 16 4-10 3 4h7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">Aarogya<span class="brand-accent">Sahay</span></span>
+                    <span class="brand-subtitle">Apex Rural Public Health Grid</span>
+                </div>
+            </a>
+
+            <nav class="nav-menu" id="navMenu">
+                <a href="{{ url_for('teleconsult') }}" class="nav-link {% if request.endpoint == 'teleconsult' %}active{% endif %}">
+                    <span class="nav-icon">📹</span><span>Tele-OPD</span>
+                </a>
+                <a href="{{ url_for('triage_page') }}" class="nav-link {% if request.endpoint == 'triage_page' %}active{% endif %}">
+                    <span class="nav-icon">⚡</span><span>Clinical Triage</span>
+                </a>
+                <a href="{{ url_for('records_page') }}" class="nav-link {% if request.endpoint == 'records_page' %}active{% endif %}">
+                    <span class="nav-icon">📂</span><span>ABHA Records</span>
+                </a>
+                <a href="{{ url_for('referrals_page') }}" class="nav-link {% if request.endpoint == 'referrals_page' %}active{% endif %}">
+                    <span class="nav-icon">🔄</span><span>Referrals</span>
+                </a>
+                <a href="{{ url_for('inventory_page') }}" class="nav-link {% if request.endpoint == 'inventory_page' %}active{% endif %}">
+                    <span class="nav-icon">💊</span><span>Medicines & Labs</span>
+                </a>
+                <a href="{{ url_for('high_risk_page') }}" class="nav-link {% if request.endpoint == 'high_risk_page' %}active{% endif %}">
+                    <span class="nav-icon">🚨</span><span>High-Risk Care</span>
+                </a>
+                <a href="{{ url_for('analytics_page') }}" class="nav-link {% if request.endpoint == 'analytics_page' %}active{% endif %}">
+                    <span class="nav-icon">📊</span><span>Analytics</span>
+                </a>
+            </nav>
+
+            <div class="nav-actions">
+                {% if current_user %}
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline btn-sm">
+                        <span class="user-role-badge role-{{ current_user['role'] }}">{{ current_user['role']|upper }}</span>
+                        Dashboard
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">Sign Out</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-ghost btn-sm">Sign In</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm btn-glow">Join Grid</a>
+                {% endif %}
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Notifications -->
+    <div class="container flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} animate-fade-in" role="alert">
+                        <span class="alert-icon">
+                            {% if category == 'success' %}✓
+                            {% elif category == 'danger' %}⚠
+                            {% elif category == 'warning' %}!
+                            {% else %}ℹ{% endif %}
+                        </span>
+                        <div class="alert-content">{{ message }}</div>
+                        <button type="button" class="alert-close" onclick="this.parentElement.remove()">×</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Optional Page Breadcrumbs Bar -->
+    {% block breadcrumbs %}{% endblock %}
+
+    <!-- Main Page Content -->
+    <main class="site-main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Public Health Footer -->
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div class="footer-col brand-col">
+                <div class="brand-logo footer-logo">
+                    <div class="logo-symbol small">
+                        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor">
+                            <path d="M4 16h5l3-8 6 16 4-10 3 4h7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span class="brand-title">Aarogya<span class="brand-accent">Sahay</span></span>
+                </div>
+                <p class="footer-desc">
+                    Strengthening, not replacing, the public health architecture. Empowering Sub-Centres, PHCs, CHCs, and District Hospitals with assisted tele-consultation, digital triage, continuity of care records, and live medicine availability.
+                </p>
+                <div class="compliance-tags">
+                    <span class="compliance-badge">ABDM / ABHA Interoperable</span>
+                    <span class="compliance-badge">FHIR & SNOMED-CT Ready</span>
+                    <span class="compliance-badge">Low-Bandwidth Resilient</span>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">Integrated Modules</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('index') }}#pillars">Assisted Tele-OPD Consultations</a></li>
+                    <li><a href="{{ url_for('index') }}#triage">Smart Clinical Triage Screener</a></li>
+                    <li><a href="{{ url_for('index') }}#inventory">Primary Health Medicine Stock</a></li>
+                    <li><a href="{{ url_for('index') }}#referrals">End-to-End Referral Tracking</a></li>
+                    <li><a href="{{ url_for('index') }}#frontline">High-Risk Maternal & Child Care</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">Stakeholder Portals</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('login') }}?role=frontline">Frontline ASHA / ANM Workers</a></li>
+                    <li><a href="{{ url_for('login') }}?role=doctor">Medical Officers & Specialists</a></li>
+                    <li><a href="{{ url_for('login') }}?role=patient">Rural Citizens & Patients</a></li>
+                    <li><a href="{{ url_for('login') }}?role=admin">PHC / District Health Administrators</a></li>
+                    <li><a href="{{ url_for('register') }}">Register New Health Facility</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col emergency-col">
+                <h4 class="footer-heading">Emergency & Support</h4>
+                <p class="emergency-info">
+                    Immediate SOS dispatch links to 108 Emergency Medical Services and District Tele-Hub.
+                </p>
+                <div class="emergency-card">
+                    <div class="hotline-item">
+                        <span class="label">Ambulance Dispatch</span>
+                        <a href="tel:108" class="val">Dial 108</a>
+                    </div>
+                    <div class="hotline-item">
+                        <span class="label">Health Consultation</span>
+                        <a href="tel:104" class="val">Dial 104</a>
+                    </div>
+                </div>
+                <div class="footer-offline-sync">
+                    <small>Local Storage: Active | Last Synced: <span id="lastSyncTime">Just now</span></small>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="container footer-bottom-flex">
+                <p>&copy; 2026 AarogyaSahay Platform | Built by Team Apex for Public Rural Healthcare Access</p>
+                <div class="footer-bottom-links">
+                    <span>Privacy & ABHA Consent</span>
+                    <span>Offline Sync Guidelines</span>
+                    <span>Health Data Governance</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Global Toast Notifications Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

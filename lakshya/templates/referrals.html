@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Closed-Loop Referral Tracking | AarogyaSahay{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb-bar">
+    <div class="container breadcrumb-flex">
+        <a href="{{ url_for('index') }}">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-curr">Closed-Loop Referrals</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper referrals-page">
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header-bar">
+            <div>
+                <span class="badge-tag">Continuity of Care Network</span>
+                <h1 class="page-title">Closed-Loop Referral Tracking System</h1>
+                <p class="page-sub">Guaranteed patient handoff from Sub-Centres to District Specialists with counter-referral feedback to village health workers.</p>
+            </div>
+            <div class="referral-rate-kpi">
+                <span class="kpi-label">District Referral Closure Rate:</span>
+                <span class="kpi-value text-emerald">89.4%</span>
+                <small>(Baseline before network: 31.2%)</small>
+            </div>
+        </div>
+
+        <!-- 4-Stage Referral Loop Pipeline Overview -->
+        <div class="referral-stages-bar glass-panel mb-4">
+            <div class="stage-step active">
+                <span class="stage-num">1</span>
+                <div>
+                    <strong>Initiated</strong>
+                    <small>Sub-Centre / PHC Triage</small>
+                </div>
+            </div>
+            <div class="stage-arrow">➔</div>
+            <div class="stage-step active">
+                <span class="stage-num">2</span>
+                <div>
+                    <strong>In-Transit</strong>
+                    <small>108 / 102 Transport Assigned</small>
+                </div>
+            </div>
+            <div class="stage-arrow">➔</div>
+            <div class="stage-step active">
+                <span class="stage-num">3</span>
+                <div>
+                    <strong>Consulted & Treated</strong>
+                    <span class="pulse-dot green"></span>
+                    <small>Specialist Hospital</small>
+                </div>
+            </div>
+            <div class="stage-arrow">➔</div>
+            <div class="stage-step current">
+                <span class="stage-num">4</span>
+                <div>
+                    <strong>Closed Loop</strong>
+                    <small>Counter-Referral to ASHA</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="referrals-split-grid">
+            <!-- Left: Referrals List with Statuses -->
+            <div class="referrals-list-column">
+                <div class="glass-panel">
+                    <div class="panel-header-flex">
+                        <h3>📋 Active Inter-Facility Referrals ({{ referrals|length }})</h3>
+                        <div class="filter-pills">
+                            <button class="btn btn-xs btn-outline" onclick="filterReferrals('all')">All</button>
+                            <button class="btn btn-xs btn-outline" onclick="filterReferrals('emergency')">Emergency</button>
+                            <button class="btn btn-xs btn-outline" onclick="filterReferrals('urgent')">Urgent</button>
+                        </div>
+                    </div>
+
+                    <div class="referrals-stream mt-3">
+                        {% for ref in referrals %}
+                            <div class="referral-card-detail urgency-{{ ref.urgency|lower }}">
+                                <div class="rc-top-bar">
+                                    <div class="rc-title-block">
+                                        <h4>{{ ref.patient_name }}</h4>
+                                        <span class="rc-abha">ABHA: <code>{{ ref.abha_id }}</code></span>
+                                    </div>
+                                    <span class="badge-status status-{{ ref.status|lower }}">{{ ref.status }}</span>
+                                </div>
+
+                                <div class="rc-route-box">
+                                    <div class="route-node">
+                                        <small>Source Facility:</small>
+                                        <strong>{{ ref.source_facility }}</strong>
+                                    </div>
+                                    <div class="route-connector">
+                                        <span>{{ ref.urgency }} Handoff</span>
+                                        <div class="arrow-line">➔</div>
+                                    </div>
+                                    <div class="route-node destination">
+                                        <small>Target Hospital:</small>
+                                        <strong>{{ ref.target_facility }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="rc-notes-box">
+                                    <span class="specialty-chip">🩺 {{ ref.specialty }}</span>
+                                    <p class="notes-text">"{{ ref.notes }}"</p>
+                                </div>
+
+                                <div class="rc-bottom-bar">
+                                    <small class="ref-time">Logged: {{ ref.created_at or 'Today' }}</small>
+                                    <div class="rc-actions">
+                                        <button class="btn btn-xs btn-outline" onclick="showToast('Updating referral transport status to In-Transit...')">Update Status</button>
+                                        <button class="btn btn-xs btn-primary" onclick="showToast('Opening counter-referral discharge notes for {{ ref.patient_name }}')">Discharge Loop</button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Initiate New Referral Form -->
+            <div class="new-referral-column">
+                <div class="glass-panel">
+                    <div class="panel-header-flex">
+                        <h4>+ Initiate New Referral</h4>
+                        <span class="badge-tag">Inter-Facility</span>
+                    </div>
+
+                    <form action="{{ url_for('referrals_page') }}" method="POST" class="new-ref-form">
+                        <div class="form-group">
+                            <label class="form-label">Patient Full Name *</label>
+                            <input type="text" name="patient_name" class="form-control" placeholder="e.g. Shakuntala Bai" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">ABHA Health ID</label>
+                            <input type="text" name="abha_id" class="form-control" placeholder="91-XXXX-XXXX-XXXX">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label class="form-label">Source Facility *</label>
+                                <input type="text" name="source_facility" class="form-control" value="Rampur Sub-Centre" required>
+                            </div>
+                            <div class="form-group col-6">
+                                <label class="form-label">Target Facility *</label>
+                                <select name="target_facility" class="form-control">
+                                    <option value="Bilaspur District Hospital" selected>Bilaspur District Hospital</option>
+                                    <option value="District TB Diagnostic Centre">District TB Diagnostic Centre</option>
+                                    <option value="Nutritional Rehabilitation Centre (NRC)">Nutritional Rehabilitation Centre (NRC)</option>
+                                    <option value="Bilaspur Rural PHC">Bilaspur Rural PHC</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label class="form-label">Clinical Specialty *</label>
+                                <select name="specialty" class="form-control">
+                                    <option value="Obstetrics & Gynaecology" selected>Obstetrics & Gynaecology</option>
+                                    <option value="Pediatrics & Neonatology">Pediatrics & Neonatology</option>
+                                    <option value="General Medicine / Pulmonology">General Medicine / Pulmonology</option>
+                                    <option value="Emergency Surgery / Trauma">Emergency Surgery / Trauma</option>
+                                    <option value="Cardiology">Cardiology</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-6">
+                                <label class="form-label">Referral Urgency</label>
+                                <select name="urgency" class="form-control">
+                                    <option value="Normal">Normal (Within 7 Days)</option>
+                                    <option value="Urgent" selected>Urgent (Within 24-48 Hours)</option>
+                                    <option value="Emergency">Emergency (Immediate Transfer)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Clinical Reason & Preliminary Findings *</label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="Describe symptoms, vital signs, and why specialist care is needed..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block btn-lg btn-glow">
+                            <span>🚀</span> Transmit Inter-Facility Referral
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function filterReferrals(type) {
+        showToast(`Filtered referrals by: ${type.toUpperCase()}`);
+    }
+</script>
+{% endblock %}
