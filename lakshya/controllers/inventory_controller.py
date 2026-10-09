@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, jsonify
-from db import get_db
+from models import medicine as med_model
+from models import diagnostic as diag_model
 
 inventory_bp = Blueprint("inventory", __name__)
 
@@ -12,9 +13,8 @@ inventory_bp = Blueprint("inventory", __name__)
 @inventory_bp.route("/inventory")
 def inventory_page():
     """Live Medicine & Diagnostic Tests Inventory Management."""
-    db = get_db()
-    medicines = db.execute("SELECT * FROM medicines ORDER BY stock_status ASC, name ASC").fetchall()
-    diagnostics = db.execute("SELECT * FROM diagnostics ORDER BY tier ASC, test_name ASC").fetchall()
+    medicines = med_model.list_all()
+    diagnostics = diag_model.list_all()
     return render_template("inventory.html", medicines=medicines, diagnostics=diagnostics)
 
 
@@ -25,16 +25,13 @@ def api_medicine_update(med_id):
     units = data.get("units")
     stock_status = data.get("stock_status", "").strip()
 
-    db = get_db()
-    existing = db.execute("SELECT id FROM medicines WHERE id = ?", (med_id,)).fetchone()
-    if not existing:
+    if not med_model.exists(med_id):
         return jsonify({"success": False, "error": "Medicine not found"}), 404
 
-    updates, params = [], []
+    fields = {}
     if units is not None:
         units = int(units)
-        updates.append("units = ?")
-        params.append(units)
+        fields["units"] = units
         # Auto-compute stock_status from units if not explicitly provided
         if not stock_status:
             if units == 0:
@@ -47,16 +44,10 @@ def api_medicine_update(med_id):
     if stock_status:
         if stock_status not in ("Available", "Low Stock", "Out of Stock"):
             return jsonify({"success": False, "error": "Invalid stock_status"}), 400
-        updates.append("stock_status = ?")
-        params.append(stock_status)
+        fields["stock_status"] = stock_status
 
-    updates.append("last_updated = ?")
-    params.append(datetime.now().strftime("%d %b %Y, %I:%M %p"))
-
-    if updates:
-        params.append(med_id)
-        db.execute(f"UPDATE medicines SET {', '.join(updates)} WHERE id = ?", params)
-        db.commit()
+    fields["last_updated"] = datetime.now().strftime("%d %b %Y, %I:%M %p")
+    med_model.update(med_id, fields)
 
     return jsonify({"success": True, "message": f"Medicine #{med_id} stock updated"})
 
@@ -64,13 +55,10 @@ def api_medicine_update(med_id):
 @inventory_bp.route("/api/medicine/<int:med_id>/delete", methods=["POST"])
 def api_medicine_delete(med_id):
     """Delete a medicine entry from inventory."""
-    db = get_db()
-    existing = db.execute("SELECT id FROM medicines WHERE id = ?", (med_id,)).fetchone()
-    if not existing:
+    if not med_model.exists(med_id):
         return jsonify({"success": False, "error": "Medicine not found"}), 404
 
-    db.execute("DELETE FROM medicines WHERE id = ?", (med_id,))
-    db.commit()
+    med_model.delete(med_id)
     return jsonify({"success": True, "message": f"Medicine #{med_id} removed from inventory"})
 
 
@@ -80,17 +68,7 @@ def api_medicine_search():
     query = request.args.get("q", "").strip()
     district = request.args.get("district", "").strip()
 
-    db = get_db()
-    sql = "SELECT * FROM medicines WHERE 1=1"
-    params = []
-    if query:
-        sql += " AND (name LIKE ? OR category LIKE ?)"
-        params.extend([f"%{query}%", f"%{query}%"])
-    if district:
-        sql += " AND district LIKE ?"
-        params.append(f"%{district}%")
-    sql += " LIMIT 15"
-    results = [dict(row) for row in db.execute(sql, params).fetchall()]
+    results = med_model.search(query, district)
 
     return jsonify({"success": True, "count": len(results), "medicines": results})
 

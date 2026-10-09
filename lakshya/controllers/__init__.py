@@ -1,11 +1,11 @@
-from .auth import auth_bp
-from .main import main_bp
-from .teleconsult import teleconsult_bp
-from .referrals import referrals_bp
-from .inventory import inventory_bp
-from .high_risk import high_risk_bp
-from .triage import triage_bp
-from .hospitals import hospitals_bp
+from .auth_controller import auth_bp
+from .main_controller import main_bp
+from .teleconsult_controller import teleconsult_bp
+from .referrals_controller import referrals_bp
+from .inventory_controller import inventory_bp
+from .high_risk_controller import high_risk_bp
+from .triage_controller import triage_bp
+from .hospitals_controller import hospitals_bp
 
 
 def register_routes(app):

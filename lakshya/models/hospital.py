@@ -22,11 +22,11 @@ def count(district="", hospital_type="", search=""):
     return get_db().execute(q, p).fetchone()[0]
 
 
-def list_paginated(district="", hospital_type="", search="", per_page=20, page=1):
-    """Filtered hospital rows as dicts, paginated."""
+def list_paginated(district="", hospital_type="", search="", per_page=20, offset=0):
+    """Filtered hospital rows as dicts, paginated by limit/offset."""
     q, p = _filtered("SELECT * FROM hospitals WHERE 1=1", district, hospital_type, search)
     q += " ORDER BY district, hospital_name LIMIT ? OFFSET ?"
-    p.extend([per_page, (page - 1) * per_page])
+    p.extend([per_page, offset])
     return [dict(h) for h in get_db().execute(q, p).fetchall()]
 
 

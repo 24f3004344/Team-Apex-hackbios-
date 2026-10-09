@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
-from db import get_db
+from models import referral as ref_model
 
 referrals_bp = Blueprint("referrals", __name__)
 
@@ -28,20 +28,14 @@ def referrals_page():
         if urgency not in ("Normal", "Urgent", "Emergency"):
             urgency = "Urgent"
 
-        db = get_db()
-        db.execute("""
-            INSERT INTO referrals (patient_name, abha_id, source_facility, target_facility, specialty, urgency, status, notes)
-            VALUES (?, ?, ?, ?, ?, ?, 'Initiated', ?)
-        """, (
+        ref_model.create(
             patient_name, abha_id or f"91-{datetime.now().strftime('%m%d')}-0000-0000",
             source_facility, target_facility, specialty, urgency, notes
-        ))
-        db.commit()
+        )
         flash(f"Referral successfully initiated for {patient_name} to {target_facility}!", "success")
         return redirect(url_for("referrals_page"))
 
-    db = get_db()
-    referrals = db.execute("SELECT * FROM referrals ORDER BY id DESC").fetchall()
+    referrals = ref_model.list_all()
     return render_template("referrals.html", referrals=referrals)
 
 
@@ -54,25 +48,19 @@ def api_referral_update(ref_id):
     if new_status not in ("Initiated", "In-Transit", "Consulted", "Closed"):
         return jsonify({"success": False, "error": "Invalid status. Must be Initiated, In-Transit, Consulted, or Closed."}), 400
 
-    db = get_db()
-    existing = db.execute("SELECT id FROM referrals WHERE id = ?", (ref_id,)).fetchone()
-    if not existing:
+    if not ref_model.exists(ref_id):
         return jsonify({"success": False, "error": "Referral not found"}), 404
 
-    db.execute("UPDATE referrals SET status = ? WHERE id = ?", (new_status, ref_id))
-    db.commit()
+    ref_model.update_status(ref_id, new_status)
     return jsonify({"success": True, "message": f"Referral #{ref_id} status updated to {new_status}"})
 
 
 @referrals_bp.route("/api/referral/<int:ref_id>/delete", methods=["POST"])
 def api_referral_delete(ref_id):
     """Delete a referral."""
-    db = get_db()
-    existing = db.execute("SELECT id FROM referrals WHERE id = ?", (ref_id,)).fetchone()
-    if not existing:
+    if not ref_model.exists(ref_id):
         return jsonify({"success": False, "error": "Referral not found"}), 404
 
-    db.execute("DELETE FROM referrals WHERE id = ?", (ref_id,))
-    db.commit()
+    ref_model.delete(ref_id)
     return jsonify({"success": True, "message": f"Referral #{ref_id} deleted"})
 

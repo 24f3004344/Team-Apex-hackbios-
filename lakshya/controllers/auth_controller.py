@@ -2,7 +2,7 @@ import sqlite3
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from db import get_db
+from models import user as user_model
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -23,11 +23,7 @@ def login():
             flash("Please enter both your identifier (Phone / Email / ABHA) and password.", "danger")
             return render_template("login.html", identifier=identifier, role_tab=role_tab)
 
-        db = get_db()
-        user = db.execute(
-            "SELECT * FROM users WHERE identifier = ? OR abha_id = ?",
-            (identifier, identifier)
-        ).fetchone()
+        user = user_model.find_by_identifier(identifier)
 
         if user and check_password_hash(user["password_hash"], password):
             session["user_id"] = user["id"]
@@ -79,18 +75,12 @@ def register():
             abha_id = f"91-{datetime.now().strftime('%m%d')}-{identifier[-4:] if len(identifier) >= 4 else '1092'}-7721"
 
         try:
-            db = get_db()
-            db.execute("""
-                INSERT INTO users (full_name, identifier, role, facility_name, district, state, abha_id, language, password_hash)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
+            new_user_id = user_model.create(
                 full_name, identifier, role,
                 facility_name or "Community Health Sub-Centre",
                 district, state, abha_id, language,
                 generate_password_hash(password)
-            ))
-            db.commit()
-            new_user_id = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+            )
 
             session["user_id"] = new_user_id
             session["user_name"] = full_name

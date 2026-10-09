@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, session
-from db import get_db
-from auth_middleware import login_required
+from models import user as user_model, referral, medicine, teleconsult, high_risk_case
+from middleware.auth_middleware import login_required
 
 main_bp = Blueprint("main", __name__)
 
@@ -19,16 +19,11 @@ def index():
 @login_required
 def dashboard():
     """Integrated Care Portal."""
-    db = get_db()
-    user = db.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
-    referrals = db.execute("SELECT * FROM referrals ORDER BY id DESC").fetchall()
-    medicines = db.execute("SELECT * FROM medicines ORDER BY stock_status ASC, units ASC").fetchall()
-    teleconsults = db.execute(
-        "SELECT * FROM teleconsults ORDER BY CASE priority WHEN 'Emergency' THEN 1 WHEN 'Priority' THEN 2 ELSE 3 END, id ASC"
-    ).fetchall()
-    high_risk_cases = db.execute(
-        "SELECT * FROM high_risk_cases ORDER BY CASE status WHEN 'Critical' THEN 1 WHEN 'Due Today' THEN 2 ELSE 3 END, id ASC"
-    ).fetchall()
+    user = user_model.get_by_id(session["user_id"])
+    referrals = referral.list_all()
+    medicines = medicine.list_all()
+    teleconsults = teleconsult.list_queue()
+    high_risk_cases = high_risk_case.list_all()
 
     return render_template(
         "dashboard.html",

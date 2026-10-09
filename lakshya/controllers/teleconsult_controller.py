@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from db import get_db
+from models import teleconsult as tc_model
 
 teleconsult_bp = Blueprint("teleconsult", __name__)
 
@@ -29,24 +29,16 @@ def teleconsult():
         if priority not in ("Routine", "Priority", "Emergency"):
             priority = "Routine"
 
-        db = get_db()
-        db.execute("""
-            INSERT INTO teleconsults (patient_name, abha_id, age, gender, asha_worker, doctor_name, specialty, chief_complaint, vitals, priority, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'In-Queue')
-        """, (
+        tc_model.create(
             patient_name, abha_id or f"91-{datetime.now().strftime('%m%d')}-0000-0000",
             age, gender, session.get("user_name", "Frontline Worker"),
             "Dr. Rajesh Sharma (MO Bilaspur)", specialty,
             chief_complaint, vitals, priority
-        ))
-        db.commit()
+        )
         flash(f"Patient {patient_name} added to Tele-OPD Queue with priority: {priority}.", "success")
         return redirect(url_for("teleconsult"))
 
-    db = get_db()
-    queue = db.execute(
-        "SELECT * FROM teleconsults ORDER BY CASE priority WHEN 'Emergency' THEN 1 WHEN 'Priority' THEN 2 ELSE 3 END, id DESC"
-    ).fetchall()
+    queue = tc_model.list_queue()
     return render_template("teleconsult.html", queue=queue)
 
 
@@ -60,23 +52,16 @@ def api_teleconsult_update(tc_id):
     if status and status not in ("In-Queue", "In-Session", "Completed"):
         return jsonify({"success": False, "error": "Invalid status value"}), 400
 
-    db = get_db()
-    existing = db.execute("SELECT id FROM teleconsults WHERE id = ?", (tc_id,)).fetchone()
-    if not existing:
+    if not tc_model.exists(tc_id):
         return jsonify({"success": False, "error": "Teleconsult not found"}), 404
 
-    updates, params = [], []
+    fields = {}
     if status:
-        updates.append("status = ?")
-        params.append(status)
+        fields["status"] = status
     if prescription:
-        updates.append("prescription = ?")
-        params.append(prescription)
+        fields["prescription"] = prescription
 
-    if updates:
-        params.append(tc_id)
-        db.execute(f"UPDATE teleconsults SET {', '.join(updates)} WHERE id = ?", params)
-        db.commit()
+    tc_model.update(tc_id, fields)
 
     return jsonify({"success": True, "message": f"Teleconsult #{tc_id} updated"})
 
@@ -84,12 +69,9 @@ def api_teleconsult_update(tc_id):
 @teleconsult_bp.route("/api/teleconsult/<int:tc_id>/delete", methods=["POST"])
 def api_teleconsult_delete(tc_id):
     """Remove teleconsult record from queue."""
-    db = get_db()
-    existing = db.execute("SELECT id FROM teleconsults WHERE id = ?", (tc_id,)).fetchone()
-    if not existing:
+    if not tc_model.exists(tc_id):
         return jsonify({"success": False, "error": "Teleconsult not found"}), 404
 
-    db.execute("DELETE FROM teleconsults WHERE id = ?", (tc_id,))
-    db.commit()
+    tc_model.delete(tc_id)
     return jsonify({"success": True, "message": f"Teleconsult #{tc_id} removed from queue"})
 
