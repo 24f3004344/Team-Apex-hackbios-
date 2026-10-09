@@ -363,8 +363,8 @@ a {
 }
 
 .logo-symbol {
-    width: 42px;
-    height: 42px;
+    width: 56px;
+    height: 56px;
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
@@ -374,8 +374,8 @@ a {
 }
 
 .logo-symbol.small {
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 44px;
 }
 
 .brand-logo-img {
