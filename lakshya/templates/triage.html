@@ -20,11 +20,14 @@
             <div>
                 <span class="badge-tag">Clinical Decision Support System</span>
                 <h1 class="page-title">Digital Triage & Emergency Escalation Matrix</h1>
-                <p class="page-sub">Evidence-based triage protocols (IMNCI & Maternal RMNCH+A) empowering frontline workers to catch acute danger signs early.</p>
+                <p class="page-sub">Evidence-based triage protocols (IMNCI & Maternal RMNCH+A) empowering frontline
+                    workers to catch acute danger signs early.</p>
             </div>
             <div class="triage-status-bar">
-                <span class="emergency-pill"><span class="pulse-dot red"></span> <strong>108 SOS Dispatch:</strong> Connected</span>
-                <span class="emergency-pill"><span class="pulse-dot green"></span> <strong>Offline Protocol:</strong> Cached</span>
+                <span class="emergency-pill"><span class="pulse-dot red"></span> <strong>108 SOS Dispatch:</strong>
+                    Connected</span>
+                <span class="emergency-pill"><span class="pulse-dot green"></span> <strong>Offline Protocol:</strong>
+                    Cached</span>
             </div>
         </div>
 
@@ -35,13 +38,24 @@
                     <!-- Protocol Category Switcher -->
                     <div class="category-tabs-row">
                         <button type="button" class="cat-tab active" onclick="switchTriageCategory('maternal', this)">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Maternal Care (ANC/PNC)
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                            </svg> Maternal Care (ANC/PNC)
                         </button>
                         <button type="button" class="cat-tab" onclick="switchTriageCategory('pediatric', this)">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg> Pediatric (IMNCI &lt;5 Yrs)
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="8" r="5" />
+                                <path d="M20 21a8 8 0 1 0-16 0" />
+                            </svg> Pediatric (IMNCI &lt;5 Yrs)
                         </button>
                         <button type="button" class="cat-tab" onclick="switchTriageCategory('general', this)">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Acute Adult &amp; Trauma
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                            </svg> Acute Adult &amp; Trauma
                         </button>
                     </div>
 
@@ -90,7 +104,8 @@
                             <div class="form-row">
                                 <div class="form-group col-6">
                                     <label class="form-label">Gestational Age (Weeks)</label>
-                                    <input type="number" id="tGestationalWeeks" class="form-control" value="32" min="1" max="42">
+                                    <input type="number" id="tGestationalWeeks" class="form-control" value="32" min="1"
+                                        max="42">
                                 </div>
                                 <div class="form-group col-6">
                                     <label class="form-label">Urine Albumin / Protein Dipstick</label>
@@ -131,12 +146,15 @@
                             <div class="form-row">
                                 <div class="form-group col-6">
                                     <label class="form-label">Mid-Upper Arm Circumference (MUAC in mm)</label>
-                                    <input type="number" id="tMUAC" class="form-control" value="125" placeholder="e.g. 115">
-                                    <small class="form-helper">< 115mm indicates Severe Acute Malnutrition (SAM)</small>
+                                    <input type="number" id="tMUAC" class="form-control" value="125"
+                                        placeholder="e.g. 115">
+                                    <small class="form-helper">
+                                        < 115mm indicates Severe Acute Malnutrition (SAM)</small>
                                 </div>
                                 <div class="form-group col-6">
                                     <label class="form-label">Respiratory Rate (Breaths/min)</label>
-                                    <input type="number" id="tRespRate" class="form-control" value="36" placeholder="Fast breathing">
+                                    <input type="number" id="tRespRate" class="form-control" value="36"
+                                        placeholder="Fast breathing">
                                 </div>
                             </div>
 
@@ -187,7 +205,10 @@
 
                         <div class="mt-3">
                             <button type="submit" class="btn btn-primary btn-block btn-lg btn-glow">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Run Clinical Triage Evaluation
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" style="vertical-align:middle; margin-right:6px;">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                                </svg> Run Clinical Triage Evaluation
                             </button>
                         </div>
                     </form>
@@ -205,23 +226,41 @@
 
                     <h2 class="outcome-title" id="triageHeading">Severe Pre-Eclampsia / Impending Eclampsia</h2>
                     <p class="outcome-desc" id="triageDesc">
-                        Patient exhibits severe hypertension (BP 160/105) at 32 weeks gestation with proteinuria (++), severe headache, and visual disturbance. Immediate maternal and fetal risk.
+                        Patient exhibits severe hypertension (BP 160/105) at 32 weeks gestation with proteinuria (++),
+                        severe headache, and visual disturbance. Immediate maternal and fetal risk.
                     </p>
 
                     <div class="pathway-box">
-                        <span class="pathway-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                        <span class="pathway-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                                <line x1="12" y1="9" x2="12" y2="13" />
+                                <line x1="12" y1="17" x2="12.01" y2="17" />
+                            </svg></span>
                         <div>
                             <strong>Mandated Clinical Protocol:</strong>
                             <p id="triageProtocol">
-                                Administer Loading Dose Magnesium Sulfate (as per National Maternal Health Protocol). Keep airway clear. Dispatch 108 Emergency Ambulance immediately to Bilaspur District Hospital.
+                                Administer Loading Dose Magnesium Sulfate (as per National Maternal Health Protocol).
+                                Keep airway clear. Dispatch 108 Emergency Ambulance immediately to Bilaspur District
+                                Hospital.
                             </p>
                         </div>
                     </div>
 
                     <!-- 108 Emergency Ambulance Dispatch Button -->
                     <div class="emergency-dispatch-action mt-3">
-                        <button type="button" class="btn btn-block btn-lg" style="background:#EF4444; color:#fff; font-weight:800;" onclick="triggerAmbulanceSOS()">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:6px;"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><circle cx="7" cy="18" r="2"/><path d="M9 18h6"/><circle cx="17" cy="18" r="2"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="7" cy="18" r="2"/></svg> DISPATCH 108 EMERGENCY AMBULANCE
+                        <button type="button" class="btn btn-block btn-lg"
+                            style="background:#EF4444; color:#fff; font-weight:800;" onclick="triggerAmbulanceSOS()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" style="vertical-align:middle; margin-right:6px;">
+                                <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                                <circle cx="7" cy="18" r="2" />
+                                <path d="M9 18h6" />
+                                <circle cx="17" cy="18" r="2" />
+                                <path
+                                    d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
+                                <circle cx="7" cy="18" r="2" />
+                            </svg> DISPATCH 108 EMERGENCY AMBULANCE
                         </button>
                     </div>
 
@@ -247,74 +286,76 @@
                     <h4>Clinical Decision Thresholds</h4>
                     <div class="thresholds-list">
                         <div class="th-item red">
-                            <strong>RED (Emergency):</strong> Systolic ≥160 or Diastolic ≥110, severe respiratory distress, convulsions, MUAC <115mm, unconsciousness.
-                        </div>
-                        <div class="th-item yellow">
-                            <strong>YELLOW (Priority):</strong> Systolic 140–159, persistent fever >3 days, moderate dehydration, gestational diabetes, abnormal vitals.
-                        </div>
-                        <div class="th-item green">
-                            <strong>GREEN (Routine):</strong> Stable vitals, routine ANC checkup, mild cough/cold, chronic refill without complications.
+                            <strong>RED (Emergency):</strong> Systolic ≥160 or Diastolic ≥110, severe respiratory
+                            distress, convulsions, MUAC <115mm, unconsciousness. </div>
+                                <div class="th-item yellow">
+                                    <strong>YELLOW (Priority):</strong> Systolic 140–159, persistent fever >3 days,
+                                    moderate dehydration, gestational diabetes, abnormal vitals.
+                                </div>
+                                <div class="th-item green">
+                                    <strong>GREEN (Routine):</strong> Stable vitals, routine ANC checkup, mild
+                                    cough/cold, chronic refill without complications.
+                                </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
+    {% endblock %}
 
-{% block scripts %}
-<script>
-    function switchTriageCategory(category, tabBtn) {
-        document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-        tabBtn.classList.add('active');
+    {% block scripts %}
+    <script>
+        function switchTriageCategory(category, tabBtn) {
+            document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+            tabBtn.classList.add('active');
 
-        document.getElementById('maternalProtocolGroup').style.display = (category === 'maternal') ? 'block' : 'none';
-        document.getElementById('pediatricProtocolGroup').style.display = (category === 'pediatric') ? 'block' : 'none';
-        document.getElementById('generalProtocolGroup').style.display = (category === 'general') ? 'block' : 'none';
-    }
-
-    function evaluateComprehensiveTriage(e) {
-        e.preventDefault();
-        const sysBP = parseInt(document.getElementById('tSystolicBP').value) || 120;
-        const diaBP = parseInt(document.getElementById('tDiastolicBP').value) || 80;
-        const mHeadache = document.getElementById('mSevereHeadache')?.checked;
-        const mBleeding = document.getElementById('mVaginalBleeding')?.checked;
-        const mConvulsions = document.getElementById('mConvulsions')?.checked;
-
-        const pill = document.getElementById('triagePill');
-        const heading = document.getElementById('triageHeading');
-        const desc = document.getElementById('triageDesc');
-        const protocol = document.getElementById('triageProtocol');
-
-        if (sysBP >= 160 || diaBP >= 100 || mConvulsions || mBleeding) {
-            pill.className = "badge-status pill-emergency";
-            pill.innerText = "RED ALERT: EMERGENCY";
-            heading.innerText = "Severe Pre-Eclampsia / Impending Obstetric Emergency";
-            desc.innerText = `Critical Vitals: BP ${sysBP}/${diaBP} with neuro-vascular symptoms. Highest clinical escalation priority.`;
-            protocol.innerText = "Initiate Mag-Sulf protocol, arrange immediate 108 Emergency transport to Bilaspur District Hospital. Alert OBGYN on call.";
-        } else if (sysBP >= 140 || diaBP >= 90 || mHeadache) {
-            pill.className = "badge-status pill-urgent";
-            pill.innerText = "YELLOW: PRIORITY TELE-OPD";
-            heading.innerText = "Moderate Gestational Hypertension";
-            desc.innerText = `Elevated Vitals: BP ${sysBP}/${diaBP}. Close monitoring required.`;
-            protocol.innerText = "Connect to Medical Officer via Tele-OPD within 4 hours. Prescribe oral anti-hypertensives as advised.";
-        } else {
-            pill.className = "badge-status pill-routine";
-            pill.innerText = "GREEN: ROUTINE PRIMARY CARE";
-            heading.innerText = "Stable Primary Case";
-            desc.innerText = `Vitals normal (BP ${sysBP}/${diaBP}). No red flags detected.`;
-            protocol.innerText = "Manage at Sub-Centre via standard ASHA/ANM antenatal care protocols. Dispense IFA and calcium.";
+            document.getElementById('maternalProtocolGroup').style.display = (category === 'maternal') ? 'block' : 'none';
+            document.getElementById('pediatricProtocolGroup').style.display = (category === 'pediatric') ? 'block' : 'none';
+            document.getElementById('generalProtocolGroup').style.display = (category === 'general') ? 'block' : 'none';
         }
 
-        showToast("Clinical triage evaluated successfully!");
-    }
+        function evaluateComprehensiveTriage(e) {
+            e.preventDefault();
+            const sysBP = parseInt(document.getElementById('tSystolicBP').value) || 120;
+            const diaBP = parseInt(document.getElementById('tDiastolicBP').value) || 80;
+            const mHeadache = document.getElementById('mSevereHeadache')?.checked;
+            const mBleeding = document.getElementById('mVaginalBleeding')?.checked;
+            const mConvulsions = document.getElementById('mConvulsions')?.checked;
 
-    function triggerAmbulanceSOS() {
-        const tracker = document.getElementById('dispatchTracker');
-        tracker.style.display = 'block';
-        showToast("108 Emergency Dispatch Confirmed. Ambulance en route to village.");
-        tracker.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-</script>
-{% endblock %}
+            const pill = document.getElementById('triagePill');
+            const heading = document.getElementById('triageHeading');
+            const desc = document.getElementById('triageDesc');
+            const protocol = document.getElementById('triageProtocol');
+
+            if (sysBP >= 160 || diaBP >= 100 || mConvulsions || mBleeding) {
+                pill.className = "badge-status pill-emergency";
+                pill.innerText = "RED ALERT: EMERGENCY";
+                heading.innerText = "Severe Pre-Eclampsia / Impending Obstetric Emergency";
+                desc.innerText = `Critical Vitals: BP ${sysBP}/${diaBP} with neuro-vascular symptoms. Highest clinical escalation priority.`;
+                protocol.innerText = "Initiate Mag-Sulf protocol, arrange immediate 108 Emergency transport to Bilaspur District Hospital. Alert OBGYN on call.";
+            } else if (sysBP >= 140 || diaBP >= 90 || mHeadache) {
+                pill.className = "badge-status pill-urgent";
+                pill.innerText = "YELLOW: PRIORITY TELE-OPD";
+                heading.innerText = "Moderate Gestational Hypertension";
+                desc.innerText = `Elevated Vitals: BP ${sysBP}/${diaBP}. Close monitoring required.`;
+                protocol.innerText = "Connect to Medical Officer via Tele-OPD within 4 hours. Prescribe oral anti-hypertensives as advised.";
+            } else {
+                pill.className = "badge-status pill-routine";
+                pill.innerText = "GREEN: ROUTINE PRIMARY CARE";
+                heading.innerText = "Stable Primary Case";
+                desc.innerText = `Vitals normal (BP ${sysBP}/${diaBP}). No red flags detected.`;
+                protocol.innerText = "Manage at Sub-Centre via standard ASHA/ANM antenatal care protocols. Dispense IFA and calcium.";
+            }
+
+            showToast("Clinical triage evaluated successfully!");
+        }
+
+        function triggerAmbulanceSOS() {
+            const tracker = document.getElementById('dispatchTracker');
+            tracker.style.display = 'block';
+            showToast("108 Emergency Dispatch Confirmed. Ambulance en route to village.");
+            tracker.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+    {% endblock %}
