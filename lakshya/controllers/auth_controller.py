@@ -4,6 +4,8 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import user as user_model
 from middleware.csrf import protect, rotate_token
+from middleware.ratelimit import clear as clear_attempts
+from middleware.ratelimit import is_blocked, register_failure
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -25,9 +27,14 @@ def login():
             flash("Please enter both your identifier (Phone / Email / ABHA) and password.", "danger")
             return render_template("login.html", identifier=identifier, role_tab=role_tab)
 
+        if is_blocked(identifier):
+            flash("Too many failed attempts. Please try again after 15 minutes.", "danger")
+            return render_template("login.html", identifier=identifier, role_tab=role_tab), 429
+
         user = user_model.find_by_identifier(identifier)
 
         if user and check_password_hash(user["password_hash"], password):
+            clear_attempts(identifier)
             session["user_id"] = user["id"]
             session["user_name"] = user["full_name"]
             session["user_role"] = user["role"]
@@ -36,7 +43,8 @@ def login():
             flash(f"Welcome back, {user['full_name']}! Connected to {user['facility_name'] or 'National Health Grid'}.", "success")
             return redirect(url_for("dashboard"))
         else:
-            flash("Invalid credentials. Use Quick-Demo credentials below for instant access.", "danger")
+            left = register_failure(identifier)
+            flash(f"Invalid credentials. {left} attempt(s) left before temporary lockout.", "danger")
             return render_template("login.html", identifier=identifier, role_tab=role_tab)
 
     return render_template("login.html")

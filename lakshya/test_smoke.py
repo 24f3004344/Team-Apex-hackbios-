@@ -147,6 +147,19 @@ def test_rbac():
     assert r.status_code == 404, f"admin delete gave {r.status_code}"
 
 
+def test_ratelimit():
+    """5 wrong passwords -> 6th attempt gets 429 lockout."""
+    from app import app
+    c = app.test_client()
+    tok = _form_token(c, "/login")
+    bad = {"identifier": "brute-probe-1", "password": "wrong", "role_tab": "frontline", "_csrf_token": tok}
+    for _ in range(5):
+        assert c.post("/login", data=bad).status_code == 200
+    r = c.post("/login", data=bad)
+    assert r.status_code == 429, f"lockout gave {r.status_code}"
+    assert "Too many failed attempts" in r.get_data(as_text=True)
+
+
 def test_csrf():
     """POSTs without a valid CSRF token must not change state."""
     from app import app
@@ -166,7 +179,7 @@ def test_csrf():
 
 
 if __name__ == "__main__":
-    for fn in [test_structure, test_url_map, test_routes, test_login_gating, test_security_fixes, test_rbac, test_csrf]:
+    for fn in [test_structure, test_url_map, test_routes, test_login_gating, test_security_fixes, test_rbac, test_ratelimit, test_csrf]:
         fn()
         print(f"PASS {fn.__name__}")
     print("ALL SMOKE TESTS PASSED")
