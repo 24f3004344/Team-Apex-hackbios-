@@ -65,12 +65,28 @@ def list_hospitals():
     # Convert Row objects to dicts for JSON serialization
     hospitals_list = [dict(h) for h in hospitals]
     
+    # Fetch up to 150 matching hospitals with coordinates for interactive map rendering
+    map_query = "SELECT id, sno, district, hospital_type, hospital_name, address, phone1, phone2, email, latitude, longitude FROM hospitals WHERE 1=1"
+    map_params = []
+    if district:
+        map_query += " AND district = ?"
+        map_params.append(district)
+    if hospital_type:
+        map_query += " AND hospital_type = ?"
+        map_params.append(hospital_type)
+    if search:
+        map_query += " AND (hospital_name LIKE ? OR address LIKE ?)"
+        map_params.extend([f"%{search}%", f"%{search}%"])
+    map_query += " AND latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY district, hospital_name LIMIT 150"
+    map_hospitals = [dict(h) for h in db.execute(map_query, map_params).fetchall()]
+    
     # Get unique districts and types for filters
     districts = db.execute("SELECT DISTINCT district FROM hospitals ORDER BY district").fetchall()
     types = db.execute("SELECT DISTINCT hospital_type FROM hospitals ORDER BY hospital_type").fetchall()
     
     return render_template('hospitals/list.html',
                            hospitals=hospitals_list,
+                           map_hospitals=map_hospitals,
                            districts=[d['district'] for d in districts],
                            types=[t['hospital_type'] for t in types],
                            current_district=district,
@@ -94,13 +110,14 @@ def hospital_detail(hospital_id):
     # Convert to dict for JSON serialization
     hospital_dict = dict(hospital)
     
-    # Get nearby hospitals in the same district
+    # Get nearby hospitals in the same district with coordinates
     nearby = db.execute(
-        "SELECT id, hospital_name, hospital_type, phone1 FROM hospitals WHERE district = ? AND id != ? ORDER BY hospital_name LIMIT 5",
+        "SELECT id, hospital_name, hospital_type, district, address, phone1, latitude, longitude FROM hospitals WHERE district = ? AND id != ? ORDER BY hospital_name LIMIT 6",
         (hospital['district'], hospital_id)
     ).fetchall()
+    nearby_list = [dict(h) for h in nearby]
     
-    return render_template('hospitals/detail.html', hospital=hospital_dict, nearby_hospitals=nearby)
+    return render_template('hospitals/detail.html', hospital=hospital_dict, nearby_hospitals=nearby_list)
 
 
 @hospitals_bp.route('/api')

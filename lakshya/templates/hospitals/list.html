@@ -2,6 +2,20 @@
 
 {% block title %}Government Hospitals | AarogyaSahay{% endblock %}
 
+{% block extra_head %}
+<!-- Leaflet CSS for Map Engine -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<style>
+    .leaflet-container { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; border-radius: var(--radius-md); z-index: 10; }
+    .clinical-map-popup .leaflet-popup-content-wrapper { border-radius: 12px; box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.1); padding: 4px 6px; }
+    .clinical-map-popup .leaflet-popup-tip { box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); }
+    .map-controls-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .map-controls-group .btn { font-size: 12px; padding: 5px 11px; }
+    .map-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+    .map-btn { display: inline-flex; align-items: center; gap: 4px; }
+</style>
+{% endblock %}
+
 {% block breadcrumbs %}
 <div class="container breadcrumbs-bar">
     <nav class="breadcrumbs" aria-label="Breadcrumb">
@@ -16,7 +30,7 @@
 <div class="container page-container">
     <header class="page-header">
         <h1 class="page-title">Government Hospitals of Chhattisgarh</h1>
-        <p class="page-subtitle">Comprehensive directory of 1,700+ public and private hospitals across all districts</p>
+        <p class="page-subtitle">Comprehensive spatial directory of 1,700+ public facilities and empanelled healthcare centers</p>
     </header>
 
     <!-- Filters -->
@@ -69,96 +83,45 @@
         {% endif %}
     </div>
 
-    <!-- Map & Table Section -->
-    <div class="map-table-section">
-        <!-- Hospital Map -->
-        <div class="map-card card">
-            <div class="card-header">
-                <h2 class="card-title">Hospital Locations Map</h2>
-                <div class="map-controls">
-                    <button type="button" class="btn btn-outline btn-sm" onclick="toggleMapLayer()" id="toggleMapBtn" style="padding: 6px 12px; font-size: 12px;">Show All</button>
-                </div>
+    <!-- Interactive Map Section -->
+    <div class="map-card card" id="hospitalMapCard" style="margin-bottom: 2rem;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <h2 class="card-title" style="margin: 0;">Interactive Hospital Locations Map</h2>
+                <p class="text-muted" style="margin: 3px 0 0; font-size: 12px;">
+                    Showing {{ (map_hospitals or hospitals)|length }} mapped facilities in Chhattisgarh. Click pins or table items for details.
+                </p>
             </div>
-            <div class="map-container" style="height: 400px; width: 100%;">
-                <div id="hospital-map" style="width: 100%; height: 100%;"></div>
-            </div>
-            <div class="map-legend" style="padding: 1rem; font-size: 12px; color: #666;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #10B981; border: 2px solid white;"></div>
-                    <span>Public Hospital</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #3B82F6;"></div>
-                    <span>Private Hospital</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 12px; height: 12px; border-radius: 50%; background: white; border: 2px solid #4285F4;"></div>
-                    <span>Your Location</span>
-                </div>
+            <div class="map-controls-group">
+                <button type="button" class="btn btn-outline btn-sm" onclick="locateUser()" title="Find hospitals near my current GPS location">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:3px;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+                    Near Me
+                </button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="filterMapByType('All')">All</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="filterMapByType('Public')">Public</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="filterMapByType('Private')">Private</button>
             </div>
         </div>
-
-        <!-- Hospitals Table -->
-        <div class="table-responsive card">
-            <table class="data-table hospitals-table">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Hospital Name</th>
-                        <th scope="col">District</th>
-                        <th scope="col">Type</th>
-                        <th scope="col">Address</th>
-                        <th scope="col">Phone</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Map</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for hospital in hospitals %}
-                    <tr>
-                        <td>{{ hospital['sno'] }}</td>
-                        <td>
-                            <strong>{{ hospital['hospital_name'] }}</strong>
-                        </td>
-                        <td>
-                            <span class="district-badge">{{ hospital['district'] }}</span>
-                        </td>
-                        <td>
-                            <span class="type-badge type-{{ hospital['hospital_type']|lower }}">{{ hospital['hospital_type'] }}</span>
-                        </td>
-                        <td class="address-cell">{{ hospital['address'][:80] }}{% if hospital['address']|length > 80 %}...{% endif %}</td>
-                        <td>
-                            {% if hospital['phone1'] %}
-                            <a href="tel:{{ hospital['phone1'] }}" class="phone-link">{{ hospital['phone1'] }}</a>
-                            {% endif %}
-                            {% if hospital['phone2'] %}
-                            <br><a href="tel:{{ hospital['phone2'] }}" class="phone-link">{{ hospital['phone2'] }}</a>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if hospital['email'] %}
-                            <a href="mailto:{{ hospital['email'] }}" class="email-link">{{ hospital['email'] }}</a>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <button class="btn btn-outline btn-sm map-btn" 
-                                    onclick="showHospitalMapDetail({{ hospital['id'] }})"
-                                    style="padding: 6px 12px; font-size: 12px; min-width: 80px;">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18L5 12a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4l-4 4"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="3" y1="21" x2="21" y2="21"></line></svg> View on Map
-                            </button>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="8" class="no-results">No hospitals found matching your criteria.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="map-container" style="height: 420px; width: 100%; position: relative;">
+            <div id="hospital-map" style="width: 100%; height: 100%;"></div>
+        </div>
+        <div class="map-legend" style="padding: 0.85rem 1.25rem; background: var(--bg-surface-elevated); border-top: 1px solid var(--border-subtle); display: flex; gap: 20px; flex-wrap: wrap;">
+            <div class="map-legend-item">
+                <div style="width: 12px; height: 12px; border-radius: 50%; background: #059669; border: 2px solid white; box-shadow: 0 0 0 1px #059669;"></div>
+                <span>Public Health Centre / CHC / DH</span>
+            </div>
+            <div class="map-legend-item">
+                <div style="width: 12px; height: 12px; border-radius: 50%; background: #2563eb; border: 2px solid white; box-shadow: 0 0 0 1px #2563eb;"></div>
+                <span>Private Empanelled Hospital</span>
+            </div>
+            <div class="map-legend-item">
+                <div style="width: 12px; height: 12px; border-radius: 50%; background: #2563eb; box-shadow: 0 0 0 4px rgba(37,99,235,0.25);"></div>
+                <span>Your Location</span>
+            </div>
         </div>
     </div>
 
-    <!-- Pagination -->
+    <!-- Hospitals Table -->
     <div class="table-responsive card">
         <table class="data-table hospitals-table">
             <thead>
@@ -170,12 +133,12 @@
                     <th scope="col">Address</th>
                     <th scope="col">Phone</th>
                     <th scope="col">Email</th>
-                    <th scope="col">Actions</th>
+                    <th scope="col" style="min-width: 170px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for hospital in hospitals %}
-                <tr>
+                <tr id="hospital-row-{{ hospital['id'] }}">
                     <td>{{ hospital['sno'] }}</td>
                     <td>
                         <strong>{{ hospital['hospital_name'] }}</strong>
@@ -186,7 +149,7 @@
                     <td>
                         <span class="type-badge type-{{ hospital['hospital_type']|lower }}">{{ hospital['hospital_type'] }}</span>
                     </td>
-                    <td class="address-cell">{{ hospital['address'][:100] }}{% if hospital['address']|length > 100 %}...{% endif %}</td>
+                    <td class="address-cell">{{ hospital['address'][:95] }}{% if hospital['address']|length > 95 %}...{% endif %}</td>
                     <td>
                         {% if hospital['phone1'] %}
                         <a href="tel:{{ hospital['phone1'] }}" class="phone-link">{{ hospital['phone1'] }}</a>
@@ -201,8 +164,18 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{{ url_for('hospitals.hospital_detail', hospital_id=hospital['id']) }}" 
-                           class="btn btn-outline btn-sm">View Details</a>
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <button type="button" class="btn btn-outline btn-sm map-btn" 
+                                    onclick="focusHospital({{ hospital['id'] }})"
+                                    title="View location pin on interactive map above"
+                                    style="padding: 5px 9px; font-size: 11.5px;">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"></circle><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path></svg>
+                                Map
+                            </button>
+                            <a href="{{ url_for('hospitals.hospital_detail', hospital_id=hospital['id']) }}" 
+                               class="btn btn-primary btn-sm"
+                               style="padding: 5px 9px; font-size: 11.5px;">Details</a>
+                        </div>
                     </td>
                 </tr>
                 {% else %}
@@ -253,45 +226,14 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="{{ url_for('static', filename='js/hospital-map.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize map with hospital data
-    const hospitalData = {{ hospitals|tojson }};
-    
-    // Wait for Google Maps to load
-    function waitForMaps() {
-        if (typeof google !== 'undefined' && google.maps && window.hospitalMap) {
-            // Convert hospital data to array with lat/lng
-            const hospitalsWithCoords = hospitalData
-                .filter(h => h.latitude && h.longitude)
-                .map(h => ({
-                    id: h.id,
-                    hospital_name: h.hospital_name,
-                    district: h.district,
-                    hospital_type: h.hospital_type,
-                    address: h.address,
-                    phone1: h.phone1,
-                    phone2: h.phone2,
-                    email: h.email,
-                    latitude: parseFloat(h.latitude),
-                    longitude: parseFloat(h.longitude)
-                }));
-            
-            if (hospitalsWithCoords.length > 0) {
-                addHospitalMarkers(hospitalsWithCoords);
-            }
-        } else {
-            setTimeout(waitForMaps, 100);
-        }
-    }
-    
-    waitForMaps();
+    const mapHospitals = {{ (map_hospitals or hospitals)|tojson }};
+    const currentDistrict = {{ current_district|tojson }};
+    initHospitalListMap('hospital-map', mapHospitals, currentDistrict);
 });
-
-// Show hospital map detail (opens detail page)
-function showHospitalMapDetail(hospitalId) {
-    window.location.href = '/hospitals/' + hospitalId;
-}
 </script>
 {% endblock %}

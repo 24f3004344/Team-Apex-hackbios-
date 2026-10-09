@@ -1,320 +1,357 @@
 /**
- * Google Maps Integration for Hospital Directory
- * Handles map initialization, markers, and info windows
+ * AarogyaSahay Healthcare Grid - Interactive Hospital Map Engine
+ * Powered by Leaflet & OpenStreetMap (Reliable, Zero-Key Dependency, Offline-Resilient)
  */
 
-let map = null;
-let markers = [];
-let infoWindow = null;
-let userLocation = null;
+(function(window) {
+    'use strict';
 
-// Initialize map when Google Maps API loads
-window.initMap = function() {
-    // Default center: Raipur, Chhattisgarh
-    const defaultCenter = { lat: 21.2514, lng: 81.6296 };
-    
-    map = new google.maps.Map(document.getElementById('hospital-map'), {
-        center: defaultCenter,
-        zoom: 10,
-        mapTypeControl: true,
-        streetViewControl: false,
-        fullscreenControl: true,
-        styles: [
-            {
-                featureType: 'poi.medical',
-                elementType: 'labels',
-                stylers: [{ visibility: 'on' }]
+    // Global map instances & registries
+    let listMap = null;
+    let detailMap = null;
+    let markersLayer = null;
+    let hospitalMarkersById = {};
+    let allHospitalsData = [];
+    let userMarker = null;
+
+    // SVG Marker pin generators for Public & Private facilities
+    function createMarkerIcon(hospitalType, isPrimary = false) {
+        const isPublic = (hospitalType || '').toLowerCase() === 'public';
+        const mainColor = isPublic ? '#059669' : '#2563eb';
+        const shadowColor = isPublic ? 'rgba(5, 150, 105, 0.35)' : 'rgba(37, 99, 235, 0.35)';
+        const size = isPrimary ? 38 : 32;
+
+        const svgHtml = `
+            <div class="custom-hospital-marker ${isPrimary ? 'primary-pin' : ''}" style="
+                width: ${size}px;
+                height: ${size}px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: ${mainColor};
+                color: #ffffff;
+                border: 2.5px solid #ffffff;
+                border-radius: 50% 50% 50% 4px;
+                transform: rotate(-45deg);
+                box-shadow: 0 4px 10px ${shadowColor};
+                cursor: pointer;
+                transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            ">
+                <svg viewBox="0 0 24 24" width="${isPrimary ? 18 : 15}" height="${isPrimary ? 18 : 15}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(45deg);">
+                    <path d="M12 6v12M6 12h12"/>
+                </svg>
+            </div>
+        `;
+
+        return L.divIcon({
+            html: svgHtml,
+            className: 'hospital-marker-container',
+            iconSize: [size, size],
+            iconAnchor: [size / 2, size],
+            popupAnchor: [0, -size]
+        });
+    }
+
+    function createPopupHtml(hospital) {
+        const isPublic = (hospital.hospital_type || '').toLowerCase() === 'public';
+        const typeBadge = isPublic
+            ? '<span class="type-badge type-public" style="background:#dcfce7; color:#166534; font-size:10px; font-weight:700; padding:2px 8px; border-radius:12px;">Public Health Centre</span>'
+            : '<span class="type-badge type-private" style="background:#e0f2fe; color:#0369a1; font-size:10px; font-weight:700; padding:2px 8px; border-radius:12px;">Private Hospital</span>';
+
+        const phoneHtml = hospital.phone1
+            ? `<div style="margin-top:6px; font-size:12px;"><a href="tel:${escapeHtml(hospital.phone1)}" style="color:#2563eb; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">📞 <strong>${escapeHtml(hospital.phone1)}</strong></a></div>`
+            : '';
+
+        const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${hospital.latitude},${hospital.longitude}`;
+
+        return `
+            <div class="map-popup-card" style="font-family:'Plus Jakarta Sans',sans-serif; min-width:240px; max-width:280px; padding:4px 0;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:6px;">
+                    <h4 style="margin:0; font-size:14px; font-weight:700; color:#0f172a; line-height:1.3;">${escapeHtml(hospital.hospital_name)}</h4>
+                </div>
+                <div style="margin-bottom:8px;">${typeBadge}</div>
+                <div style="font-size:11.5px; color:#64748b; line-height:1.4; margin-bottom:8px;">
+                    <strong style="color:#334155;">${escapeHtml(hospital.district)} District</strong><br>
+                    ${escapeHtml((hospital.address || '').substring(0, 95))}${hospital.address && hospital.address.length > 95 ? '...' : ''}
+                </div>
+                ${phoneHtml}
+                <div style="display:flex; gap:6px; margin-top:10px; border-top:1px solid #f1f5f9; padding-top:8px;">
+                    <a href="/hospitals/${hospital.id}" class="btn btn-primary btn-sm" style="flex:1; text-align:center; padding:6px 10px; font-size:11.5px; font-weight:600; text-decoration:none; border-radius:6px; background:#2563eb; color:#ffffff;">Facility Details</a>
+                    <a href="${directionsUrl}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="flex:1; text-align:center; padding:6px 10px; font-size:11.5px; font-weight:600; text-decoration:none; border-radius:6px; border:1px solid #cbd5e1; color:#334155; background:#f8fafc;">Directions ↗</a>
+                </div>
+            </div>
+        `;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    /**
+     * Initialize interactive hospital list map
+     */
+    function initHospitalListMap(containerId, hospitals, selectedDistrict) {
+        const container = document.getElementById(containerId);
+        if (!container || typeof L === 'undefined') return null;
+
+        // Clean up previous map instance if any
+        if (listMap) {
+            listMap.remove();
+            listMap = null;
+        }
+
+        allHospitalsData = hospitals || [];
+        hospitalMarkersById = {};
+
+        // Default center: Chhattisgarh Center (Raipur / Bilaspur region)
+        const defaultCenter = [21.2514, 81.6296];
+        const defaultZoom = selectedDistrict ? 11 : 7;
+
+        listMap = L.map(containerId, {
+            center: defaultCenter,
+            zoom: defaultZoom,
+            zoomControl: false,
+            scrollWheelZoom: true
+        });
+
+        // Add top-right zoom control
+        L.control.zoom({ position: 'topright' }).addTo(listMap);
+
+        // High quality OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(listMap);
+
+        // Marker layer group
+        markersLayer = L.featureGroup().addTo(listMap);
+
+        renderMarkers(allHospitalsData);
+
+        window.hospitalMap = listMap;
+        return listMap;
+    }
+
+    function renderMarkers(hospitalsToRender) {
+        if (!markersLayer || !listMap) return;
+        markersLayer.clearLayers();
+        hospitalMarkersById = {};
+
+        const validHospitals = (hospitalsToRender || []).filter(h => h.latitude && h.longitude);
+
+        validHospitals.forEach(hospital => {
+            const lat = parseFloat(hospital.latitude);
+            const lng = parseFloat(hospital.longitude);
+            if (isNaN(lat) || isNaN(lng)) return;
+
+            const icon = createMarkerIcon(hospital.hospital_type);
+            const marker = L.marker([lat, lng], {
+                icon: icon,
+                title: hospital.hospital_name,
+                riseOnHover: true
+            });
+
+            marker.bindPopup(createPopupHtml(hospital), {
+                maxWidth: 300,
+                className: 'clinical-map-popup'
+            });
+
+            marker.on('click', function() {
+                marker.openPopup();
+            });
+
+            markersLayer.addLayer(marker);
+            hospitalMarkersById[hospital.id] = marker;
+        });
+
+        // Fit bounds if markers exist
+        if (validHospitals.length > 0) {
+            try {
+                listMap.fitBounds(markersLayer.getBounds().pad(0.12), {
+                    maxZoom: 14,
+                    animate: true
+                });
+            } catch (e) {
+                console.warn('Could not fit map bounds:', e);
             }
-        ]
-    });
-    
-    infoWindow = new google.maps.InfoWindow();
-    
-    // Try to get user location
-    if (navigator.geolocation) {
+        }
+    }
+
+    /**
+     * Focus and highlight a single hospital when clicked in list/table
+     */
+    function focusHospital(hospitalId) {
+        const marker = hospitalMarkersById[hospitalId];
+        const container = document.getElementById('hospital-map') || document.getElementById('map-section');
+
+        if (container) {
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        if (marker && listMap) {
+            setTimeout(() => {
+                listMap.setView(marker.getLatLng(), 15, { animate: true });
+                marker.openPopup();
+            }, 300);
+        }
+    }
+
+    /**
+     * Filter map markers by type ('All', 'Public', 'Private')
+     */
+    function filterMapByType(type) {
+        if (!allHospitalsData || allHospitalsData.length === 0) return;
+
+        if (!type || type.toLowerCase() === 'all') {
+            renderMarkers(allHospitalsData);
+        } else {
+            const filtered = allHospitalsData.filter(h => (h.hospital_type || '').toLowerCase() === type.toLowerCase());
+            renderMarkers(filtered);
+        }
+
+        const btn = document.getElementById('toggleMapBtn');
+        if (btn) {
+            btn.innerText = type === 'Public' ? 'Show Private' : (type === 'Private' ? 'Show All' : 'Show Public');
+        }
+    }
+
+    /**
+     * Locate user with HTML5 Geolocation API
+     */
+    function locateUser() {
+        if (!navigator.geolocation) {
+            if (window.showToast) window.showToast("Geolocation is not supported by your browser.", "warning");
+            return;
+        }
+
+        if (window.showToast) window.showToast("Detecting your location in Chhattisgarh...", "info");
+
         navigator.geolocation.getCurrentPosition(
-            (position) => {
-                userLocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-                // Add user location marker
-                addUserLocationMarker(userLocation);
-                // Center map on user if no hospitals loaded yet
-                if (markers.length === 0) {
-                    map.setCenter(userLocation);
-                    map.setZoom(13);
+            position => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                if (listMap) {
+                    if (userMarker) {
+                        listMap.removeLayer(userMarker);
+                    }
+
+                    const userIcon = L.divIcon({
+                        html: `<div style="width:20px; height:20px; background:#2563eb; border:3px solid #ffffff; border-radius:50%; box-shadow:0 0 0 6px rgba(37,99,235,0.3); animation:pulse 2s infinite;"></div>`,
+                        className: 'user-location-marker',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10]
+                    });
+
+                    userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(listMap);
+                    userMarker.bindPopup("<strong>Your Current Location</strong>").openPopup();
+                    listMap.setView([lat, lng], 13, { animate: true });
+
+                    if (window.showToast) window.showToast("Location detected. Showing nearest healthcare facilities.", "success");
                 }
             },
-            (error) => {
-                console.log('Geolocation not available:', error.message);
+            err => {
+                if (window.showToast) window.showToast("Could not determine your location. Please check browser permissions.", "warning");
             },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+            { enableHighAccuracy: true, timeout: 8000 }
         );
     }
-    
-    // Make map globally accessible
-    window.hospitalMap = map;
-};
 
-// Add user location marker
-function addUserLocationMarker(location) {
-    if (!map) return;
-    
-    const marker = new google.maps.Marker({
-        position: location,
-        map: map,
-        title: 'Your Location',
-        icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: '#4285F4',
-            fillOpacity: 1,
-            strokeColor: '#FFFFFF',
-            strokeWeight: 2
-        },
-        zIndex: 1000
-    });
-    
-    marker.addListener('click', () => {
-        infoWindow.setContent('<div style="padding: 8px;"><strong>Your Location</strong></div>');
-        infoWindow.open(map, marker);
-    });
-}
+    /**
+     * Initialize hospital detail page map
+     */
+    function initHospitalDetailMap(containerId, mainHospital, nearbyHospitals = []) {
+        const container = document.getElementById(containerId);
+        if (!container || typeof L === 'undefined') return null;
 
-// Add hospital markers to map
-function addHospitalMarkers(hospitals) {
-    if (!map) return;
-    
-    // Clear existing markers
-    clearMarkers();
-    
-    const bounds = new google.maps.LatLngBounds();
-    let hasValidCoords = false;
-    
-    hospitals.forEach(hospital => {
-        if (hospital.latitude && hospital.longitude) {
-            const position = { lat: hospital.latitude, lng: hospital.longitude };
-            
-            // Choose icon based on hospital type
-            const isPublic = hospital.hospital_type === 'Public';
-            const icon = {
-                url: isPublic 
-                    ? 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" fill="#10B981" stroke="#FFFFFF" stroke-width="2"/>
-                            <path d="M12 8v4M12 16h.01" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    `)
-                    : 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" fill="#3B82F6" stroke="#FFFFFF" stroke-width="2"/>
-                            <path d="M12 8v4M12 16h.01" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    `),
-                scaledSize: new google.maps.Size(32, 32),
-                anchor: new google.maps.Point(16, 16)
-            };
-            
-            const marker = new google.maps.Marker({
-                position: position,
-                map: map,
-                title: hospital.hospital_name,
-                icon: icon,
-                hospitalId: hospital.id
-            });
-            
-            // Create info window content
-            const content = createInfoWindowContent(hospital);
-            
-            marker.addListener('click', () => {
-                infoWindow.setContent(content);
-                infoWindow.open(map, marker);
-            });
-            
-            markers.push(marker);
-            bounds.extend(position);
-            hasValidCoords = true;
+        if (detailMap) {
+            detailMap.remove();
+            detailMap = null;
         }
-    });
-    
-    // Fit map to show all markers
-    if (hasValidCoords && markers.length > 0) {
-        map.fitBounds(bounds);
-        // Don't zoom in too much if only one marker
-        if (markers.length === 1) {
-            map.setZoom(15);
+
+        const lat = parseFloat(mainHospital.latitude);
+        const lng = parseFloat(mainHospital.longitude);
+
+        if (isNaN(lat) || isNaN(lng)) {
+            container.innerHTML = `
+                <div style="display:flex; align-items:center; justify-content:center; height:100%; color:#64748b; text-align:center; padding:2rem; background:#f8fafc; border-radius:8px;">
+                    <div>
+                        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:8px; color:#94a3b8;">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <p style="margin:0; font-weight:600;">Geocoordinates pending for this facility.</p>
+                    </div>
+                </div>
+            `;
+            return null;
         }
-    }
-    
-    return markers.length;
-}
 
-// Create info window content for hospital
-function createInfoWindowContent(hospital) {
-    const typeClass = hospital.hospital_type === 'Public' ? 'public' : 'private';
-    const typeLabel = hospital.hospital_type === 'Public' ? '🏥 Public' : '🏥 Private';
-    
-    return `
-        <div class="map-info-window" style="min-width: 250px; max-width: 300px; padding: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: #1f2937;">${escapeHtml(hospital.hospital_name)}</h4>
-                <span class="type-badge type-${typeClass}" style="font-size: 10px; padding: 2px 6px; border-radius: 10px; background: ${typeClass === 'public' ? '#DCFCE7' : '#E0F2FE'}; color: ${typeClass === 'public' ? '#166534' : '#075985'};">${typeLabel}</span>
-            </div>
-            <div style="font-size: 12px; color: #4b5563; margin-bottom: 8px;">
-                <div>${escapeHtml(hospital.district)} District, Chhattisgarh</div>
-                ${hospital.address ? `<div style="margin-top: 4px;">${escapeHtml(hospital.address.substring(0, 100))}${hospital.address.length > 100 ? '...' : ''}</div>` : ''}
-            </div>
-            <div style="font-size: 12px; color: #4b5563; margin-bottom: 8px;">
-                ${hospital.phone1 ? `<div>📞 <a href="tel:${escapeHtml(hospital.phone1)}" style="color: #2563eb; text-decoration: none;">${escapeHtml(hospital.phone1)}</a></div>` : ''}
-                ${hospital.phone2 ? `<div>📞 <a href="tel:${escapeHtml(hospital.phone2)}" style="color: #2563eb; text-decoration: none;">${escapeHtml(hospital.phone2)}</a></div>` : ''}
-                ${hospital.email ? `<div>✉️ <a href="mailto:${escapeHtml(hospital.email)}" style="color: #2563eb; text-decoration: none;">${escapeHtml(hospital.email)}</a></div>` : ''}
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <a href="/hospitals/${hospital.id}" class="btn btn-primary btn-sm" style="padding: 6px 12px; font-size: 12px; text-decoration: none; background: #2563eb; color: white; border-radius: 4px;">View Details</a>
-                ${hospital.latitude && hospital.longitude ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${hospital.latitude},${hospital.longitude}" target="_blank" class="btn btn-outline btn-sm" style="padding: 6px 12px; font-size: 12px; text-decoration: none; border: 1px solid #d1d5db; color: #374151; border-radius: 4px;">Directions</a>` : ''}
-            </div>
-        </div>
-    `;
-}
-
-// Clear all markers
-function clearMarkers() {
-    markers.forEach(marker => marker.setMap(null));
-    markers = [];
-}
-
-// Show single hospital on map (for detail page)
-function showHospitalOnMap(hospital) {
-    if (!map || !hospital.latitude || !hospital.longitude) return;
-    
-    const position = { lat: hospital.latitude, lng: hospital.longitude };
-    
-    // Clear existing markers
-    clearMarkers();
-    
-    // Add hospital marker
-    const isPublic = hospital.hospital_type === 'Public';
-    const icon = {
-        url: isPublic 
-            ? 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" fill="#10B981" stroke="#FFFFFF" stroke-width="3"/>
-                    <path d="M12 8v4M12 16h.01" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
-                </svg>
-            `)
-            : 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" fill="#3B82F6" stroke="#FFFFFF" stroke-width="3"/>
-                    <path d="M12 8v4M12 16h.01" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
-                </svg>
-            `),
-        scaledSize: new google.maps.Size(40, 40),
-        anchor: new google.maps.Point(20, 20)
-    };
-    
-    const marker = new google.maps.Marker({
-        position: position,
-        map: map,
-        title: hospital.hospital_name,
-        icon: icon,
-        animation: google.maps.Animation.DROP
-    });
-    
-    markers.push(marker);
-    
-    // Center map on hospital
-    map.setCenter(position);
-    map.setZoom(16);
-    
-    // Open info window
-    const content = createInfoWindowContent(hospital);
-    infoWindow.setContent(content);
-    infoWindow.open(map, marker);
-    
-    // Add user location if available
-    if (userLocation) {
-        addUserLocationMarker(userLocation);
-    }
-}
-
-// Get directions to hospital
-function getDirections(hospital) {
-    if (!hospital.latitude || !hospital.longitude) {
-        alert('Location not available for this hospital');
-        return;
-    }
-    
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${hospital.latitude},${hospital.longitude}`;
-    window.open(url, '_blank');
-}
-
-// Find nearby hospitals (using Places API or simple radius search)
-function findNearbyHospitals(location, radius = 5000) {
-    if (!map) return Promise.resolve([]);
-    
-    return new Promise((resolve) => {
-        const service = new google.maps.places.PlacesService(map);
-        const request = {
-            location: location,
-            radius: radius,
-            type: ['hospital'],
-            keyword: 'hospital'
-        };
-        
-        service.nearbySearch(request, (results, status) => {
-            if (status === google.maps.places.PlacesServiceStatus.OK) {
-                resolve(results.map(place => ({
-                    name: place.name,
-                    latitude: place.geometry.location.lat(),
-                    longitude: place.geometry.location.lng(),
-                    address: place.vicinity,
-                    placeId: place.place_id
-                })));
-            } else {
-                resolve([]);
-            }
+        detailMap = L.map(containerId, {
+            center: [lat, lng],
+            zoom: 15,
+            zoomControl: true,
+            scrollWheelZoom: false
         });
-    });
-}
 
-// Utility function to escape HTML
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(detailMap);
 
-// Initialize map on a specific container (for detail page)
-function initMapOnContainer(containerId, center, zoom = 15) {
-    if (typeof google === 'undefined' || !google.maps) {
-        console.warn('Google Maps API not loaded yet');
-        return null;
+        const group = L.featureGroup().addTo(detailMap);
+
+        // Add main hospital marker
+        const mainIcon = createMarkerIcon(mainHospital.hospital_type, true);
+        const mainMarker = L.marker([lat, lng], {
+            icon: mainIcon,
+            title: mainHospital.hospital_name,
+            zIndexOffset: 1000
+        }).addTo(group);
+
+        mainMarker.bindPopup(createPopupHtml(mainHospital), {
+            maxWidth: 320,
+            className: 'clinical-map-popup'
+        }).openPopup();
+
+        // Add nearby secondary hospitals
+        (nearbyHospitals || []).forEach(h => {
+            if (h.id === mainHospital.id) return;
+            const nLat = parseFloat(h.latitude);
+            const nLng = parseFloat(h.longitude);
+            if (isNaN(nLat) || isNaN(nLng)) return;
+
+            const nIcon = createMarkerIcon(h.hospital_type, false);
+            const nMarker = L.marker([nLat, nLng], {
+                icon: nIcon,
+                title: h.hospital_name
+            }).addTo(group);
+
+            nMarker.bindPopup(createPopupHtml(h), { maxWidth: 300 });
+        });
+
+        return detailMap;
     }
-    
-    const container = document.getElementById(containerId);
-    if (!container) return null;
-    
-    const mapInstance = new google.maps.Map(container, {
-        center: center,
-        zoom: zoom,
-        mapTypeControl: true,
-        streetViewControl: false,
-        fullscreenControl: true
-    });
-    
-    return mapInstance;
-}
 
-// Export for module usage
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        initMap,
-        addHospitalMarkers,
-        showHospitalOnMap,
-        getDirections,
-        findNearbyHospitals,
-        clearMarkers
+    // Export to global scope
+    window.initHospitalListMap = initHospitalListMap;
+    window.initHospitalDetailMap = initHospitalDetailMap;
+    window.focusHospital = focusHospital;
+    window.filterMapByType = filterMapByType;
+    window.locateUser = locateUser;
+
+    // Backward compatibility bridges
+    window.initMap = function() {
+        console.log("AarogyaSahay Map Engine active.");
     };
-}
+    window.showHospitalMapDetail = function(hospitalId) {
+        focusHospital(hospitalId);
+    };
+
+})(window);

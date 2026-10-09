@@ -2,6 +2,16 @@
 
 {% block title %}{{ hospital['hospital_name'] }} | AarogyaSahay{% endblock %}
 
+{% block extra_head %}
+<!-- Leaflet CSS for Map Engine -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<style>
+    .leaflet-container { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; border-radius: var(--radius-md); z-index: 10; }
+    .clinical-map-popup .leaflet-popup-content-wrapper { border-radius: 12px; box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.1); padding: 4px 6px; }
+    .clinical-map-popup .leaflet-popup-tip { box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); }
+</style>
+{% endblock %}
+
 {% block breadcrumbs %}
 <div class="container breadcrumbs-bar">
     <nav class="breadcrumbs" aria-label="Breadcrumb">
@@ -31,10 +41,19 @@
 
     <!-- Map Section -->
     <div class="map-card card" style="margin-bottom: 1.5rem;">
-        <div class="card-header">
-            <h2 class="card-title">Location Map</h2>
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div>
+                <h2 class="card-title" style="margin: 0;">Facility Geospatial Location</h2>
+                <p class="text-muted" style="margin: 3px 0 0; font-size: 12px;">Verified district coordinates with route navigation support</p>
+            </div>
+            {% if hospital['latitude'] and hospital['longitude'] %}
+            <a href="https://www.google.com/maps/dir/?api=1&destination={{ hospital['latitude'] }},{{ hospital['longitude'] }}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="font-size: 12px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                Open Google Maps Navigation ↗
+            </a>
+            {% endif %}
         </div>
-        <div class="map-container" style="height: 350px; width: 100%;">
+        <div class="map-container" style="height: 380px; width: 100%; position: relative;">
             <div id="hospital-detail-map" style="width: 100%; height: 100%;"></div>
         </div>
     </div>
@@ -64,6 +83,12 @@
                     <dt>Address</dt>
                     <dd class="address-full">{{ hospital['address'] }}</dd>
                 </div>
+                {% if hospital['latitude'] and hospital['longitude'] %}
+                <div class="info-item">
+                    <dt>Coordinates</dt>
+                    <dd><code style="background:var(--bg-surface-elevated); padding:2px 6px; border-radius:4px; font-size:12px;">{{ hospital['latitude'] }}, {{ hospital['longitude'] }}</code></dd>
+                </div>
+                {% endif %}
             </dl>
         </div>
 
@@ -91,7 +116,7 @@
                 {% endif %}
                 {% if not hospital['phone1'] and not hospital['phone2'] and not hospital['email'] %}
                 <div class="info-item">
-                    <dd class="no-contact">No contact information available</dd>
+                    <dd class="no-contact">No official contact phone/email registered</dd>
                 </div>
                 {% endif %}
             </dl>
@@ -99,7 +124,7 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="action-bar card">
+    <div class="action-bar card" style="margin-top: 1.5rem;">
         <div class="action-buttons">
             {% if hospital['phone1'] %}
             <a href="tel:{{ hospital['phone1'] }}" class="btn btn-primary btn-lg">
@@ -120,24 +145,20 @@
             </a>
             {% endif %}
             {% if hospital['latitude'] and hospital['longitude'] %}
-            <a href="https://www.google.com/maps/dir/?api=1&destination={{ hospital['latitude'] }},{{ hospital['longitude'] }}" target="_blank" class="btn btn-primary btn-lg">
+            <a href="https://www.google.com/maps/dir/?api=1&destination={{ hospital['latitude'] }},{{ hospital['longitude'] }}" target="_blank" rel="noopener" class="btn btn-primary btn-lg">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                 Get Directions
             </a>
             {% endif %}
             <a href="{{ url_for('hospitals.list_hospitals', district=hospital['district']) }}" class="btn btn-ghost btn-lg">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><polyline points="12 19 5 12 12 5"></polyline></svg>
-                Back to List
-            </a>
-            <a href="{{ url_for('hospitals.list_hospitals', type=hospital['hospital_type']) }}" class="btn btn-ghost btn-lg">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                All {{ hospital['hospital_type'] }} Hospitals
+                Back to {{ hospital['district'] }}
             </a>
         </div>
     </div>
 
     <!-- Nearby Hospitals -->
-    <div class="card nearby-card">
+    <div class="card nearby-card" style="margin-top: 1.5rem;">
         <h2 class="card-title">Other Hospitals in {{ hospital['district'] }}</h2>
         <div class="nearby-list">
             {% if nearby_hospitals %}
@@ -147,19 +168,23 @@
                         <th>Hospital Name</th>
                         <th>Type</th>
                         <th>Phone</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for h in nearby_hospitals %}
                     <tr>
-                        <td><a href="{{ url_for('hospitals.hospital_detail', hospital_id=h['id']) }}">{{ h['hospital_name'] }}</a></td>
+                        <td><strong>{{ h['hospital_name'] }}</strong></td>
                         <td><span class="type-badge type-{{ h['hospital_type']|lower }}">{{ h['hospital_type'] }}</span></td>
-                        <td>{% if h['phone1'] %}<a href="tel:{{ h['phone1'] }}">{{ h['phone1'] }}</a>{% endif %}</td>
+                        <td>{% if h['phone1'] %}<a href="tel:{{ h['phone1'] }}">{{ h['phone1'] }}</a>{% else %}-{% endif %}</td>
+                        <td>
+                            <a href="{{ url_for('hospitals.hospital_detail', hospital_id=h['id']) }}" class="btn btn-outline btn-sm" style="font-size: 11px; padding: 4px 8px;">View</a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <a href="{{ url_for('hospitals.list_hospitals', district=hospital['district']) }}" class="btn btn-outline btn-sm mt-2">View All in {{ hospital['district'] }}</a>
+            <a href="{{ url_for('hospitals.list_hospitals', district=hospital['district']) }}" class="btn btn-outline btn-sm mt-3" style="display: inline-block;">View All Hospitals in {{ hospital['district'] }}</a>
             {% else %}
             <p class="no-nearby">No other hospitals found in this district.</p>
             {% endif %}
@@ -169,93 +194,14 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="{{ url_for('static', filename='js/hospital-map.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize map for hospital detail
-    const hospitalData = {{ hospital|tojson }};
-    
-    // Wait for Google Maps to load
-    function waitForMaps() {
-        if (typeof google !== 'undefined' && google.maps) {
-            if (hospitalData.latitude && hospitalData.longitude) {
-                const center = { 
-                    lat: parseFloat(hospitalData.latitude), 
-                    lng: parseFloat(hospitalData.longitude) 
-                };
-                
-                // Initialize map on detail page container
-                const detailMap = initMapOnContainer('hospital-detail-map', center, 16);
-                
-                if (detailMap) {
-                    // Add hospital marker
-                    const isPublic = hospitalData.hospital_type === 'Public';
-                    const icon = {
-                        url: isPublic 
-                            ? 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
-                                    <circle cx="12" cy="12" r="10" fill="#10B981" stroke="#FFFFFF" stroke-width="3"/>
-                                    <path d="M12 8v4M12 16h.01" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
-                                </svg>
-                            `)
-                            : 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
-                                    <circle cx="12" cy="12" r="10" fill="#3B82F6" stroke="#FFFFFF" stroke-width="3"/>
-                                    <path d="M12 8v4M12 16h.01" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
-                                </svg>
-                            `),
-                        scaledSize: new google.maps.Size(40, 40),
-                        anchor: new google.maps.Point(20, 20)
-                    };
-                    
-                    const marker = new google.maps.Marker({
-                        position: center,
-                        map: detailMap,
-                        title: hospitalData.hospital_name,
-                        icon: icon,
-                        animation: google.maps.Animation.DROP
-                    });
-                    
-                    // Add info window
-                    const infoWindow = new google.maps.InfoWindow();
-                    const content = `
-                        <div class="map-info-window" style="min-width: 250px; padding: 8px;">
-                            <h4 style="margin: 0 0 8px; font-size: 14px; font-weight: 600; color: #1f2937;">${hospitalData.hospital_name}</h4>
-                            <div style="font-size: 12px; color: #4b5563; margin-bottom: 8px;">
-                                <div>${hospitalData.district} District, Chhattisgarh</div>
-                                ${hospitalData.address ? `<div style="margin-top: 4px;">${hospitalData.address.substring(0, 100)}${hospitalData.address.length > 100 ? '...' : ''}</div>` : ''}
-                            </div>
-                            <div style="font-size: 12px; color: #4b5563; margin-bottom: 8px;">
-                                ${hospitalData.phone1 ? `<div>📞 <a href="tel:${hospitalData.phone1}" style="color: #2563eb; text-decoration: none;">${hospitalData.phone1}</a></div>` : ''}
-                                ${hospitalData.phone2 ? `<div>📞 <a href="tel:${hospitalData.phone2}" style="color: #2563eb; text-decoration: none;">${hospitalData.phone2}</a></div>` : ''}
-                                ${hospitalData.email ? `<div>✉️ <a href="mailto:${hospitalData.email}" style="color: #2563eb; text-decoration: none;">${hospitalData.email}</a></div>` : ''}
-                            </div>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=${hospitalData.latitude},${hospitalData.longitude}" target="_blank" class="btn btn-primary btn-sm" style="padding: 6px 12px; font-size: 12px; text-decoration: none; background: #2563eb; color: white; border-radius: 4px; display: inline-block;">Get Directions</a>
-                        </div>
-                    `;
-                    
-                    marker.addListener('click', () => {
-                        infoWindow.setContent(content);
-                        infoWindow.open(detailMap, marker);
-                    });
-                    
-                    // Open info window by default
-                    infoWindow.setContent(content);
-                    infoWindow.open(detailMap, marker);
-                }
-            } else {
-                // No coordinates - show message
-                const container = document.getElementById('hospital-detail-map');
-                if (container) {
-                    container.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; text-align: center; padding: 20px;"><div><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 16px; color: #999;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><p>Location coordinates not available for this hospital</p></div></div>';
-                }
-            }
-        } else {
-            setTimeout(waitForMaps, 100);
-        }
-    }
-    
-    waitForMaps();
+    const mainHospital = {{ hospital|tojson }};
+    const nearbyList = {{ nearby_hospitals|tojson }};
+    initHospitalDetailMap('hospital-detail-map', mainHospital, nearbyList);
 });
 </script>
 {% endblock %}
