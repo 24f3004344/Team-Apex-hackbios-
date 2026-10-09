@@ -4093,6 +4093,11 @@ img, video, canvas {
 a, button {
     -webkit-tap-highlight-color: transparent;
 }
+/* Status pills/badges are short labels: never wrap mid-phrase */
+.stock-badge, .status-chip, .queue-p-badge, .badge-status, .badge-tag,
+.live-pill, .cat-pill, .emergency-pill, .user-role-badge {
+    white-space: nowrap;
+}
 
 @media (max-width: 768px) {
     /* 1. No iOS auto-zoom on input focus (needs >=16px) */
