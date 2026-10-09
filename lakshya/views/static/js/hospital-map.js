@@ -348,7 +348,7 @@
 
     // Backward compatibility bridges
     window.initMap = function() {
-        console.log("AarogyaSahay Map Engine active.");
+        // Map engine ready.
     };
     window.showHospitalMapDetail = function(hospitalId) {
         focusHospital(hospitalId);

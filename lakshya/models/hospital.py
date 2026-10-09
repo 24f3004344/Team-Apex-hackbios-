@@ -35,7 +35,8 @@ def list_for_map(district="", hospital_type="", search="", limit=150):
     q = ("SELECT id, sno, district, hospital_type, hospital_name, address, phone1, phone2, email,"
          " latitude, longitude FROM hospitals WHERE 1=1")
     q, p = _filtered(q, district, hospital_type, search)
-    q += " AND latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY district, hospital_name LIMIT 150"
+    q += " AND latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY district, hospital_name LIMIT ?"
+    p.append(int(limit))
     return [dict(h) for h in get_db().execute(q, p).fetchall()]
 
 
@@ -49,8 +50,8 @@ def nearby(district, exclude_id, limit=6):
     """Nearby hospitals in the same district."""
     rows = get_db().execute(
         "SELECT id, hospital_name, hospital_type, district, address, phone1, latitude, longitude"
-        " FROM hospitals WHERE district = ? AND id != ? ORDER BY hospital_name LIMIT 6",
-        (district, exclude_id),
+        " FROM hospitals WHERE district = ? AND id != ? ORDER BY hospital_name LIMIT ?",
+        (district, exclude_id, int(limit)),
     ).fetchall()
     return [dict(h) for h in rows]
 

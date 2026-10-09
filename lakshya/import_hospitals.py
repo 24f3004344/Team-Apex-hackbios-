@@ -6,8 +6,6 @@ and store it in the SQLite database.
 import re
 import sqlite3
 import os
-import sys
-from datetime import datetime
 
 # Database path
 DATABASE = os.path.join(os.path.dirname(__file__), "swasthya.db")

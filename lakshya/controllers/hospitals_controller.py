@@ -1,18 +1,11 @@
 """
 Hospital routes for accessing government hospital data.
 """
-from flask import Blueprint, render_template, request, jsonify, current_app
+from flask import Blueprint, render_template, request, jsonify
 from models import hospital as hospital_model
 from middleware.auth_middleware import login_required
 
 hospitals_bp = Blueprint('hospitals', __name__, url_prefix='/hospitals')
-
-
-# Make helper available in templates
-@hospitals_bp.app_template_global()
-def get_nearby_hospitals_global(district, exclude_id, limit=5):
-    """Template global for getting nearby hospitals."""
-    return hospital_model.nearby(district, exclude_id, limit)
 
 
 @hospitals_bp.route('/')

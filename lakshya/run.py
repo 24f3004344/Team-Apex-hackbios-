@@ -1,8 +1,8 @@
 """AarogyaSahay entrypoint. Run from the lakshya/ directory:  python run.py"""
 import os
-from app import app, _is_debug
+from app import app, is_debug
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5050))
     print(f"Starting AarogyaSahay Health Grid on http://127.0.0.1:{port}")
-    app.run(host="127.0.0.1", port=port, debug=_is_debug(), use_reloader=False)
+    app.run(host="127.0.0.1", port=port, debug=is_debug(), use_reloader=False)

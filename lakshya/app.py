@@ -16,7 +16,7 @@ def _get_secret_key():
     return key
 
 
-def _is_debug():
+def is_debug():
     return os.environ.get("FLASK_DEBUG", "0") == "1"
 
 
@@ -65,4 +65,4 @@ app = create_app()
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5050))
     print(f"Starting AarogyaSahay Health Grid on http://127.0.0.1:{port}")
-    app.run(host="127.0.0.1", port=port, debug=_is_debug(), use_reloader=False)
+    app.run(host="127.0.0.1", port=port, debug=is_debug(), use_reloader=False)

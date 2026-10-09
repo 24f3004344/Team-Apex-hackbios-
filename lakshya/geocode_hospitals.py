@@ -9,7 +9,6 @@ import time
 import math
 import sqlite3
 import requests
-from urllib.parse import quote
 
 # Configuration — key MUST come from env (never commit keys).
 # NOTE: the key previously hardcoded here is compromised (it lives in git
@@ -98,7 +97,7 @@ def geocode_address(address):
             location = data['results'][0]['geometry']['location']
             return location['lat'], location['lng']
         elif data['status'] == 'OVER_QUERY_LIMIT':
-            print(f"  Rate limit hit, waiting...")
+            print("  Rate limit hit, waiting...")
             time.sleep(2)
             return geocode_address(address)  # Retry
         else:
@@ -169,7 +168,7 @@ def geocode_hospitals(batch_size=100, start_from=0):
             success_count += 1
             print(f"    ✓ {lat:.6f}, {lng:.6f}")
         else:
-            print(f"    ✗ Failed to geocode")
+            print("    ✗ Failed to geocode")
         
         # Rate limiting
         time.sleep(REQUEST_DELAY)
