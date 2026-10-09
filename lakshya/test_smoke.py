@@ -120,6 +120,33 @@ def test_security_fixes():
     assert r.status_code == 400, f"units garbage gave {r.status_code}"
 
 
+def test_rbac():
+    """Patients are read-only on staff write APIs; deletes are admin-only."""
+    from app import app
+    c = app.test_client()
+
+    def api(path, role_user, role_pass, payload):
+        _login(c, role_user, role_pass)
+        return c.post(path, json=payload, headers={"X-CSRF-Token": _meta_token(c)})
+
+    # patient blocked from staff update API
+    r = api("/api/medicine/1/update", "9876543212", "patient123", {"units": 10})
+    assert r.status_code == 403, f"patient update gave {r.status_code}"
+    # staff allowed (valid update on real row, then restore)
+    r = api("/api/medicine/1/update", "9876543210", "asha123", {"units": 451})
+    assert r.status_code == 200 and r.get_json()["success"], "staff update blocked"
+    api("/api/medicine/1/update", "9876543210", "asha123", {"units": 450})
+    # delete blocked for staff, passes gate for admin (404 = no such row, gate passed)
+    c2 = app.test_client()
+    _login(c2, "9876543210", "asha123")
+    r = c2.post("/api/medicine/99999/delete", json={}, headers={"X-CSRF-Token": _meta_token(c2)})
+    assert r.status_code == 403, f"staff delete gave {r.status_code}"
+    c3 = app.test_client()
+    _login(c3, "admin@swasthya.gov.in", "admin123")
+    r = c3.post("/api/medicine/99999/delete", json={}, headers={"X-CSRF-Token": _meta_token(c3)})
+    assert r.status_code == 404, f"admin delete gave {r.status_code}"
+
+
 def test_csrf():
     """POSTs without a valid CSRF token must not change state."""
     from app import app
@@ -139,7 +166,7 @@ def test_csrf():
 
 
 if __name__ == "__main__":
-    for fn in [test_structure, test_url_map, test_routes, test_login_gating, test_security_fixes, test_csrf]:
+    for fn in [test_structure, test_url_map, test_routes, test_login_gating, test_security_fixes, test_rbac, test_csrf]:
         fn()
         print(f"PASS {fn.__name__}")
     print("ALL SMOKE TESTS PASSED")

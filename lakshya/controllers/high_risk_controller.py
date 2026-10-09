@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, jsonify
 from models import high_risk_case as hr_model
 from middleware.auth_middleware import login_required
 from middleware.csrf import protect
+from middleware.roles import STAFF, require_roles
 
 high_risk_bp = Blueprint("high_risk", __name__)
 
@@ -21,6 +22,7 @@ def high_risk_page():
 @high_risk_bp.route("/api/high-risk/<int:case_id>/update", methods=["POST"])
 @login_required
 @protect
+@require_roles(*STAFF)
 def api_high_risk_update(case_id):
     """Update high-risk case status, notes, or next action date."""
     data = request.get_json() or {}
@@ -50,6 +52,7 @@ def api_high_risk_update(case_id):
 @high_risk_bp.route("/api/high-risk/<int:case_id>/delete", methods=["POST"])
 @login_required
 @protect
+@require_roles("admin")
 def api_high_risk_delete(case_id):
     """Remove a high-risk case record."""
     if not hr_model.exists(case_id):
