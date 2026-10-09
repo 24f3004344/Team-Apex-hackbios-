@@ -147,6 +147,14 @@ def test_rbac():
     assert r.status_code == 404, f"admin delete gave {r.status_code}"
 
 
+def test_no_hardcoded_secrets():
+    """No API keys / secrets committed in runnable code."""
+    with open(os.path.join(BASE, "geocode_hospitals.py")) as f:
+        src = f.read()
+    assert "AIzaSy" not in src, "hardcoded Google API key still present"
+    assert 'os.environ.get("GOOGLE_MAPS_API_KEY"' in src
+
+
 def test_headers_and_cookies():
     """Security headers on every response; session cookie HttpOnly + SameSite=Lax."""
     from app import app
@@ -196,7 +204,7 @@ def test_csrf():
 
 
 if __name__ == "__main__":
-    for fn in [test_structure, test_url_map, test_routes, test_login_gating, test_security_fixes, test_rbac, test_ratelimit, test_headers_and_cookies, test_csrf]:
+    for fn in [test_structure, test_url_map, test_routes, test_login_gating, test_security_fixes, test_rbac, test_ratelimit, test_headers_and_cookies, test_no_hardcoded_secrets, test_csrf]:
         fn()
         print(f"PASS {fn.__name__}")
     print("ALL SMOKE TESTS PASSED")

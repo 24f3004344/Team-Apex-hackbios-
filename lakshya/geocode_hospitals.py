@@ -11,10 +11,19 @@ import sqlite3
 import requests
 from urllib.parse import quote
 
-# Configuration
+# Configuration — key MUST come from env (never commit keys).
+# NOTE: the key previously hardcoded here is compromised (it lives in git
+# history). Revoke/regenerate it in Google Cloud Console, then export the new one:
+#   export GOOGLE_MAPS_API_KEY="your-new-key"
 DATABASE = os.path.join(os.path.dirname(__file__), "swasthya.db")
-GOOGLE_MAPS_API_KEY = "AIzaSyBCCOj8ob_JRXuuQA7qI-hVXTfn-jrSBl0"
+GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_MAPS_API_KEY", "")
 GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json"
+
+
+def _require_api_key():
+    if not GOOGLE_MAPS_API_KEY:
+        print("ERROR: GOOGLE_MAPS_API_KEY env var is not set. Export it first.")
+        sys.exit(1)
 
 DISTRICT_COORDS = {
     'BALOD': (20.7297, 81.2039),
@@ -198,6 +207,7 @@ def verify_geocoding():
     conn.close()
 
 def main():
+    _require_api_key()
     print("=" * 60)
     print("Hospital Geocoding Script")
     print("=" * 60)
