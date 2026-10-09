@@ -36,6 +36,7 @@ def dashboard():
 
 
 @main_bp.route("/records")
+@login_required
 def records_page():
     """Longitudinal Patient Records / ABHA Unified Medical Journey."""
     abha_query = request.args.get("abha", "91-3321-4451-0982").strip()
@@ -43,6 +44,7 @@ def records_page():
 
 
 @main_bp.route("/analytics")
+@login_required
 def analytics_page():
     """Public Health Facility Quality & Impact Dashboard."""
     return render_template("analytics.html")

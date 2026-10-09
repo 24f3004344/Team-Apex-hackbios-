@@ -33,21 +33,44 @@ def test_url_map():
 def test_routes():
     from app import app
     c = app.test_client()
-    for path in ["/", "/login", "/register", "/teleconsult", "/triage",
-                 "/records", "/referrals", "/inventory", "/high-risk",
-                 "/analytics", "/hospitals/", "/hospitals/1", "/static/css/style.css",
-                 "/hospitals/api/stats"]:
+    # Public surface (logged out)
+    for path in ["/", "/login", "/register", "/static/css/style.css"]:
         assert c.get(path).status_code == 200, f"GET {path} failed"
-    assert c.get("/hospitals").status_code == 308  # strict-slash redirect to /hospitals/
-    assert c.get("/dashboard").status_code == 302  # login_required redirect
-    r = c.post("/api/triage-evaluate", json={"breathing_difficulty": True})
-    assert r.status_code == 200 and "Red" in r.get_json()["tier"]
     r = c.get("/api/medicine-search?q=ORS")
     assert r.status_code == 200 and r.get_json()["count"] >= 1
+    r = c.post("/api/triage-evaluate", json={"breathing_difficulty": True})
+    assert r.status_code == 200 and "Red" in r.get_json()["tier"]
+    # Logged in: every app page renders
+    c.post("/login", data={"identifier": "9876543210", "password": "asha123", "role_tab": "frontline"})
+    for path in ["/dashboard", "/teleconsult", "/triage", "/records", "/referrals",
+                 "/inventory", "/high-risk", "/analytics", "/hospitals/", "/hospitals/1",
+                 "/hospitals/api/stats"]:
+        assert c.get(path).status_code == 200, f"GET {path} failed (logged in)"
+
+
+def test_login_gating():
+    """Logged-out users get bounced to /login on every app page/API (except landing + auth + 2 public read APIs)."""
+    from app import app
+    c = app.test_client()
+    locked = ["/dashboard", "/teleconsult", "/triage", "/records", "/referrals",
+              "/inventory", "/high-risk", "/analytics", "/hospitals/", "/hospitals/1",
+              "/hospitals/api/stats",
+              "/api/medicine/1/update", "/api/medicine/1/delete",
+              "/api/high-risk/1/update", "/api/teleconsult/1/update",
+              "/api/referral/1/update"]
+    for path in locked:
+        r = c.get(path) if "update" not in path and "delete" not in path else c.post(path, json={})
+        assert r.status_code == 302, f"{path} not gated (got {r.status_code})"
+        assert "/login" in r.headers.get("Location", ""), f"{path} bounce target wrong"
+    # Public surface stays open
+    for path in ["/", "/login", "/register", "/static/css/style.css"]:
+        assert c.get(path).status_code == 200, f"public {path} broke"
+    assert c.get("/api/medicine-search?q=ORS").status_code == 200
+    assert c.post("/api/triage-evaluate", json={"breathing_difficulty": True}).status_code == 200
 
 
 if __name__ == "__main__":
-    for fn in [test_structure, test_url_map, test_routes]:
+    for fn in [test_structure, test_url_map, test_routes, test_login_gating]:
         fn()
         print(f"PASS {fn.__name__}")
     print("ALL SMOKE TESTS PASSED")

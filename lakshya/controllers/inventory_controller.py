@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, jsonify
 from models import medicine as med_model
 from models import diagnostic as diag_model
+from middleware.auth_middleware import login_required
 
 inventory_bp = Blueprint("inventory", __name__)
 
@@ -11,6 +12,7 @@ inventory_bp = Blueprint("inventory", __name__)
 # =====================================================================
 
 @inventory_bp.route("/inventory")
+@login_required
 def inventory_page():
     """Live Medicine & Diagnostic Tests Inventory Management."""
     medicines = med_model.list_all()
@@ -19,6 +21,7 @@ def inventory_page():
 
 
 @inventory_bp.route("/api/medicine/<int:med_id>/update", methods=["POST"])
+@login_required
 def api_medicine_update(med_id):
     """Update medicine stock quantity and status."""
     data = request.get_json() or {}
@@ -53,6 +56,7 @@ def api_medicine_update(med_id):
 
 
 @inventory_bp.route("/api/medicine/<int:med_id>/delete", methods=["POST"])
+@login_required
 def api_medicine_delete(med_id):
     """Delete a medicine entry from inventory."""
     if not med_model.exists(med_id):

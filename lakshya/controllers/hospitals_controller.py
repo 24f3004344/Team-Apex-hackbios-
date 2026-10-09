@@ -3,6 +3,7 @@ Hospital routes for accessing government hospital data.
 """
 from flask import Blueprint, render_template, request, jsonify, current_app
 from models import hospital as hospital_model
+from middleware.auth_middleware import login_required
 
 hospitals_bp = Blueprint('hospitals', __name__, url_prefix='/hospitals')
 
@@ -15,6 +16,7 @@ def get_nearby_hospitals_global(district, exclude_id, limit=5):
 
 
 @hospitals_bp.route('/')
+@login_required
 def list_hospitals():
     """List all hospitals with pagination and filtering."""
     # Get query parameters
@@ -45,6 +47,7 @@ def list_hospitals():
 
 
 @hospitals_bp.route('/<int:hospital_id>')
+@login_required
 def hospital_detail(hospital_id):
     """Show hospital detail page."""
     hospital_dict = hospital_model.get(hospital_id)
@@ -59,6 +62,7 @@ def hospital_detail(hospital_id):
 
 
 @hospitals_bp.route('/api')
+@login_required
 def api_hospitals():
     """API endpoint for hospital data."""
     # Get query parameters
@@ -77,12 +81,14 @@ def api_hospitals():
 
 
 @hospitals_bp.route('/api/districts')
+@login_required
 def api_districts():
     """API endpoint for list of districts."""
     return jsonify({'districts': hospital_model.districts()})
 
 
 @hospitals_bp.route('/api/stats')
+@login_required
 def api_stats():
     """API endpoint for hospital statistics."""
     stats = hospital_model.stats()

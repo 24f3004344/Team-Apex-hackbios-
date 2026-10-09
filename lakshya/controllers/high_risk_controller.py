@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify
 from models import high_risk_case as hr_model
+from middleware.auth_middleware import login_required
 
 high_risk_bp = Blueprint("high_risk", __name__)
 
@@ -9,6 +10,7 @@ high_risk_bp = Blueprint("high_risk", __name__)
 # =====================================================================
 
 @high_risk_bp.route("/high-risk")
+@login_required
 def high_risk_page():
     """High-Risk Patient Follow-up for Maternal, Child & Chronic Conditions."""
     cases = hr_model.list_all()
@@ -16,6 +18,7 @@ def high_risk_page():
 
 
 @high_risk_bp.route("/api/high-risk/<int:case_id>/update", methods=["POST"])
+@login_required
 def api_high_risk_update(case_id):
     """Update high-risk case status, notes, or next action date."""
     data = request.get_json() or {}
@@ -43,6 +46,7 @@ def api_high_risk_update(case_id):
 
 
 @high_risk_bp.route("/api/high-risk/<int:case_id>/delete", methods=["POST"])
+@login_required
 def api_high_risk_delete(case_id):
     """Remove a high-risk case record."""
     if not hr_model.exists(case_id):
