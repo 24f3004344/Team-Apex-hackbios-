@@ -43,4 +43,4 @@ register_routes(app)
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5050))
     print(f"Starting AarogyaSahay Health Grid on http://127.0.0.1:{port}")
-    app.run(host="127.0.0.1", port=port, debug=True, use_reloader=False)
+    app.run(host="127.0.0.1", port=port, debug=True)

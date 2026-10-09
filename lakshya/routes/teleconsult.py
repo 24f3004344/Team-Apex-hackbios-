@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from db import get_db
+from auth_middleware import login_required, role_required
 
 teleconsult_bp = Blueprint("teleconsult", __name__)
 
@@ -10,6 +11,7 @@ teleconsult_bp = Blueprint("teleconsult", __name__)
 # =====================================================================
 
 @teleconsult_bp.route("/teleconsult", methods=["GET", "POST"])
+@role_required("doctor", "frontline")
 def teleconsult():
     """Assisted Teleconsultation & Tele-OPD Hub."""
     if request.method == "POST":
@@ -51,6 +53,7 @@ def teleconsult():
 
 
 @teleconsult_bp.route("/api/teleconsult/<int:tc_id>/update", methods=["POST"])
+@role_required("doctor", "frontline")
 def api_teleconsult_update(tc_id):
     """Update teleconsult status and prescription."""
     data = request.get_json() or {}
@@ -82,6 +85,7 @@ def api_teleconsult_update(tc_id):
 
 
 @teleconsult_bp.route("/api/teleconsult/<int:tc_id>/delete", methods=["POST"])
+@role_required("doctor", "frontline")
 def api_teleconsult_delete(tc_id):
     """Remove teleconsult record from queue."""
     db = get_db()

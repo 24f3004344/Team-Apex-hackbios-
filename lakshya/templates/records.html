@@ -20,11 +20,13 @@
             <div>
                 <span class="badge-tag">Ayushman Bharat Digital Mission (ABDM) Aligned</span>
                 <h1 class="page-title">Longitudinal Electronic Health Records (EHR)</h1>
-                <p class="page-sub">Unbroken medical continuity across Sub-Centres, PHCs, CHCs, and District Hospitals. Eliminates lost paper records.</p>
+                <p class="page-sub">Unbroken medical continuity across Sub-Centres, PHCs, CHCs, and District Hospitals.
+                    Eliminates lost paper records.</p>
             </div>
             <div class="abha-lookup-box">
                 <form action="{{ url_for('records_page') }}" method="GET" class="lookup-form">
-                    <input type="text" name="abha" class="form-control" placeholder="Search by ABHA (e.g. 91-3321-4451-0982)" value="{{ active_abha }}">
+                    <input type="text" name="abha" class="form-control"
+                        placeholder="Search by ABHA (e.g. 91-3321-4451-0982)" value="{{ active_abha }}">
                     <button type="submit" class="btn btn-primary btn-sm">Fetch EHR</button>
                 </form>
             </div>
@@ -35,7 +37,11 @@
             <div class="patient-id-grid">
                 <div class="pt-avatar-block">
                     <div class="pt-avatar">
-                        <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
                     </div>
                     <div class="pt-basic">
                         <h2>Meena Sahu</h2>
@@ -65,7 +71,9 @@
 
                 <div class="pt-consent-status">
                     <span class="status-chip in-stock">ABDM Consent: Active (24h Window)</span>
-                    <button class="btn btn-xs btn-outline mt-2" onclick="showToast('ABHA QR Health Card downloaded to local storage.')">Download ABHA Card</button>
+                    <button class="btn btn-xs btn-outline mt-2"
+                        onclick="showToast('ABHA QR Health Card downloaded to local storage.')">Download ABHA
+                        Card</button>
                 </div>
             </div>
         </div>
@@ -92,7 +100,9 @@
                                 <h4 class="event-title">Post-Discharge ASHA Home Visit & Adherence Verification</h4>
                                 <p class="event-facility">Conducted by Sunita Devi (ASHA) • Rampur Village</p>
                                 <div class="event-details-box">
-                                    <p><strong>Clinical Status:</strong> Blood pressure stabilized at 128/84 mmHg. Patient adhering to Tab. Labetalol. Fetal movements vigorous. Dispensed 30-day IFA supplements.</p>
+                                    <p><strong>Clinical Status:</strong> Blood pressure stabilized at 128/84 mmHg.
+                                        Patient adhering to Tab. Labetalol. Fetal movements vigorous. Dispensed 30-day
+                                        IFA supplements.</p>
                                     <span class="status-chip in-stock">Protocol Completed</span>
                                 </div>
                             </div>
@@ -107,12 +117,20 @@
                                     <span class="event-date">3 Days Ago</span>
                                 </div>
                                 <h4 class="event-title">Specialist Consult & Day-Care IV Iron Sucrose Infusion</h4>
-                                <p class="event-facility">Dr. Sunayana Sen (Consultant OBGYN) • Bilaspur District Hospital</p>
+                                <p class="event-facility">Dr. Sunayana Sen (Consultant OBGYN) • Bilaspur District
+                                    Hospital</p>
                                 <div class="event-details-box">
-                                    <p><strong>Treatment Done:</strong> 200mg IV Iron Sucrose administered over 2 hours under observation. Obstetric USG performed: Single live intrauterine fetus, cephalic presentation, liquor adequate (AFI 12cm). Estimated fetal weight: 1.85 kg.</p>
+                                    <p><strong>Treatment Done:</strong> 200mg IV Iron Sucrose administered over 2 hours
+                                        under observation. Obstetric USG performed: Single live intrauterine fetus,
+                                        cephalic presentation, liquor adequate (AFI 12cm). Estimated fetal weight: 1.85
+                                        kg.</p>
                                     <div class="event-docs-row">
-                                        <button class="btn btn-xs btn-outline" onclick="showToast('Displaying USG Scan Report #USG-88219')">View USG Scan</button>
-                                        <button class="btn btn-xs btn-outline" onclick="showToast('Displaying Day-Care Discharge Summary')">Discharge Note</button>
+                                        <button class="btn btn-xs btn-outline"
+                                            onclick="showToast('Displaying USG Scan Report #USG-88219')">View USG
+                                            Scan</button>
+                                        <button class="btn btn-xs btn-outline"
+                                            onclick="showToast('Displaying Day-Care Discharge Summary')">Discharge
+                                            Note</button>
                                     </div>
                                 </div>
                             </div>
@@ -129,7 +147,9 @@
                                 <h4 class="event-title">Assisted Tele-OPD Consultation & Diagnostic Orders</h4>
                                 <p class="event-facility">Dr. Rajesh Sharma (Medical Officer) • Bilaspur Rural PHC</p>
                                 <div class="event-details-box">
-                                    <p><strong>Finding:</strong> Gestational hypertension (BP 155/100) and severe nutritional anemia (Hb 7.2 g/dL). Started Tab. Labetalol 100mg BD. Requisitioned CBC, Sputum, and Urgent District Hospital Referral.</p>
+                                    <p><strong>Finding:</strong> Gestational hypertension (BP 155/100) and severe
+                                        nutritional anemia (Hb 7.2 g/dL). Started Tab. Labetalol 100mg BD. Requisitioned
+                                        CBC, Sputum, and Urgent District Hospital Referral.</p>
                                     <span class="status-chip low-stock">Urgent Referral Triggered</span>
                                 </div>
                             </div>
@@ -146,7 +166,8 @@
                                 <h4 class="event-title">Routine Village Antenatal Screening (ANC-3)</h4>
                                 <p class="event-facility">Sunita Devi (ASHA) & ANM Suman • Rampur Sub-Centre</p>
                                 <div class="event-details-box">
-                                    <p><strong>Observation:</strong> Patient presented with severe pedal edema and headache. Digital triage flagged YELLOW/RED danger signs.</p>
+                                    <p><strong>Observation:</strong> Patient presented with severe pedal edema and
+                                        headache. Digital triage flagged YELLOW/RED danger signs.</p>
                                 </div>
                             </div>
                         </div>

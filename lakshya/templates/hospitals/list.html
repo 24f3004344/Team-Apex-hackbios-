@@ -147,26 +147,31 @@
                         <span class="district-badge">{{ hospital['district'] }}</span>
                     </td>
                     <td>
-                        <span class="type-badge type-{{ hospital['hospital_type']|lower }}">{{ hospital['hospital_type'] }}</span>
+                        <span class="type-badge type-{{ (hospital['hospital_type'] or '')|lower }}">{{ hospital['hospital_type'] or 'Public' }}</span>
                     </td>
-                    <td class="address-cell">{{ hospital['address'][:95] }}{% if hospital['address']|length > 95 %}...{% endif %}</td>
+                    <td class="address-cell" title="{{ hospital['address'] or '' }}">{{ (hospital['address'] or '')[:95] }}{% if (hospital['address'] or '')|length > 95 %}...{% endif %}</td>
                     <td>
                         {% if hospital['phone1'] %}
                         <a href="tel:{{ hospital['phone1'] }}" class="phone-link">{{ hospital['phone1'] }}</a>
                         {% endif %}
                         {% if hospital['phone2'] %}
-                        <br><a href="tel:{{ hospital['phone2'] }}" class="phone-link">{{ hospital['phone2'] }}</a>
+                        {% if hospital['phone1'] %}<br>{% endif %}<a href="tel:{{ hospital['phone2'] }}" class="phone-link">{{ hospital['phone2'] }}</a>
+                        {% endif %}
+                        {% if not hospital['phone1'] and not hospital['phone2'] %}
+                        <span class="text-muted">-</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if hospital['email'] %}
                         <a href="mailto:{{ hospital['email'] }}" class="email-link">{{ hospital['email'] }}</a>
+                        {% else %}
+                        <span class="text-muted">-</span>
                         {% endif %}
                     </td>
                     <td>
                         <div style="display: flex; gap: 6px; align-items: center;">
                             <button type="button" class="btn btn-outline btn-sm map-btn" 
-                                    onclick="focusHospital({{ hospital['id'] }})"
+                                    onclick="focusHospital({{ hospital['id'] }}, {{ hospital['latitude'] or 'null' }}, {{ hospital['longitude'] or 'null' }}, {{ hospital['hospital_name']|tojson }}, {{ hospital['hospital_type']|tojson }}, {{ (hospital['address'] or '')|tojson }})"
                                     title="View location pin on interactive map above"
                                     style="padding: 5px 9px; font-size: 11.5px;">
                                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"></circle><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path></svg>
@@ -233,7 +238,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     const mapHospitals = {{ (map_hospitals or hospitals)|tojson }};
     const currentDistrict = {{ current_district|tojson }};
-    initHospitalListMap('hospital-map', mapHospitals, currentDistrict);
+    function tryInitMap() {
+        if (typeof L !== 'undefined' && window.initHospitalListMap) {
+            initHospitalListMap('hospital-map', mapHospitals, currentDistrict);
+        } else {
+            setTimeout(tryInitMap, 80);
+        }
+    }
+    tryInitMap();
 });
 </script>
 {% endblock %}

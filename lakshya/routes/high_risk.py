@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify
 from db import get_db
+from auth_middleware import login_required, role_required
 
 high_risk_bp = Blueprint("high_risk", __name__)
 
@@ -9,6 +10,7 @@ high_risk_bp = Blueprint("high_risk", __name__)
 # =====================================================================
 
 @high_risk_bp.route("/high-risk")
+@role_required("doctor", "frontline")
 def high_risk_page():
     """High-Risk Patient Follow-up for Maternal, Child & Chronic Conditions."""
     db = get_db()
@@ -19,6 +21,7 @@ def high_risk_page():
 
 
 @high_risk_bp.route("/api/high-risk/<int:case_id>/update", methods=["POST"])
+@role_required("doctor", "frontline")
 def api_high_risk_update(case_id):
     """Update high-risk case status, notes, or next action date."""
     data = request.get_json() or {}
@@ -54,6 +57,7 @@ def api_high_risk_update(case_id):
 
 
 @high_risk_bp.route("/api/high-risk/<int:case_id>/delete", methods=["POST"])
+@role_required("doctor", "frontline")
 def api_high_risk_delete(case_id):
     """Remove a high-risk case record."""
     db = get_db()

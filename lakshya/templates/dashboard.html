@@ -1,18 +1,31 @@
 {% extends "base.html" %}
 
-{% block title %}Care Coordination Dashboard | AarogyaSahay{% endblock %}
+{% block title %}
+    {% if user.role == 'doctor' %}Clinical Tele-OPD Hub | AarogyaSahay
+    {% elif user.role == 'frontline' %}Frontline ASHA Operations | AarogyaSahay
+    {% elif user.role == 'patient' %}My Health Dashboard | AarogyaSahay
+    {% else %}Health Grid Administrator Console | AarogyaSahay{% endif %}
+{% endblock %}
 
 {% block breadcrumbs %}
 <div class="breadcrumb-bar">
     <div class="container breadcrumb-flex">
         <a href="{{ url_for('index') }}">Home</a>
         <span class="breadcrumb-sep">/</span>
-        <span class="breadcrumb-curr">Coordination Dashboard</span>
+        <span class="breadcrumb-curr">{{ user.role|upper }} Dashboard</span>
     </div>
 </div>
 {% endblock %}
 
 {% block content %}
+{% set stats = stats if (stats is defined and stats) else {} %}
+{% set referrals = referrals if (referrals is defined and referrals) else [] %}
+{% set medicines = medicines if (medicines is defined and medicines) else [] %}
+{% set teleconsults = teleconsults if (teleconsults is defined and teleconsults) else [] %}
+{% set high_risk_cases = high_risk_cases if (high_risk_cases is defined and high_risk_cases) else [] %}
+{% set patient_teleconsults = patient_teleconsults if (patient_teleconsults is defined and patient_teleconsults) else [] %}
+{% set patient_prescriptions = patient_prescriptions if (patient_prescriptions is defined and patient_prescriptions) else [] %}
+{% set nearby_hospitals = nearby_hospitals if (nearby_hospitals is defined and nearby_hospitals) else [] %}
 <div class="dashboard-page">
     <div class="container dashboard-container">
         <!-- Dashboard Top Banner -->
@@ -33,7 +46,7 @@
                     <div class="greeting-badge-row">
                         <span class="user-role-badge role-{{ user.role }}">{{ user.role|upper }}</span>
                         <span class="facility-tag">{{ user.facility_name or 'District Care Grid' }}</span>
-                        <span class="district-tag">{{ user.district }}, {{ user.state }}</span>
+                        <span class="district-tag">{{ user.district or 'Chhattisgarh' }}, {{ user.state or 'India' }}</span>
                     </div>
                     <h1 class="greeting-name">{{ user.full_name }}</h1>
                     <p class="greeting-sub">
@@ -43,169 +56,560 @@
             </div>
 
             <div class="banner-quick-actions">
-                <button class="btn btn-primary btn-sm btn-glow" onclick="simulateTeleConsultModal()">
-                    Join Tele-OPD
-                </button>
-                <button class="btn btn-outline btn-sm" onclick="syncFieldData()">
-                    Sync Field Data
-                </button>
+                {% if user.role == 'doctor' %}
+                    <a href="{{ url_for('teleconsult') }}" class="btn btn-primary btn-sm btn-glow">Consultation Room</a>
+                    <a href="{{ url_for('triage_page') }}" class="btn btn-outline btn-sm">Review Triage</a>
+                    <a href="{{ url_for('referrals_page') }}" class="btn btn-outline btn-sm">Referrals</a>
+                {% elif user.role == 'frontline' %}
+                    <a href="{{ url_for('triage_page') }}" class="btn btn-primary btn-sm btn-glow">Start Triage</a>
+                    <a href="{{ url_for('high_risk_page') }}" class="btn btn-outline btn-sm">High-Risk Care</a>
+                    <button class="btn btn-outline btn-sm" onclick="syncFieldData()">Sync Offline Data</button>
+                {% elif user.role == 'patient' %}
+                    <a href="{{ url_for('records_page') }}" class="btn btn-primary btn-sm btn-glow">My ABHA Health Records</a>
+                    <a href="{{ url_for('hospitals.list_hospitals') }}" class="btn btn-outline btn-sm">Find Hospitals</a>
+                    <a href="{{ url_for('inventory_page') }}" class="btn btn-outline btn-sm">Find Medicines</a>
+                {% else %}
+                    <a href="{{ url_for('analytics_page') }}" class="btn btn-primary btn-sm btn-glow">System Analytics</a>
+                    <a href="{{ url_for('inventory_page') }}" class="btn btn-outline btn-sm">EDL Stock</a>
+                    <a href="{{ url_for('hospitals.list_hospitals') }}" class="btn btn-outline btn-sm">Hospital Network</a>
+                {% endif %}
                 <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">Sign Out</a>
             </div>
         </div>
 
-        <!-- Metric KPI Cards -->
+        <!-- Role-Specific Dynamic Metric KPI Cards -->
         <div class="dashboard-kpis">
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-icon teal">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-                    </span>
-                    <span class="kpi-trend up">+14% vs last wk</span>
+            {% if user.role == 'patient' %}
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon teal"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span>
+                        <span class="kpi-badge in-stock">Active</span>
+                    </div>
+                    <div class="kpi-val">{{ user.abha_id[:7] }}...</div>
+                    <div class="kpi-title">ABHA Health Card</div>
+                    <small class="kpi-sub">Digital ABDM identity linked</small>
                 </div>
-                <div class="kpi-val">18</div>
-                <div class="kpi-title">Assisted Tele-OPDs</div>
-                <small class="kpi-sub">Conducted at village Sub-Centres</small>
-            </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon emerald"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg></span>
+                        <span class="kpi-trend up">Verified</span>
+                    </div>
+                    <div class="kpi-val">{{ patient_teleconsults|length }}</div>
+                    <div class="kpi-title">My Tele-Consultations</div>
+                    <small class="kpi-sub">Assisted OPD sessions on record</small>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon amber"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg></span>
+                        <span class="kpi-badge in-stock">Active</span>
+                    </div>
+                    <div class="kpi-val">{{ patient_prescriptions|length }}</div>
+                    <div class="kpi-title">Active Prescriptions</div>
+                    <small class="kpi-sub">Issued by Medical Officers</small>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon red"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path><path d="M2 22V8a2 2 0 0 1 2-2h2"></path><path d="M22 11V6a2 2 0 0 1-2-2v0a2 2 0 0 1-2 2v0"></path></svg></span>
+                        <span class="kpi-trend up">In {{ user.district or 'State' }}</span>
+                    </div>
+                    <div class="kpi-val">{{ stats.total_hospitals }}</div>
+                    <div class="kpi-title">Government Hospitals</div>
+                    <small class="kpi-sub">Empanelled for emergency care</small>
+                </div>
 
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-icon red">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    </span>
-                    <span class="kpi-badge alert">Active (1)</span>
+            {% elif user.role == 'doctor' %}
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon teal"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg></span>
+                        <span class="kpi-badge alert">Active Queue</span>
+                    </div>
+                    <div class="kpi-val">{{ stats.pending_teleconsults }}</div>
+                    <div class="kpi-title">Pending Tele-OPD</div>
+                    <small class="kpi-sub">Waiting for physician consult</small>
                 </div>
-                <div class="kpi-val">3</div>
-                <div class="kpi-title">Emergency Escalations</div>
-                <small class="kpi-sub">Dispatched via 108 network</small>
-            </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon red"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg></span>
+                        <span class="kpi-badge alert">Immediate</span>
+                    </div>
+                    <div class="kpi-val">{{ stats.emergency_escalations }}</div>
+                    <div class="kpi-title">Emergency Escalations</div>
+                    <small class="kpi-sub">Red tier triage & 108 dispatches</small>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon emerald"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline></svg></span>
+                        <span class="kpi-trend up">Active Transfer</span>
+                    </div>
+                    <div class="kpi-val">{{ stats.active_referrals }}</div>
+                    <div class="kpi-title">District Referrals</div>
+                    <small class="kpi-sub">Closed-loop handover tracking</small>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon amber"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>
+                        <span class="kpi-badge warning">High Priority</span>
+                    </div>
+                    <div class="kpi-val">{{ stats.critical_high_risk }}</div>
+                    <div class="kpi-title">Critical High-Risk Cases</div>
+                    <small class="kpi-sub">Maternal HRP & Severe SAM</small>
+                </div>
 
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-icon emerald">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
-                    </span>
-                    <span class="kpi-trend up">92.4% success</span>
+            {% elif user.role == 'frontline' %}
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon teal"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg></span>
+                        <span class="kpi-trend up">Assisted Queue</span>
+                    </div>
+                    <div class="kpi-val">{{ stats.pending_teleconsults }}</div>
+                    <div class="kpi-title">Assisted Tele-OPDs</div>
+                    <small class="kpi-sub">Patients waiting at Sub-Centre</small>
                 </div>
-                <div class="kpi-val">12</div>
-                <div class="kpi-title">Active Referrals</div>
-                <small class="kpi-sub">Continuous longitudinal tracking</small>
-            </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon red"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></span>
+                        <span class="kpi-badge alert">Surveillance</span>
+                    </div>
+                    <div class="kpi-val">{{ stats.critical_high_risk }}</div>
+                    <div class="kpi-title">High-Risk Cohort</div>
+                    <small class="kpi-sub">Maternal & Child Cases Due</small>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon emerald"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path></svg></span>
+                        <span class="kpi-trend up">Continuous</span>
+                    </div>
+                    <div class="kpi-val">{{ stats.active_referrals }}</div>
+                    <div class="kpi-title">Active Referrals</div>
+                    <small class="kpi-sub">Tracked through completion</small>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon amber"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/></svg></span>
+                        <span class="kpi-badge warning">{{ stats.low_stock_medicines }} Stock Alert</span>
+                    </div>
+                    <div class="kpi-val">{{ medicines|length }}</div>
+                    <div class="kpi-title">Essential Medicines</div>
+                    <small class="kpi-sub">Tracked in Sub-Centre kit</small>
+                </div>
 
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-icon amber">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
-                    </span>
-                    <span class="kpi-badge warning">1 Low Stock</span>
+            {% else %}
+                <!-- Admin Role -->
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon teal"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path><path d="M2 22V8a2 2 0 0 1 2-2h2"></path></svg></span>
+                        <span class="kpi-trend up">Grid Network</span>
+                    </div>
+                    <div class="kpi-val">{{ stats.total_hospitals }}</div>
+                    <div class="kpi-title">Empanelled Facilities</div>
+                    <small class="kpi-sub">Public & Private Centres in Grid</small>
                 </div>
-                <div class="kpi-val">6</div>
-                <div class="kpi-title">Essential Medicines</div>
-                <small class="kpi-sub">Tracked in local dispensary</small>
-            </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon emerald"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg></span>
+                        <span class="kpi-trend up">Tele-OPD</span>
+                    </div>
+                    <div class="kpi-val">{{ stats.total_teleconsults }}</div>
+                    <div class="kpi-title">Total Consultations</div>
+                    <small class="kpi-sub">Completed & in-session</small>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon red"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg></span>
+                        <span class="kpi-badge alert">{{ stats.emergency_escalations }} Emergency</span>
+                    </div>
+                    <div class="kpi-val">{{ stats.active_referrals }}</div>
+                    <div class="kpi-title">Active Referrals</div>
+                    <small class="kpi-sub">District handover pipeline</small>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <span class="kpi-icon amber"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/></svg></span>
+                        <span class="kpi-badge warning">Indents Required</span>
+                    </div>
+                    <div class="kpi-val">{{ stats.low_stock_medicines }}</div>
+                    <div class="kpi-title">Critical Stockouts</div>
+                    <small class="kpi-sub">Facilities below safety stock</small>
+                </div>
+            {% endif %}
         </div>
 
-        <!-- Dashboard Main Grid: Referrals & Medicine Inventory -->
-        <div class="dashboard-main-grid">
-            <!-- Left Column: Closed-Loop Referral Tracker -->
-            <div class="dash-column referrals-col">
-                <div class="panel-card glass-panel">
-                    <div class="panel-header-flex">
-                        <div class="panel-title-wrap">
-                            <h3>Longitudinal Referral Tracker</h3>
-                            <small>Tracking patient journey from Sub-Centre to District Hospital</small>
+        <!-- ========================================================= -->
+        <!-- ROLE-OPTIMIZED MAIN DASHBOARD PANELS                      -->
+        <!-- ========================================================= -->
+
+        {% if user.role == 'patient' %}
+            <!-- PATIENT OPTIMIZED DASHBOARD -->
+            <div class="dashboard-main-grid">
+                <!-- Left: My ABHA Medical History & Consultations -->
+                <div class="dash-column referrals-col">
+                    <div class="panel-card glass-panel">
+                        <div class="panel-header-flex">
+                            <div class="panel-title-wrap">
+                                <h3>My Health Care Continuum (ABHA)</h3>
+                                <small>Your verified longitudinal medical history</small>
+                            </div>
+                            <a href="{{ url_for('records_page') }}" class="btn btn-xs btn-primary">Open Full EHR Record</a>
                         </div>
-                        <span class="live-pill"><span class="pulse-dot green"></span> Live Queue</span>
+
+                        <div class="referral-list">
+                            {% for tc in patient_teleconsults %}
+                                <div class="referral-item urgency-{{ tc.priority|lower }}">
+                                    <div class="ref-top-row">
+                                        <strong class="ref-patient">{{ tc.specialty or 'General Medicine' }}</strong>
+                                        <span class="badge-status status-{{ tc.status|lower }}">{{ tc.status }}</span>
+                                    </div>
+                                    <div class="ref-meta-row">
+                                        <span>Consultant: <strong>{{ tc.doctor_name }}</strong></span>
+                                        <span>ASHA: <strong>{{ tc.asha_worker }}</strong></span>
+                                    </div>
+                                    <p class="ref-notes"><strong>Chief Complaint:</strong> "{{ tc.chief_complaint }}"</p>
+                                    {% if tc.prescription %}
+                                        <div style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10b981; padding: 8px 12px; border-radius: 4px; margin: 8px 0; font-size: 13px;">
+                                            <strong>Doctor's Prescription:</strong> {{ tc.prescription }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="ref-action-bar">
+                                        <span class="urgency-label">Vitals: <strong>{{ tc.vitals or 'Recorded' }}</strong></span>
+                                        <a href="{{ url_for('records_page') }}" class="btn btn-xs btn-outline">View Clinical Trace</a>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                                    <p>No past consultations recorded for this profile yet.</p>
+                                    <a href="{{ url_for('hospitals.list_hospitals') }}" class="btn btn-sm btn-outline">Locate Nearest Public PHC</a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Nearest Government Hospitals & Medicines -->
+                <div class="dash-column queue-col">
+                    <div class="panel-card glass-panel mb-4">
+                        <div class="panel-header-flex">
+                            <div class="panel-title-wrap">
+                                <h3>Nearest Government Hospitals</h3>
+                                <small>Empanelled facilities in {{ user.district or 'Chhattisgarh' }}</small>
+                            </div>
+                            <a href="{{ url_for('hospitals.list_hospitals') }}" class="btn btn-xs btn-outline">View All Map Pins ↗</a>
+                        </div>
+                        <div class="opd-queue-list">
+                            {% for h in nearby_hospitals %}
+                                <div class="queue-item" style="border-left: 3px solid var(--primary);">
+                                    <div class="queue-info">
+                                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                                            <strong>{{ h.hospital_name }}</strong>
+                                            <span class="type-badge type-{{ (h.hospital_type or '')|lower }}" style="font-size: 10px; padding: 1px 6px;">{{ h.hospital_type }}</span>
+                                        </div>
+                                        <small>{{ (h.address or '')[:75] }}{% if (h.address or '')|length > 75 %}...{% endif %}</small>
+                                    </div>
+                                    <a href="{{ url_for('hospitals.hospital_detail', hospital_id=h.id) }}" class="btn btn-xs btn-outline">Details</a>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
 
-                    <div class="referral-list">
-                        {% for ref in referrals %}
-                            <div class="referral-item urgency-{{ ref.urgency|lower }}">
-                                <div class="ref-top-row">
-                                    <strong class="ref-patient">{{ ref.patient_name }}</strong>
-                                    <span class="badge-status status-{{ ref.status|lower }}">{{ ref.status }}</span>
-                                </div>
-                                <div class="ref-meta-row">
-                                    <span>ABHA: <code>{{ ref.abha_id }}</code></span>
-                                    <span>Specialty: <strong>{{ ref.specialty }}</strong></span>
-                                </div>
-                                <div class="ref-route-row">
-                                    <span class="route-point">{{ ref.source_facility }}</span>
-                                    <span class="route-arrow">→</span>
-                                    <span class="route-point destination">{{ ref.target_facility }}</span>
-                                </div>
-                                <p class="ref-notes">"{{ ref.notes }}"</p>
-                                <div class="ref-action-bar">
-                                    <span class="urgency-label">Priority: <strong>{{ ref.urgency }}</strong></span>
-                                    <a href="{{ url_for('records_page') }}?abha={{ ref.abha_id }}" class="btn btn-xs btn-outline">View EHR Record</a>
-                                </div>
+                    <div class="panel-card glass-panel">
+                        <div class="panel-header-flex">
+                            <div class="panel-title-wrap">
+                                <h3>Essential Medicine Availability</h3>
+                                <small>Check stock at your local dispensary</small>
                             </div>
-                        {% endfor %}
+                            <a href="{{ url_for('inventory_page') }}" class="btn btn-xs btn-outline">Search EDL Stock</a>
+                        </div>
+                        <div class="mini-inventory-list">
+                            {% for med in medicines[:4] %}
+                                <div class="mini-med-item">
+                                    <div class="med-info">
+                                        <strong>{{ med.name }}</strong>
+                                        <small>{{ med.category }} • {{ med.facility_name }}</small>
+                                    </div>
+                                    <div class="med-stock-meta text-right">
+                                        <span class="stock-badge {% if med.stock_status == 'Available' %}in-stock{% elif med.stock_status == 'Low Stock' %}low-stock{% else %}out-stock{% endif %}">
+                                            {{ med.stock_status }}
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: Medicine Inventory & Tele-OPD Queue -->
-            <div class="dash-column queue-col">
-                <!-- Live Tele-OPD Queue -->
-                <div class="panel-card glass-panel mb-4">
-                    <div class="panel-header-flex">
-                        <div class="panel-title-wrap">
-                            <h3>Assisted Tele-OPD Queue</h3>
-                            <small>Pending consultations with Medical Officers</small>
-                        </div>
-                        <button class="btn btn-xs btn-primary" onclick="showToast('Patient added to Tele-OPD priority queue', 'success')">+ Add Patient</button>
-                    </div>
-
-                    <div class="opd-queue-list">
-                        <div class="queue-item priority-high">
-                            <div class="queue-num">Q-01</div>
-                            <div class="queue-info">
-                                <strong>Meena Sahu (32 Wks Maternal)</strong>
-                                <small>Vitals: BP 145/95, Hb 7.2 | Dr. Rajesh Sharma</small>
+        {% elif user.role == 'doctor' %}
+            <!-- DOCTOR OPTIMIZED DASHBOARD -->
+            <div class="dashboard-main-grid">
+                <!-- Left: Live Tele-OPD Queue for Doctor -->
+                <div class="dash-column queue-col">
+                    <div class="panel-card glass-panel">
+                        <div class="panel-header-flex">
+                            <div class="panel-title-wrap">
+                                <h3>Live Tele-OPD Consultation Queue</h3>
+                                <small>Pending patients assisted by ASHA frontline workers</small>
                             </div>
-                            <a href="{{ url_for('teleconsult') }}" class="btn btn-xs btn-glow btn-primary">Connect Now</a>
+                            <a href="{{ url_for('teleconsult') }}" class="btn btn-xs btn-primary btn-glow">Open Consult Room</a>
                         </div>
 
-                        <div class="queue-item priority-medium">
-                            <div class="queue-num">Q-02</div>
-                            <div class="queue-info">
-                                <strong>Rameshwar Gond (Elderly)</strong>
-                                <small>Chronic cough & dyspnea | Dr. Ananya Sen</small>
-                            </div>
-                            <span class="queue-wait">Waiting (8m)</span>
+                        <div class="opd-queue-list">
+                            {% for tc in teleconsults %}
+                                <div class="queue-item priority-{{ tc.priority|lower }}">
+                                    <div class="queue-num">Q-{{ tc.id }}</div>
+                                    <div class="queue-info">
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <strong>{{ tc.patient_name }} ({{ tc.age }}y, {{ tc.gender }})</strong>
+                                            <span class="badge-status status-{{ tc.status|lower }}">{{ tc.status }}</span>
+                                        </div>
+                                        <small><strong>Vitals:</strong> {{ tc.vitals or 'Standard' }} | <strong>ASHA:</strong> {{ tc.asha_worker }}</small>
+                                        <small style="color:var(--text-secondary); display:block; margin-top:2px;">"{{ tc.chief_complaint }}"</small>
+                                    </div>
+                                    <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
+                                        <a href="{{ url_for('teleconsult') }}" class="btn btn-xs btn-glow btn-primary">Connect</a>
+                                        <a href="{{ url_for('records_page') }}?abha={{ tc.abha_id }}" class="btn btn-xs btn-outline" style="font-size:10px;">EHR</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
 
-                <!-- Primary Health Medicine Stock Status -->
-                <div class="panel-card glass-panel">
-                    <div class="panel-header-flex">
-                        <div class="panel-title-wrap">
-                            <h3>Local Medicine & Kit Stock</h3>
-                            <small>Sub-Centre & PHC Dispensary status</small>
+                <!-- Right: Urgent Referrals & High-Risk Case Reviews -->
+                <div class="dash-column referrals-col">
+                    <div class="panel-card glass-panel mb-4">
+                        <div class="panel-header-flex">
+                            <div class="panel-title-wrap">
+                                <h3>Urgent Inter-Facility Referrals</h3>
+                                <small>District Hospital handover awaiting consultation</small>
+                            </div>
+                            <a href="{{ url_for('referrals_page') }}" class="btn btn-xs btn-outline">Referral Pipeline</a>
                         </div>
-                        <button class="btn btn-xs btn-outline" onclick="showToast('Automated restocking indent submitted to District Drug Store', 'success')">Indent Stock</button>
+                        <div class="referral-list">
+                            {% for ref in referrals[:3] %}
+                                <div class="referral-item urgency-{{ ref.urgency|lower }}">
+                                    <div class="ref-top-row">
+                                        <strong class="ref-patient">{{ ref.patient_name }}</strong>
+                                        <span class="badge-status status-{{ ref.status|lower }}">{{ ref.status }}</span>
+                                    </div>
+                                    <div class="ref-route-row">
+                                        <span class="route-point">{{ ref.source_facility }}</span>
+                                        <span class="route-arrow">→</span>
+                                        <span class="route-point destination">{{ ref.target_facility }}</span>
+                                    </div>
+                                    <p class="ref-notes">"{{ ref.notes }}"</p>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
 
-                    <div class="mini-inventory-list">
-                        {% for med in medicines %}
-                            <div class="mini-med-item">
-                                <div class="med-info">
-                                    <strong>{{ med.name }}</strong>
-                                    <small>{{ med.category }} • {{ med.facility_name }}</small>
-                                </div>
-                                <div class="med-stock-meta text-right">
-                                    <span class="units-count">{{ med.units }} units</span>
-                                    <span class="stock-badge {% if med.stock_status == 'Available' %}in-stock{% elif med.stock_status == 'Low Stock' %}low-stock{% else %}out-stock{% endif %}">
-                                        {{ med.stock_status }}
-                                    </span>
-                                </div>
+                    <div class="panel-card glass-panel">
+                        <div class="panel-header-flex">
+                            <div class="panel-title-wrap">
+                                <h3>High-Risk Maternal & SAM Registry</h3>
+                                <small>Patients requiring specialist obstetric / pediatric care</small>
                             </div>
-                        {% endfor %}
+                            <a href="{{ url_for('high_risk_page') }}" class="btn btn-xs btn-outline">All Cases</a>
+                        </div>
+                        <div class="referral-list">
+                            {% for c in high_risk_cases[:3] %}
+                                <div class="referral-item urgency-{% if c.status == 'Critical' %}emergency{% else %}urgent{% endif %}">
+                                    <div class="ref-top-row">
+                                        <strong>{{ c.patient_name }} ({{ c.category }})</strong>
+                                        <span class="badge-status status-{{ c.status|lower }}">{{ c.status }}</span>
+                                    </div>
+                                    <small style="color:var(--text-secondary); display:block; margin:4px 0;"><strong>Risks:</strong> {{ c.risk_factors }}</small>
+                                    <div class="ref-action-bar">
+                                        <span>Next Action: <strong>{{ c.next_action_date }}</strong></span>
+                                        <a href="{{ url_for('records_page') }}?abha={{ c.abha_id }}" class="btn btn-xs btn-outline">Review ABHA</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+        {% elif user.role == 'frontline' %}
+            <!-- FRONTLINE ASHA / ANM OPTIMIZED DASHBOARD -->
+            <div class="dashboard-main-grid">
+                <!-- Left: Village High-Risk Care Registry -->
+                <div class="dash-column referrals-col">
+                    <div class="panel-card glass-panel">
+                        <div class="panel-header-flex">
+                            <div class="panel-title-wrap">
+                                <h3>Village High-Risk Surveillance Cohort</h3>
+                                <small>Active follow-ups for pregnant mothers & children in your area</small>
+                            </div>
+                            <a href="{{ url_for('high_risk_page') }}" class="btn btn-xs btn-primary">+ Add Patient</a>
+                        </div>
+
+                        <div class="referral-list">
+                            {% for c in high_risk_cases %}
+                                <div class="referral-item urgency-{% if c.status == 'Critical' %}emergency{% elif c.status == 'Due Today' %}urgent{% else %}normal{% endif %}">
+                                    <div class="ref-top-row">
+                                        <strong class="ref-patient">{{ c.patient_name }}</strong>
+                                        <span class="badge-status status-{{ c.status|lower }}">{{ c.status }}</span>
+                                    </div>
+                                    <div class="ref-meta-row">
+                                        <span>Category: <strong>{{ c.category }}</strong></span>
+                                        <span>Facility: <strong>{{ c.facility_name }}</strong></span>
+                                    </div>
+                                    <p class="ref-notes"><strong>Risk Flag:</strong> {{ c.risk_factors }}</p>
+                                    <div class="ref-action-bar">
+                                        <span>Follow-up: <strong>{{ c.next_action_date }}</strong></span>
+                                        <a href="{{ url_for('records_page') }}?abha={{ c.abha_id }}" class="btn btn-xs btn-outline">ABHA Card</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Tele-OPD Queue & Sub-Centre Stock -->
+                <div class="dash-column queue-col">
+                    <div class="panel-card glass-panel mb-4">
+                        <div class="panel-header-flex">
+                            <div class="panel-title-wrap">
+                                <h3>Assisted Tele-OPD Queue</h3>
+                                <small>Patients awaiting doctor tele-consultation</small>
+                            </div>
+                            <a href="{{ url_for('teleconsult') }}" class="btn btn-xs btn-primary">+ Queue Patient</a>
+                        </div>
+                        <div class="opd-queue-list">
+                            {% for tc in teleconsults[:3] %}
+                                <div class="queue-item priority-{{ tc.priority|lower }}">
+                                    <div class="queue-num">Q-{{ tc.id }}</div>
+                                    <div class="queue-info">
+                                        <strong>{{ tc.patient_name }} ({{ tc.age }}y)</strong>
+                                        <small>{{ tc.chief_complaint[:50] }}...</small>
+                                    </div>
+                                    <a href="{{ url_for('teleconsult') }}" class="btn btn-xs btn-glow btn-primary">Join Call</a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="panel-card glass-panel">
+                        <div class="panel-header-flex">
+                            <div class="panel-title-wrap">
+                                <h3>Sub-Centre Drug Kit Stock</h3>
+                                <small>Essential maternal & pediatric kit</small>
+                            </div>
+                            <a href="{{ url_for('inventory_page') }}" class="btn btn-xs btn-outline">Check All</a>
+                        </div>
+                        <div class="mini-inventory-list">
+                            {% for med in medicines %}
+                                <div class="mini-med-item">
+                                    <div class="med-info">
+                                        <strong>{{ med.name }}</strong>
+                                        <small>{{ med.category }}</small>
+                                    </div>
+                                    <div class="med-stock-meta text-right">
+                                        <span class="units-count">{{ med.units }} units</span>
+                                        <span class="stock-badge {% if med.stock_status == 'Available' %}in-stock{% elif med.stock_status == 'Low Stock' %}low-stock{% else %}out-stock{% endif %}">
+                                            {{ med.stock_status }}
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- ADMIN OPTIMIZED DASHBOARD -->
+            <div class="dashboard-main-grid">
+                <!-- Left: Closed-Loop Referral Pipeline -->
+                <div class="dash-column referrals-col">
+                    <div class="panel-card glass-panel">
+                        <div class="panel-header-flex">
+                            <div class="panel-title-wrap">
+                                <h3>District Closed-Loop Referral Pipeline</h3>
+                                <small>Monitoring handovers from rural clinics to tertiary hospitals</small>
+                            </div>
+                            <a href="{{ url_for('referrals_page') }}" class="btn btn-xs btn-primary">All Referrals</a>
+                        </div>
+
+                        <div class="referral-list">
+                            {% for ref in referrals %}
+                                <div class="referral-item urgency-{{ ref.urgency|lower }}">
+                                    <div class="ref-top-row">
+                                        <strong class="ref-patient">{{ ref.patient_name }}</strong>
+                                        <span class="badge-status status-{{ ref.status|lower }}">{{ ref.status }}</span>
+                                    </div>
+                                    <div class="ref-meta-row">
+                                        <span>Specialty: <strong>{{ ref.specialty }}</strong></span>
+                                        <span>ABHA: <code>{{ ref.abha_id }}</code></span>
+                                    </div>
+                                    <div class="ref-route-row">
+                                        <span class="route-point">{{ ref.source_facility }}</span>
+                                        <span class="route-arrow">→</span>
+                                        <span class="route-point destination">{{ ref.target_facility }}</span>
+                                    </div>
+                                    <p class="ref-notes">"{{ ref.notes }}"</p>
+                                    <div class="ref-action-bar">
+                                        <span class="urgency-label">Priority: <strong>{{ ref.urgency }}</strong></span>
+                                        <a href="{{ url_for('records_page') }}?abha={{ ref.abha_id }}" class="btn btn-xs btn-outline">Inspect Record</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Critical Stockout Alerts & Facility Load -->
+                <div class="dash-column queue-col">
+                    <div class="panel-card glass-panel mb-4">
+                        <div class="panel-header-flex">
+                            <div class="panel-title-wrap">
+                                <h3>Critical Stockout & Supply Indents</h3>
+                                <small>Facilities requiring emergency medicine replenishment</small>
+                            </div>
+                            <a href="{{ url_for('inventory_page') }}" class="btn btn-xs btn-outline">EDL Catalog</a>
+                        </div>
+                        <div class="mini-inventory-list">
+                            {% for med in medicines %}
+                                <div class="mini-med-item">
+                                    <div class="med-info">
+                                        <strong>{{ med.name }}</strong>
+                                        <small>{{ med.category }} • {{ med.facility_name }}</small>
+                                    </div>
+                                    <div class="med-stock-meta text-right">
+                                        <span class="units-count">{{ med.units }} units</span>
+                                        <span class="stock-badge {% if med.stock_status == 'Available' %}in-stock{% elif med.stock_status == 'Low Stock' %}low-stock{% else %}out-stock{% endif %}">
+                                            {{ med.stock_status }}
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="panel-card glass-panel">
+                        <div class="panel-header-flex">
+                            <div class="panel-title-wrap">
+                                <h3>Quality & Governance Shortcuts</h3>
+                                <small>District administrative operational modules</small>
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                            <a href="{{ url_for('analytics_page') }}" class="btn btn-outline" style="justify-content:space-between; display:flex;">
+                                <span>📊 Public Health Quality Analytics</span>
+                                <span>↗</span>
+                            </a>
+                            <a href="{{ url_for('hospitals.list_hospitals') }}" class="btn btn-outline" style="justify-content:space-between; display:flex;">
+                                <span>🏥 Hospital Geospatial Registry (1,700+)</span>
+                                <span>↗</span>
+                            </a>
+                            <a href="{{ url_for('inventory_page') }}" class="btn btn-outline" style="justify-content:space-between; display:flex;">
+                                <span>💊 Essential Drug List Management</span>
+                                <span>↗</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

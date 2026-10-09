@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, jsonify
 from db import get_db
+from auth_middleware import role_required
 
 inventory_bp = Blueprint("inventory", __name__)
 
@@ -19,6 +20,7 @@ def inventory_page():
 
 
 @inventory_bp.route("/api/medicine/<int:med_id>/update", methods=["POST"])
+@role_required("doctor", "frontline")
 def api_medicine_update(med_id):
     """Update medicine stock quantity and status."""
     data = request.get_json() or {}
@@ -62,6 +64,7 @@ def api_medicine_update(med_id):
 
 
 @inventory_bp.route("/api/medicine/<int:med_id>/delete", methods=["POST"])
+@role_required("doctor", "frontline")
 def api_medicine_delete(med_id):
     """Delete a medicine entry from inventory."""
     db = get_db()

@@ -134,6 +134,10 @@
 
         renderMarkers(allHospitalsData);
 
+        setTimeout(() => {
+            if (listMap) listMap.invalidateSize();
+        }, 250);
+
         window.hospitalMap = listMap;
         return listMap;
     }
@@ -186,12 +190,39 @@
     /**
      * Focus and highlight a single hospital when clicked in list/table
      */
-    function focusHospital(hospitalId) {
-        const marker = hospitalMarkersById[hospitalId];
+    function focusHospital(hospitalId, lat, lng, name, type, address) {
+        let marker = hospitalMarkersById[hospitalId];
         const container = document.getElementById('hospital-map') || document.getElementById('map-section');
 
         if (container) {
             container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Dynamically add marker if missing from initial batch
+        if (!marker && lat && lng && listMap && markersLayer) {
+            const parsedLat = parseFloat(lat);
+            const parsedLng = parseFloat(lng);
+            if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
+                const hospitalData = {
+                    id: hospitalId,
+                    hospital_name: name || 'Healthcare Facility',
+                    hospital_type: type || 'Public',
+                    address: address || '',
+                    latitude: parsedLat,
+                    longitude: parsedLng
+                };
+                const icon = createMarkerIcon(hospitalData.hospital_type, true);
+                marker = L.marker([parsedLat, parsedLng], {
+                    icon: icon,
+                    title: hospitalData.hospital_name,
+                    riseOnHover: true
+                }).bindPopup(createPopupHtml(hospitalData), {
+                    maxWidth: 300,
+                    className: 'clinical-map-popup'
+                });
+                markersLayer.addLayer(marker);
+                hospitalMarkersById[hospitalId] = marker;
+            }
         }
 
         if (marker && listMap) {
@@ -199,6 +230,8 @@
                 listMap.setView(marker.getLatLng(), 15, { animate: true });
                 marker.openPopup();
             }, 300);
+        } else if (!marker && window.showToast) {
+            window.showToast("Coordinates not available for this facility pin.", "info");
         }
     }
 
@@ -335,6 +368,10 @@
 
             nMarker.bindPopup(createPopupHtml(h), { maxWidth: 300 });
         });
+
+        setTimeout(() => {
+            if (detailMap) detailMap.invalidateSize();
+        }, 250);
 
         return detailMap;
     }

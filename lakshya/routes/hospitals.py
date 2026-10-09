@@ -80,6 +80,13 @@ def list_hospitals():
     map_query += " AND latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY district, hospital_name LIMIT 150"
     map_hospitals = [dict(h) for h in db.execute(map_query, map_params).fetchall()]
     
+    # Ensure current page hospitals with valid coordinates are also mapped
+    existing_map_ids = {h['id'] for h in map_hospitals}
+    for h in hospitals_list:
+        if h.get('latitude') and h.get('longitude') and h['id'] not in existing_map_ids:
+            map_hospitals.append(h)
+            existing_map_ids.add(h['id'])
+    
     # Get unique districts and types for filters
     districts = db.execute("SELECT DISTINCT district FROM hospitals ORDER BY district").fetchall()
     types = db.execute("SELECT DISTINCT hospital_type FROM hospitals ORDER BY hospital_type").fetchall()
@@ -105,7 +112,9 @@ def hospital_detail(hospital_id):
     hospital = db.execute("SELECT * FROM hospitals WHERE id = ?", (hospital_id,)).fetchone()
     
     if not hospital:
-        return "Hospital not found", 404
+        from flask import flash, redirect, url_for
+        flash("Hospital record not found or unavailable.", "warning")
+        return redirect(url_for('hospitals.list_hospitals'))
     
     # Convert to dict for JSON serialization
     hospital_dict = dict(hospital)

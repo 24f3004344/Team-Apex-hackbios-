@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from db import get_db
+from auth_middleware import login_required, role_required
 
 referrals_bp = Blueprint("referrals", __name__)
 
@@ -10,6 +11,7 @@ referrals_bp = Blueprint("referrals", __name__)
 # =====================================================================
 
 @referrals_bp.route("/referrals", methods=["GET", "POST"])
+@role_required("doctor", "frontline")
 def referrals_page():
     """Closed-Loop Referral Tracking & Inter-Facility Handover."""
     if request.method == "POST":
@@ -46,6 +48,7 @@ def referrals_page():
 
 
 @referrals_bp.route("/api/referral/<int:ref_id>/update", methods=["POST"])
+@role_required("doctor", "frontline")
 def api_referral_update(ref_id):
     """Update referral progress status."""
     data = request.get_json() or {}
@@ -65,6 +68,7 @@ def api_referral_update(ref_id):
 
 
 @referrals_bp.route("/api/referral/<int:ref_id>/delete", methods=["POST"])
+@role_required("doctor", "frontline")
 def api_referral_delete(ref_id):
     """Delete a referral."""
     db = get_db()

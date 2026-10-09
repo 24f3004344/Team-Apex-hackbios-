@@ -81,7 +81,7 @@
                 </div>
                 <div class="info-item">
                     <dt>Address</dt>
-                    <dd class="address-full">{{ hospital['address'] }}</dd>
+                    <dd class="address-full">{{ hospital['address'] or 'Official address not registered' }}</dd>
                 </div>
                 {% if hospital['latitude'] and hospital['longitude'] %}
                 <div class="info-item">
@@ -200,8 +200,15 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const mainHospital = {{ hospital|tojson }};
-    const nearbyList = {{ nearby_hospitals|tojson }};
-    initHospitalDetailMap('hospital-detail-map', mainHospital, nearbyList);
+    const nearbyList = {{ (nearby_hospitals or [])|tojson }};
+    function tryInitDetailMap() {
+        if (typeof L !== 'undefined' && window.initHospitalDetailMap) {
+            initHospitalDetailMap('hospital-detail-map', mainHospital, nearbyList);
+        } else {
+            setTimeout(tryInitDetailMap, 80);
+        }
+    }
+    tryInitDetailMap();
 });
 </script>
 {% endblock %}

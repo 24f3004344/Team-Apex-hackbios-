@@ -20,11 +20,13 @@
             <div>
                 <span class="badge-tag">Rural Tele-Medicine</span>
                 <h1 class="page-title">Assisted Tele-OPD Consultation Console</h1>
-                <p class="page-sub">Connecting village Sub-Centres with Medical Officers and District Specialists over low-bandwidth channels.</p>
+                <p class="page-sub">Connecting Sub-Centres with Medical Officers and Specialists over
+                    low-bandwidth channels.</p>
             </div>
             <div class="bandwidth-control-box">
                 <span class="band-label">Bandwidth Mode:</span>
-                <select id="networkBandwidthSelect" class="form-control band-select" onchange="updateBandwidthMode(this.value)">
+                <select id="networkBandwidthSelect" class="form-control band-select"
+                    onchange="updateBandwidthMode(this.value)">
                     <option value="2g" selected>2G / EDGE (Audio + Low-Fi Vitals Telemetry)</option>
                     <option value="3g">3G Standard (Compressed Video)</option>
                     <option value="4g">4G / Broadband (Full HD Video)</option>
@@ -38,7 +40,8 @@
             <div class="tele-call-container">
                 <div class="video-feed-box glass-panel">
                     <div class="video-overlay-top">
-                        <span class="live-pill"><span class="pulse-dot green"></span> Live Tele-Consultation (Room #402)</span>
+                        <span class="live-pill"><span class="pulse-dot green"></span> Live Tele-Consultation (Room
+                            #402)</span>
                         <span class="call-duration" id="callDuration">04:18</span>
                     </div>
 
@@ -46,23 +49,38 @@
                     <div class="video-screens">
                         <div class="screen-doctor">
                             <div class="doctor-avatar-circle">
-                                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/></svg>
+                                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor"
+                                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+                                    <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4" />
+                                    <circle cx="20" cy="10" r="2" />
+                                </svg>
                             </div>
                             <div class="screen-label">Dr. Rajesh Sharma, MD (Bilaspur District Hospital)</div>
                             <span class="audio-wave-anim"><span></span><span></span><span></span><span></span></span>
                         </div>
                         <div class="screen-pip-patient">
                             <div class="pip-avatar">
-                                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
                             </div>
                             <span class="pip-label">Sunita Devi (ASHA) & Patient Meena Sahu</span>
                         </div>
                     </div>
 
                     <div class="call-controls">
-                        <button class="call-btn btn-mic" onclick="toggleMic(this)" title="Mute/Unmute Audio">Mic On</button>
+                        <button class="call-btn btn-mic" onclick="toggleMic(this)" title="Mute/Unmute Audio">Mic
+                            On</button>
                         <button class="call-btn btn-cam" onclick="toggleCam(this)" title="Camera">Video On</button>
-                        <button class="call-btn btn-screen" onclick="showToast('Displaying digital vitals and ECG trace to doctor...')">Stream Vitals</button>
+                        <button class="call-btn btn-screen"
+                            onclick="showToast('Displaying digital vitals and ECG trace to doctor...')">Stream
+                            Vitals</button>
                         <button class="call-btn btn-end" onclick="endConsultation()">End Session</button>
                     </div>
                 </div>
@@ -81,26 +99,26 @@
                         <div class="form-row">
                             <div class="form-group col-6">
                                 <label class="form-label">Diagnosis / Clinical Impression</label>
-                                <input type="text" id="rxDiagnosis" class="form-control" value="Gestational Hypertension (32 Wks) + Nutritional Anemia" required>
+                                <input type="text" id="rxDiagnosis" class="form-control" value="" required>
                             </div>
                             <div class="form-group col-6">
                                 <label class="form-label">Medication & Dosage Instructions</label>
-                                <input type="text" id="rxMeds" class="form-control" value="Tab. Labetalol 100mg (BD), Tab. IFA (OD after meal), High protein diet" required>
+                                <input type="text" id="rxMeds" class="form-control" value="" required>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Specialist Referral / Diagnostic Requisition</label>
-                            <input type="text" id="rxReferral" class="form-control" value="Refer to Bilaspur District Hospital for Obstetric Ultrasound & CBC test within 48h.">
+                            <input type="text" id="rxReferral" class="form-control" value="">
                         </div>
 
                         <div class="rx-actions-flex">
                             <button type="submit" class="btn btn-primary btn-glow">
                                 Sign & Issue Prescription to ASHA Tablet
                             </button>
-                            <button type="button" class="btn btn-outline" onclick="generateAudioRx()">
+                            <!-- <button type="button" class="btn btn-outline" onclick="generateAudioRx()">
                                 Generate Vernacular Audio Instructions
-                            </button>
+                            </button> -->
                         </div>
                     </form>
                 </div>
@@ -118,7 +136,8 @@
                     <form action="{{ url_for('teleconsult') }}" method="POST" class="quick-queue-form">
                         <div class="form-group">
                             <label class="form-label">Patient Name *</label>
-                            <input type="text" name="patient_name" class="form-control" placeholder="e.g. Radhabai Gond" required>
+                            <input type="text" name="patient_name" class="form-control" placeholder="e.g. Radhabai Gond"
+                                required>
                         </div>
 
                         <div class="form-row">
@@ -138,7 +157,9 @@
 
                         <div class="form-group">
                             <label class="form-label">Chief Complaint & Vitals *</label>
-                            <textarea name="chief_complaint" class="form-control" rows="2" placeholder="e.g. High fever for 3 days, BP 140/90, severe weakness" required></textarea>
+                            <textarea name="chief_complaint" class="form-control" rows="2"
+                                placeholder="e.g. High fever for 3 days, BP 140/90, severe weakness"
+                                required></textarea>
                         </div>
 
                         <button type="submit" class="btn btn-secondary btn-block">Add to Tele-Consult Queue</button>
@@ -154,24 +175,25 @@
 
                     <div class="queue-cards-stream">
                         {% for pt in queue %}
-                            <div class="queue-card-item priority-{{ pt.priority|lower }}">
-                                <div class="queue-card-top">
-                                    <strong>{{ pt.patient_name }}</strong>
-                                    <span class="queue-p-badge {{ pt.priority|lower }}">{{ pt.priority }}</span>
-                                </div>
-                                <div class="queue-meta-text">
-                                    <span>Age: {{ pt.age }} • {{ pt.gender }}</span>
-                                    <span>ABHA: <code>{{ pt.abha_id }}</code></span>
-                                </div>
-                                <p class="queue-complaint">"{{ pt.chief_complaint }}"</p>
-                                <div class="queue-vitals-row">
-                                    <small>{{ pt.vitals or 'Vitals captured by ASHA' }}</small>
-                                </div>
-                                <div class="queue-item-actions">
-                                    <button class="btn btn-xs btn-primary" onclick="connectQueuePatient('{{ pt.patient_name }}')">Start Consultation</button>
-                                    <span class="status-chip">{{ pt.status }}</span>
-                                </div>
+                        <div class="queue-card-item priority-{{ pt.priority|lower }}">
+                            <div class="queue-card-top">
+                                <strong>{{ pt.patient_name }}</strong>
+                                <span class="queue-p-badge {{ pt.priority|lower }}">{{ pt.priority }}</span>
                             </div>
+                            <div class="queue-meta-text">
+                                <span>Age: {{ pt.age }} • {{ pt.gender }}</span>
+                                <span>ABHA: <code>{{ pt.abha_id }}</code></span>
+                            </div>
+                            <p class="queue-complaint">"{{ pt.chief_complaint }}"</p>
+                            <div class="queue-vitals-row">
+                                <small>{{ pt.vitals or 'Vitals captured by ASHA' }}</small>
+                            </div>
+                            <div class="queue-item-actions">
+                                <button class="btn btn-xs btn-primary"
+                                    onclick="connectQueuePatient('{{ pt.patient_name }}')">Start Consultation</button>
+                                <span class="status-chip">{{ pt.status }}</span>
+                            </div>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>

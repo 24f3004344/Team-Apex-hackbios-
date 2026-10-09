@@ -34,6 +34,7 @@ def login():
             session["user_name"] = user["full_name"]
             session["user_role"] = user["role"]
             session["facility_name"] = user["facility_name"]
+            session["abha_id"] = user["abha_id"]
             flash(f"Welcome back, {user['full_name']}! Connected to {user['facility_name'] or 'National Health Grid'}.", "success")
             return redirect(url_for("dashboard"))
         else:

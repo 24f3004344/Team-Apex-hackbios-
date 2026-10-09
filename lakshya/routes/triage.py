@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, jsonify
+from auth_middleware import login_required, role_required
 
 triage_bp = Blueprint("triage", __name__)
 
@@ -9,6 +10,7 @@ triage_bp = Blueprint("triage", __name__)
 # =====================================================================
 
 @triage_bp.route("/triage")
+@role_required("doctor", "frontline")
 def triage_page():
     """Comprehensive Digital Clinical Triage & Emergency Escalation Hub."""
     return render_template("triage.html")
