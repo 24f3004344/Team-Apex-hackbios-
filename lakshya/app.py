@@ -1,6 +1,10 @@
 import os
-from dotenv import load_dotenv
-load_dotenv()
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 from flask import Flask, session
 from db import init_db, close_db, get_db, DATABASE
