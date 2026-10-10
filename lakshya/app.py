@@ -1,10 +1,18 @@
 import os
 
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass
+# Pure standard library .env loader (100% dependency-free for cloud deployments)
+_env_path = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(_env_path):
+    try:
+        with open(_env_path, "r", encoding="utf-8") as _f:
+            for _line in _f:
+                _line = _line.strip()
+                if _line and not _line.startswith("#") and "=" in _line:
+                    _k, _v = _line.split("=", 1)
+                    os.environ.setdefault(_k.strip(), _v.strip().strip('"').strip("'"))
+    except Exception:
+        pass
+
 
 from flask import Flask, session
 from db import init_db, close_db, get_db, DATABASE
