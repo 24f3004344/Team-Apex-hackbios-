@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, session
 from db import init_db, close_db, get_db, DATABASE
 from auth_middleware import login_required
@@ -7,6 +10,7 @@ from routes import register_routes
 # Initialize Flask application
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "swasthya-setu-secure-secret-key-2026")
+
 
 # Automatically close database connection when the request ends
 app.teardown_appcontext(close_db)

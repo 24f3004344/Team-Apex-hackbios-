@@ -17,15 +17,36 @@ The entire suite of modules requested in the problem description is implemented 
 | **`/dashboard`** | **Care Coordination Hub** | Logged-in console featuring active Tele-OPD queue, emergency escalations, longitudinal referrals, and local dispensary stock status. |
 | **`/teleconsult`** | **Assisted Tele-OPD Hub** | Low-bandwidth video/audio consultation room simulation (2G/EDGE telemetry mode), digital prescription pad with cryptographic signing, and ASHA assisted patient queue. |
 | **`/triage`** | **Digital Clinical Triage** | Evidence-based triage protocols (IMNCI & Maternal RMNCH+A) categorizing cases into Green, Yellow, and Red. Direct **108 Emergency Ambulance Dispatch** simulator with live GPS tracking. |
-| **`/records`** | **Longitudinal ABHA Records** | Chronological continuum of care tracking a patient from Village Sub-Centre ➔ PHC Tele-OPD ➔ District Hospital day-care ➔ Post-discharge ASHA home visit. |
+| **`/records`** | **Longitudinal ABHA Records** | Chronological continuum of care with **✨ Aarogya Mitra AI Vernacular Explainer** translating complex lab reports & prescriptions into simple Hindi / regional language. |
 | **`/referrals`** | **Closed-Loop Referral Tracking** | 4-stage pipeline (Initiated ➔ In-Transit ➔ Consulted ➔ Closed Loop) ensuring no patient is lost in transit between rural facilities and district hospitals. |
 | **`/inventory`** | **Medicine & Lab Availability** | Essential Drug List (EDL) compliance monitor, live stock availability across Sub-Centres and PHCs, and diagnostic test catalog (Free under NHM). |
-| **`/high-risk`** | **High-Risk Patient Registry** | Targeted surveillance cohort for High-Risk Pregnancies (HRP), Severe Acute Malnutrition (SAM), and Chronic NCDs with automated vernacular reminder broadcasts. |
+| **`/high-risk`** | **High-Risk Patient Registry** | Targeted surveillance cohort for High-Risk Pregnancies (HRP), Severe Acute Malnutrition (SAM), and Chronic NCDs with **✨ Gemini AI Home Care Planner**. |
 | **`/analytics`** | **Quality & Impact Analytics** | Evidence-based outcomes: 42 min travel time saved, 8.4 min waiting time, 89.4% referral completion rate, and 4.1% stockout frequency. |
+| **`/ai-assistant`** | **Aarogya AI Healthcare Copilot** | **Google Gemini 2.5 Flash** conversational health navigator with live voice recognition (Speech-to-Text), text-to-speech audio guidance, multi-role toggles, and government scheme navigator. |
 
 ---
 
-## 🚀 How to Run the Application
+## ✨ Google Gemini AI Medical Intelligence Grid
+
+AarogyaSahay is deeply powered by the official **Google GenAI SDK (`google-genai`)** utilizing **Gemini 2.5 Flash**:
+
+1. **Clinical Triage CDSS (`/triage`)**: Evaluates patient hemodynamics and clinical signs against National Health Mission protocols (IMNCI & Maternal RMNCH+A) to identify impending danger signs, tier risks (Green/Yellow/Red), and recommend immediate ASHA on-site stabilization steps.
+2. **Tele-OPD Clinical Copilot (`/teleconsult`)**: Formulates comprehensive SOAP Encounter Notes (Subjective, Objective, Assessment, Plan) and auto-populates prescriptions strictly compliant with India's **National Essential Drug List (EDL)**.
+3. **Aarogya Mitra Vernacular Explainer (`/records`)**: Transforms confusing medical prescriptions and lab values (e.g. Hemoglobin 7.2 g/dL, USG liquor AFI 12cm) into clear, comforting advice in Hindi, Bengali, Telugu, Marathi, and Tamil with audio read-aloud support.
+4. **Conversational Health Copilot (`/ai-assistant`)**: 24/7 multilingual healthcare assistant addressing clinical questions, maternal immunization schedules, and welfare scheme navigation (Ayushman Bharat PM-JAY, JSY, PMSMA).
+5. **Zero-Failure Architecture**: Supports direct runtime Gemini API key configuration via in-app modal, environment variable (`GEMINI_API_KEY`), or `.env`. If no key is set or network is offline, it seamlessly falls back to a deterministic clinical protocol engine.
+
+### How to Configure Gemini API Key:
+- **Option 1 (Web UI):** Click the **✨ Gemini 2.5** button in the top navigation strip or on `/ai-assistant` and paste your key.
+- **Option 2 (Terminal/Environment):**
+  ```bash
+  export GEMINI_API_KEY="your-gemini-api-key"
+  ```
+- **Option 3 (.env file):**
+  ```bash
+  echo "GEMINI_API_KEY=your-gemini-api-key" >> lakshya/.env
+  ```
+
 
 From your terminal in the workspace:
 

@@ -1,0 +1,649 @@
+{% extends "base.html" %}
+
+{% block title %}Aarogya AI Copilot | Powered by Google Gemini{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumb-bar">
+    <div class="container breadcrumb-flex">
+        <a href="{{ url_for('index') }}">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-curr">Aarogya AI Healthcare Copilot</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper ai-portal-page">
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header-bar">
+            <div>
+                <span class="badge-tag" style="background: linear-gradient(135deg, rgba(78, 128, 237, 0.15), rgba(168, 85, 247, 0.15)); color: #7C3AED; border-color: rgba(168, 85, 247, 0.3);">
+                    ✨ Powered by Google Gemini 3.8
+                </span>
+                <h1 class="page-title">Aarogya AI — Clinical Decision & Health Copilot</h1>
+                <p class="page-sub">
+                    Multilingual conversational medical assistant supporting rural patients, ASHA frontline workers, and medical officers with evidence-based triage, scheme benefits, and emergency guidelines.
+                </p>
+            </div>
+            <div class="ai-header-controls">
+                <button type="button" class="btn btn-outline btn-sm" onclick="openApiKeyModal()">
+                    <span class="ai-sparkle">✨</span> Gemini Key Settings
+                </button>
+                <div class="status-indicator-pill" id="geminiLiveStatusPill">
+                    <span class="pulse-dot green"></span>
+                    <span id="geminiStatusLabel">Gemini Active</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-portal-grid">
+            <!-- Left Sidebar: Modes, Schemes & Quick Topics -->
+            <div class="ai-portal-sidebar">
+                <!-- User Perspective Switcher -->
+                <div class="glass-panel mb-3">
+                    <h3 class="panel-section-title">Consultation Mode</h3>
+                    <div class="role-selector-pills">
+                        <button type="button" class="role-pill active" data-role="patient" onclick="setAiRole('patient', this)">
+                            <span class="pill-icon">🧑‍🌾</span>
+                            <span>Rural Citizen / Patient</span>
+                        </button>
+                        <button type="button" class="role-pill" data-role="frontline" onclick="setAiRole('frontline', this)">
+                            <span class="pill-icon">👩‍⚕️</span>
+                            <span>Frontline ASHA / ANM</span>
+                        </button>
+                        <button type="button" class="role-pill" data-role="doctor" onclick="setAiRole('doctor', this)">
+                            <span class="pill-icon">🩺</span>
+                            <span>Medical Officer (Doctor)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Medical Report Upload & Explanation -->
+                <div class="glass-panel mb-3">
+                    <h3 class="panel-section-title">📄 Lab Report Explainer</h3>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">
+                        Upload a lab report photo or test results (CBC, Sugar, USG) for an instant simple-language explanation.
+                    </p>
+                    <input type="file" id="reportFileInput" accept="image/*,.pdf" style="display:none;" onchange="handleReportFileUpload(event)">
+                    <button type="button" class="btn btn-outline btn-block btn-sm" onclick="document.getElementById('reportFileInput').click()">
+                        📎 Upload Lab Report Image/PDF
+                    </button>
+                    <div style="margin-top:6px; display:flex; gap:4px;">
+                        <button type="button" class="btn btn-ghost btn-xs" style="flex:1;" onclick="explainSampleReport('cbc')">Sample CBC</button>
+                        <button type="button" class="btn btn-ghost btn-xs" style="flex:1;" onclick="explainSampleReport('sugar')">Sample Glucose</button>
+                    </div>
+                </div>
+
+                <!-- Suggested Clinical Prompt Chips -->
+                <div class="glass-panel mb-3">
+                    <h3 class="panel-section-title">Quick Health Queries</h3>
+                    <div class="prompt-chips-list">
+                        <button type="button" class="prompt-chip" onclick="sendQuickPrompt('Symptom guidance: I have had a mild fever and dry cough for 3 days. What are possible causes and what next steps should I take?')">
+                            🩺 Symptom Guidance (Cough &amp; Fever)
+                        </button>
+                        <button type="button" class="prompt-chip" onclick="sendQuickPrompt('Medical report explanation: My hemoglobin is 8.5 g/dL and platelet count is 180,000. What does this mean in simple words?')">
+                            📄 Explain Lab Report (Hb &amp; Platelets)
+                        </button>
+                        <button type="button" class="prompt-chip" onclick="sendQuickPrompt('What are the critical danger signs in high-risk pregnancy?')">
+                            🚨 Pregnancy Danger Signs
+                        </button>
+                        <button type="button" class="prompt-chip" onclick="sendQuickPrompt('How does Ayushman Bharat PM-JAY work and what is covered?')">
+                            🏛️ Ayushman Bharat PM-JAY Benefits
+                        </button>
+                        <button type="button" class="prompt-chip" onclick="sendQuickPrompt('What is the national immunization schedule for a child up to 1 year?')">
+                            💉 Child Vaccination Timeline
+                        </button>
+                        <button type="button" class="prompt-chip" onclick="sendQuickPrompt('How to treat severe diarrhea in children under 5 using ORS and Zinc?')">
+                            💧 Diarrhea Zinc + ORS Guidelines
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Emergency Fast SOS Link -->
+                <div class="glass-panel emergency-callout-panel">
+                    <div class="callout-header">
+                        <span class="pulse-dot red"></span>
+                        <strong>Acute Emergency?</strong>
+                    </div>
+                    <p class="callout-text">If someone is unconscious, bleeding heavily, or in severe distress:</p>
+                    <a href="tel:108" class="btn btn-danger btn-block btn-sm">
+                        📞 Dial 108 Rural Ambulance
+                    </a>
+                    <a href="{{ url_for('triage_page') }}" class="btn btn-outline btn-block btn-xs mt-2">
+                        Open Clinical Triage Screener &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Main: Interactive AI Chat Room -->
+            <div class="ai-portal-chat-area">
+                <div class="glass-panel chat-card">
+                    <!-- Chat Header Bar -->
+                    <div class="chat-header-bar">
+                        <div class="chat-bot-info">
+                            <div class="chat-bot-avatar">
+                                <span>✨</span>
+                            </div>
+                            <div>
+                                <h3 class="chat-bot-name">Aarogya AI Health Navigator</h3>
+                                <p class="chat-bot-desc" id="chatSubRole">Mode: Rural Citizen | Bilingual Hindi &amp; Regional Support</p>
+                            </div>
+                        </div>
+
+                        <div class="chat-header-actions">
+                            <select id="chatLanguageSelect" class="form-control form-control-sm" style="width: auto;" onchange="updateChatLanguage(this.value)">
+                                <option value="en" selected>English</option>
+                                <option value="hi">हिन्दी (Hindi)</option>
+                                <option value="bn">বাংলা (Bengali)</option>
+                                <option value="te">తెలుగు (Telugu)</option>
+                                <option value="mr">मराठी (Marathi)</option>
+                                <option value="ta">தமிழ் (Tamil)</option>
+                            </select>
+                            <button type="button" class="btn btn-ghost btn-sm" onclick="clearChatHistory()" title="Clear Chat History">
+                                🗑️ Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages Stream -->
+                    <div class="chat-stream-window" id="chatStream">
+                        <!-- Welcome Message -->
+                        <div class="chat-bubble bot-bubble">
+                            <div class="bubble-avatar">✨</div>
+                            <div class="bubble-body">
+                                <div class="bubble-header">
+                                    <span class="sender-name">Aarogya AI</span>
+                                    <span class="msg-time">Just now</span>
+                                </div>
+                                <div class="bubble-text">
+                                    <p><strong>Namaste!</strong> I am your clinical support companion powered by <strong>Google Gemini</strong>.</p>
+                                    <p>I can help you with:</p>
+                                    <ul>
+                                        <li>🩺 Assessing symptoms and danger signs</li>
+                                        <li>🏛️ Government healthcare schemes (PM-JAY, JSY, PMSMA)</li>
+                                        <li>👶 Antenatal, postnatal, and child immunization guidelines</li>
+                                        <li>💊 Essential medicines and low-cost village nutrition</li>
+                                    </ul>
+                                    <p><em>Type your health query below in English, Hindi, or your regional language, or tap the microphone to speak!</em></p>
+                                </div>
+                                <div class="bubble-actions">
+                                    <button type="button" class="btn-voice-speak" onclick="speakMessage(this)" title="Read aloud">🔊 Listen</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input Box -->
+                    <div class="chat-input-container">
+                        <form id="chatForm" onsubmit="handleChatSubmit(event)" class="chat-input-form">
+                            <button type="button" class="btn-mic-toggle" id="micBtn" onclick="toggleVoiceInput()" title="Voice input (Speech to Text)">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                                </svg>
+                            </button>
+                            <input type="text" id="chatInput" class="chat-input-field" placeholder="Ask a clinical question, symptom evaluation, or scheme detail..." autocomplete="off" required>
+                            <button type="submit" class="btn btn-primary chat-send-btn" id="sendBtn">
+                                <span>Send</span>
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </form>
+                        <div class="chat-disclaimer">
+                            ⚠️ Aarogya AI provides clinical decision support. Always consult a certified Medical Officer or dial <strong>108</strong> for acute emergencies.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gemini API Key Configuration Modal -->
+<div class="modal-backdrop" id="apiKeyModal" style="display:none;">
+    <div class="modal-dialog glass-panel">
+        <div class="modal-header">
+            <h3>✨ Google Gemini API Configuration</h3>
+            <button type="button" class="modal-close-btn" onclick="closeApiKeyModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>
+                AarogyaSahay is integrated with <strong>Google Gemini 2.5 Flash</strong>. You can enter your Google GenAI API key below to enable direct live cloud model inference, or enjoy the intelligent built-in clinical rule fallback.
+            </p>
+            <div class="form-group mb-3">
+                <label class="form-label">Google Gemini API Key</label>
+                <input type="password" id="inputApiKey" class="form-control" placeholder="AIzaSy...">
+                <small class="form-helper">Get your free key from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.</small>
+            </div>
+            <div id="keyTestResult" class="key-test-feedback mb-2" style="display:none;"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" onclick="closeApiKeyModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" id="saveKeyBtn" onclick="saveGeminiApiKey()">
+                Verify &amp; Save Key
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentRole = 'patient';
+    let currentLanguage = 'en';
+    let chatHistory = [];
+    let isListening = false;
+    let recognition = null;
+
+    // Check system status on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        checkGeminiStatus();
+        initSpeechRecognition();
+    });
+
+    async function checkGeminiStatus() {
+        try {
+            const res = await fetch('/api/ai/status');
+            const data = await res.json();
+            const pill = document.getElementById('geminiLiveStatusPill');
+            const label = document.getElementById('geminiStatusLabel');
+            if (data.configured) {
+                label.innerText = 'Gemini 2.5 Live';
+                pill.classList.remove('pill-offline');
+            } else {
+                label.innerText = 'Gemini Ready (CDSS)';
+            }
+        } catch (e) {
+            console.error('Status check error:', e);
+        }
+    }
+
+    function setAiRole(role, btn) {
+        currentRole = role;
+        document.querySelectorAll('.role-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const roleNames = {
+            patient: 'Rural Citizen / Patient',
+            frontline: 'Frontline ASHA / ANM Worker',
+            doctor: 'Medical Officer (Doctor)'
+        };
+        document.getElementById('chatSubRole').innerText = `Mode: ${roleNames[role]} | Bilingual Regional Support`;
+        showToast(`Consultation mode set to: ${roleNames[role]}`);
+    }
+
+    function updateChatLanguage(val) {
+        currentLanguage = val;
+        showToast(`Language preference set to: ${val.toUpperCase()}`);
+    }
+
+    function sendQuickPrompt(promptText) {
+        document.getElementById('chatInput').value = promptText;
+        handleChatSubmit(new Event('submit'));
+    }
+
+    async function handleChatSubmit(e) {
+        if (e) e.preventDefault();
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
+        if (!message) return;
+
+        input.value = '';
+        appendMessage('user', message);
+
+        // Append loading bubble
+        const stream = document.getElementById('chatStream');
+        const loadingId = 'loading-' + Date.now();
+        const loadingBubble = document.createElement('div');
+        loadingBubble.id = loadingId;
+        loadingBubble.className = 'chat-bubble bot-bubble loading-bubble';
+        loadingBubble.innerHTML = `
+            <div class="bubble-avatar">✨</div>
+            <div class="bubble-body">
+                <div class="typing-indicator">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        `;
+        stream.appendChild(loadingBubble);
+        stream.scrollTop = stream.scrollHeight;
+
+        try {
+            const res = await fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: message,
+                    history: chatHistory,
+                    role: currentRole,
+                    language: currentLanguage
+                })
+            });
+            const data = await res.json();
+            const elem = document.getElementById(loadingId);
+            if (elem) elem.remove();
+
+            if (data.success && data.reply) {
+                appendMessage('bot', data.reply, data.is_ai_live);
+                chatHistory.push({ role: 'user', content: message });
+                chatHistory.push({ role: 'model', content: data.reply });
+            } else {
+                appendMessage('bot', 'I encountered an issue processing your query. Please check your network or try again.');
+            }
+        } catch (err) {
+            const elem = document.getElementById(loadingId);
+            if (elem) elem.remove();
+            appendMessage('bot', 'Network error reaching Aarogya AI service. Please verify your connection.');
+        }
+    }
+
+    function appendMessage(sender, text, isAiLive = true) {
+        const stream = document.getElementById('chatStream');
+        const bubble = document.createElement('div');
+        bubble.className = `chat-bubble ${sender === 'user' ? 'user-bubble' : 'bot-bubble'}`;
+
+        const formattedText = formatMarkdown(text);
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        if (sender === 'user') {
+            bubble.innerHTML = `
+                <div class="bubble-body">
+                    <div class="bubble-header">
+                        <span class="sender-name">You</span>
+                        <span class="msg-time">${time}</span>
+                    </div>
+                    <div class="bubble-text">${formattedText}</div>
+                </div>
+                <div class="bubble-avatar user-av">👤</div>
+            `;
+        } else {
+            bubble.innerHTML = `
+                <div class="bubble-avatar">✨</div>
+                <div class="bubble-body">
+                    <div class="bubble-header">
+                        <span class="sender-name">Aarogya AI</span>
+                        <span class="msg-time">${time}</span>
+                    </div>
+                    <div class="bubble-text">${formattedText}</div>
+                    <div class="bubble-actions">
+                        <button type="button" class="btn-voice-speak" onclick="speakMessage(this)" title="Read aloud">🔊 Listen</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        stream.appendChild(bubble);
+        stream.scrollTop = stream.scrollHeight;
+    }
+
+    function formatMarkdown(text) {
+        if (!text) return '';
+        let html = text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/\n\n/g, '<br><br>')
+            .replace(/\n- (.*?)/g, '<br>• $1')
+            .replace(/\n1\. (.*?)/g, '<br>1. $1')
+            .replace(/\n2\. (.*?)/g, '<br>2. $1')
+            .replace(/\n3\. (.*?)/g, '<br>3. $1');
+        return html;
+    }
+
+    function speakMessage(btn) {
+        const bubbleBody = btn.closest('.bubble-body');
+        const textElem = bubbleBody.querySelector('.bubble-text');
+        if (!textElem) return;
+
+        const text = textElem.innerText;
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.95;
+            window.speechSynthesis.speak(utterance);
+            showToast('Reading response aloud...');
+        } else {
+            showToast('Text-to-speech not supported in this browser.');
+        }
+    }
+
+    function initSpeechRecognition() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('chatInput').value = transcript;
+                stopVoiceInput();
+                handleChatSubmit(new Event('submit'));
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                stopVoiceInput();
+            };
+
+            recognition.onend = function() {
+                stopVoiceInput();
+            };
+        }
+    }
+
+    function toggleVoiceInput() {
+        if (!recognition) {
+            showToast('Voice recognition not supported in your browser.');
+            return;
+        }
+
+        if (isListening) {
+            recognition.stop();
+            stopVoiceInput();
+        } else {
+            recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+            recognition.start();
+            isListening = true;
+            document.getElementById('micBtn').classList.add('listening');
+            showToast('Listening... Speak your symptoms now');
+        }
+    }
+
+    function stopVoiceInput() {
+        isListening = false;
+        const mic = document.getElementById('micBtn');
+        if (mic) mic.classList.remove('listening');
+    }
+
+    function clearChatHistory() {
+        chatHistory = [];
+        const stream = document.getElementById('chatStream');
+        stream.innerHTML = `
+            <div class="chat-bubble bot-bubble">
+                <div class="bubble-avatar">✨</div>
+                <div class="bubble-body">
+                    <div class="bubble-header">
+                        <span class="sender-name">Aarogya AI</span>
+                        <span class="msg-time">Just now</span>
+                    </div>
+                    <div class="bubble-text">
+                        <p>Chat cleared. How can I assist your health and clinical needs today?</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        showToast('Chat history reset.');
+    }
+
+    // Modal management
+    function openApiKeyModal() {
+        document.getElementById('apiKeyModal').style.display = 'flex';
+    }
+
+    function closeApiKeyModal() {
+        document.getElementById('apiKeyModal').style.display = 'none';
+        document.getElementById('keyTestResult').style.display = 'none';
+    }
+
+    async function saveGeminiApiKey() {
+        const key = document.getElementById('inputApiKey').value.trim();
+        const feedback = document.getElementById('keyTestResult');
+        const saveBtn = document.getElementById('saveKeyBtn');
+
+        if (!key) {
+            feedback.style.display = 'block';
+            feedback.className = 'key-test-feedback error';
+            feedback.innerText = 'Please enter a valid Gemini API key.';
+            return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.innerText = 'Testing Key...';
+        feedback.style.display = 'block';
+        feedback.className = 'key-test-feedback info';
+        feedback.innerText = 'Testing connection with Google Gemini 2.5...';
+
+        try {
+            const res = await fetch('/api/ai/set-key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ api_key: key })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                feedback.className = 'key-test-feedback success';
+                feedback.innerText = data.message;
+                showToast('Gemini API key configured successfully!');
+                setTimeout(() => {
+                    closeApiKeyModal();
+                    checkGeminiStatus();
+                }, 1200);
+            } else {
+                feedback.className = 'key-test-feedback error';
+                feedback.innerText = data.error || 'Failed to verify API key.';
+            }
+        } catch (e) {
+            feedback.className = 'key-test-feedback error';
+            feedback.innerText = 'Network error while contacting backend.';
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerText = 'Verify & Save Key';
+        }
+    }
+
+    async function handleReportFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        appendMessage('user', `📎 Uploaded Lab Report: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB). Please explain this report in simple language.`);
+
+        const formData = new FormData();
+        formData.append('report_file', file);
+        formData.append('language', currentLanguage);
+
+        showToast('Uploading & analyzing report with Gemini...');
+
+        try {
+            const res = await fetch('/api/ai/upload-report-explain', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success && data.result) {
+                renderUploadedReportCard(data.result);
+            } else {
+                appendMessage('bot', 'Could not parse the report image. Please ensure the photo is clear or type the values into the chat.');
+            }
+        } catch (err) {
+            appendMessage('bot', 'Network error uploading medical report.');
+        }
+        event.target.value = '';
+    }
+
+    async function explainSampleReport(type) {
+        let sampleText = '';
+        if (type === 'cbc') {
+            sampleText = "Complete Blood Count (CBC) Report:\nHemoglobin: 8.2 g/dL (Normal: 12.0 - 15.5)\nRBC Count: 3.1 million/mcL (Low)\nWBC Count: 7,400 /mcL (Normal)\nPlatelets: 190,000 /mcL (Normal)\nMCV: 68 fL (Microcytic)\nConclusion: Microcytic hypochromic anemia";
+        } else {
+            sampleText = "Blood Glucose & Metabolic Profile:\nFasting Blood Sugar (FBS): 146 mg/dL (Normal: 70 - 99)\nPost-Prandial Blood Sugar: 210 mg/dL (Normal: < 140)\nHbA1c: 7.4% (Target: < 5.7%)\nSerum Creatinine: 0.9 mg/dL (Normal)";
+        }
+
+        appendMessage('user', `Please explain this lab report:\n\n${sampleText}`);
+
+        try {
+            const res = await fetch('/api/ai/upload-report-explain', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text_content: sampleText,
+                    language: currentLanguage
+                })
+            });
+            const data = await res.json();
+            if (data.success && data.result) {
+                renderUploadedReportCard(data.result);
+            }
+        } catch (e) {
+            appendMessage('bot', 'Error analyzing sample report.');
+        }
+    }
+
+    function renderUploadedReportCard(r) {
+        const stream = document.getElementById('chatStream');
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble bot-bubble';
+
+        const paramsHtml = (r.parameters_explained || []).map(p => `
+            <div style="background:var(--bg-surface-elevated); padding:8px 12px; border-radius:6px; margin-bottom:6px; border-left:3px solid ${p.status && p.status.includes('Normal') ? '#10B981' : '#EF4444'};">
+                <div style="display:flex; justify-content:space-between; font-weight:600; font-size:0.88rem;">
+                    <span>${p.parameter}</span>
+                    <span style="color:${p.status && p.status.includes('Normal') ? '#059669' : '#DC2626'};">${p.status || 'Noted'}</span>
+                </div>
+                <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:2px;">${p.plain_meaning}</div>
+            </div>
+        `).join('');
+
+        const stepsHtml = (r.suggested_next_steps || []).map(s => `<li>👉 ${s}</li>`).join('');
+        const dietHtml = (r.diet_and_lifestyle_tips || []).map(d => `<li>🥗 ${d}</li>`).join('');
+
+        bubble.innerHTML = `
+            <div class="bubble-avatar">✨</div>
+            <div class="bubble-body" style="max-width: 90%;">
+                <div class="bubble-header">
+                    <span class="sender-name">Aarogya AI Report Explainer</span>
+                    <span class="msg-time">Just now</span>
+                </div>
+                <div class="bubble-text">
+                    <h4 style="margin:0 0 6px 0; color:#4E80ED;">📋 ${r.report_title || 'Medical Report Summary'}</h4>
+                    <p style="margin-bottom:10px;">${r.patient_summary}</p>
+                    
+                    <div style="margin-bottom:12px;">${paramsHtml}</div>
+
+                    <div style="background:rgba(78, 128, 237, 0.08); padding:10px 14px; border-radius:8px; margin-bottom:10px;">
+                        <strong>🩺 Suggested Next Steps (Non-diagnostic):</strong>
+                        <ul style="padding-left:18px; margin:4px 0 0 0;">${stepsHtml}</ul>
+                    </div>
+
+                    <div style="background:rgba(16, 185, 129, 0.08); padding:10px 14px; border-radius:8px;">
+                        <strong>🥗 Daily Care & Diet Guidance:</strong>
+                        <ul style="padding-left:18px; margin:4px 0 0 0;">${dietHtml}</ul>
+                    </div>
+                </div>
+                <div class="bubble-actions">
+                    <button type="button" class="btn-voice-speak" onclick="speakMessage(this)">🔊 Listen</button>
+                </div>
+            </div>
+        `;
+
+        stream.appendChild(bubble);
+        stream.scrollTop = stream.scrollHeight;
+    }
+</script>
+{% endblock %}

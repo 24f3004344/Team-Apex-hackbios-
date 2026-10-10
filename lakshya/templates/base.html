@@ -32,6 +32,10 @@
                 <a href="tel:14416" class="emergency-pill hide-mobile"><span class="pulse-dot green"></span> <strong>14416</strong> Tele-MANAS</a>
             </div>
             <div class="top-utilities">
+                <button type="button" class="gemini-top-pill" onclick="openGlobalKeyModal()" title="Configure Google Gemini API Key">
+                    <span class="sparkle-icon">✨</span>
+                    <span id="globalGeminiLabel">Gemini 3.8</span>
+                </button>
                 <div class="offline-indicator" id="offlineIndicator" title="Offline-resilient caching enables field workers to operate without active internet">
                     <span class="status-dot green"></span>
                     <span class="offline-text">Field Sync: <strong>Active (Offline-Ready)</strong></span>
@@ -104,6 +108,10 @@
 
                 <a href="{{ url_for('analytics_page') }}" class="nav-link {% if request.endpoint in ('analytics_page', 'main.analytics_page') %}active{% endif %}">
                     <span class="nav-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span>Analytics</span>
+                </a>
+
+                <a href="{{ url_for('ai.ai_assistant_page') }}" class="nav-link nav-link-ai {% if request.endpoint in ('ai.ai_assistant_page', 'ai_assistant_page') %}active{% endif %}">
+                    <span class="nav-icon"><span style="color:#A855F7;">✨</span></span><span>Aarogya AI</span>
                 </a>
             </nav>
 
@@ -233,6 +241,76 @@
         </div>
     </footer>
 
+    <!-- Global Floating Aarogya AI Launcher -->
+    <div class="floating-ai-widget" id="floatingAiWidget">
+        <button type="button" class="floating-ai-btn" id="floatingAiBtn" onclick="toggleFloatingAiDrawer()" title="Aarogya AI Health Copilot (Gemini 3.8)">
+            <span class="ai-sparkle-anim">✨</span>
+            <span class="floating-btn-text">Aarogya AI</span>
+        </button>
+        <!-- Floating Quick Chat Drawer -->
+        <div class="floating-ai-drawer" id="floatingAiDrawer" style="display:none;">
+            <div class="drawer-header">
+                <div class="drawer-header-title">
+                    <span class="sparkle-badge">✨</span>
+                    <div>
+                        <strong>Aarogya AI Copilot</strong>
+                        <small>Powered by Gemini 3.8</small>
+                    </div>
+                </div>
+                <div class="drawer-header-actions">
+                    <a href="{{ url_for('ai.ai_assistant_page') }}" class="btn-drawer-portal" title="Open Full Portal">↗ Full Portal</a>
+                    <button type="button" class="btn-drawer-close" onclick="toggleFloatingAiDrawer()">&times;</button>
+                </div>
+            </div>
+            <div class="drawer-chat-stream" id="floatingChatStream">
+                <div class="drawer-msg bot">
+                    <span class="bot-icon">✨</span>
+                    <div class="msg-bubble">
+                        Namaste! I am your rural clinical companion. Ask any question about symptoms, emergency triage, or government health schemes.
+                    </div>
+                </div>
+            </div>
+            <div class="drawer-quick-chips">
+                <button type="button" class="drawer-chip" onclick="sendDrawerPrompt('What are red flag symptoms in pregnancy?')">🚨 High-Risk ANC</button>
+                <button type="button" class="drawer-chip" onclick="sendDrawerPrompt('Ayushman Bharat PM-JAY hospital coverage details')">🏛️ PM-JAY Benefits</button>
+                <button type="button" class="drawer-chip" onclick="sendDrawerPrompt('Emergency 108 ambulance dispatch criteria')">📞 108 SOS Protocol</button>
+            </div>
+            <form class="drawer-input-row" onsubmit="handleDrawerChat(event)">
+                <input type="text" id="floatingChatInput" placeholder="Ask Gemini AI..." autocomplete="off" required>
+                <button type="submit" class="btn-drawer-send">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Global Gemini Key Modal -->
+    <div class="modal-backdrop" id="globalApiKeyModal" style="display:none;">
+        <div class="modal-dialog glass-panel">
+            <div class="modal-header">
+                <h3>✨ Google Gemini 2.5 API Settings</h3>
+                <button type="button" class="modal-close-btn" onclick="closeGlobalKeyModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    AarogyaSahay is integrated with <strong>Google Gemini 2.5 Flash</strong>. You can enter your Google GenAI API key below to enable direct live cloud model inference, or enjoy the intelligent built-in clinical rule fallback.
+                </p>
+                <div class="form-group mb-3">
+                    <label class="form-label">Google Gemini API Key</label>
+                    <input type="password" id="globalInputApiKey" class="form-control" placeholder="AIzaSy...">
+                    <small class="form-helper">Get your free key from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.</small>
+                </div>
+                <div id="globalKeyTestResult" class="key-test-feedback mb-2" style="display:none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost" onclick="closeGlobalKeyModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" id="globalSaveKeyBtn" onclick="saveGlobalGeminiApiKey()">
+                    Verify &amp; Save Key
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Global Toast Notifications Container -->
     <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
@@ -253,6 +331,7 @@
 
     <script src="{{ url_for('static', filename='js/translations.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ai_features.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
