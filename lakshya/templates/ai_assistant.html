@@ -27,6 +27,9 @@
                 </p>
             </div>
             <div class="ai-header-controls">
+                <button type="button" class="btn btn-outline btn-sm" onclick="openVoiceSettingsModal()" style="border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.08);">
+                    <span id="elevenLabsBadge">🎙️ ElevenLabs Voice</span>
+                </button>
                 <button type="button" class="btn btn-outline btn-sm" onclick="openApiKeyModal()">
                     <span class="ai-sparkle">✨</span> Gemini Key Settings
                 </button>
@@ -400,7 +403,9 @@
         if (!textElem) return;
 
         const text = textElem.innerText;
-        if ('speechSynthesis' in window) {
+        if (typeof playAccessibleVoice === 'function') {
+            playAccessibleVoice(text, btn);
+        } else if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.95;

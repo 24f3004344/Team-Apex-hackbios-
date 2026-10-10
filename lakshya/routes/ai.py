@@ -4,10 +4,12 @@ Provides RESTful APIs for AI Clinical Triage, Tele-OPD Copilot,
 Vernacular Health Record Explainer, High-Risk Care Plans, and Live Chat Assistant.
 """
 
-from flask import Blueprint, render_template, request, jsonify, session
+from flask import Blueprint, render_template, request, jsonify, session, Response
 import gemini_service
+import elevenlabs_service
 
 ai_bp = Blueprint("ai", __name__)
+
 
 
 # =====================================================================
@@ -191,3 +193,85 @@ def api_ai_high_risk_plan():
 def ai_assistant_page():
     """Full-page interactive Aarogya AI Healthcare Copilot portal."""
     return render_template("ai_assistant.html")
+
+
+# =====================================================================
+# ELEVENLABS REALISTIC VOICE TTS ROUTES
+# =====================================================================
+
+@ai_bp.route("/api/voice/status", methods=["GET"])
+def api_voice_status():
+    """Return ElevenLabs API configuration status and available voices."""
+    configured = elevenlabs_service.is_configured()
+    key = elevenlabs_service.get_api_key()
+    masked_key = ""
+    if key and len(key) > 8:
+        masked_key = f"{key[:4]}...{key[-4:]}"
+
+    return jsonify({
+        "success": True,
+        "configured": configured,
+        "masked_key": masked_key,
+        "active_engine": "ElevenLabs Lifelike TTS" if configured else "Browser Speech Engine",
+        "model": elevenlabs_service.DEFAULT_MODEL,
+        "voices": elevenlabs_service.get_available_voices()
+    })
+
+
+@ai_bp.route("/api/voice/set-key", methods=["POST"])
+def api_voice_set_key():
+    """Configure or update the ElevenLabs API key dynamically."""
+    data = request.get_json() or {}
+    api_key = data.get("api_key", "").strip()
+
+    if not api_key:
+        return jsonify({"success": False, "error": "API key cannot be empty."}), 400
+
+    test_result = elevenlabs_service.test_elevenlabs_connection(api_key)
+    if not test_result.get("success"):
+        return jsonify({
+            "success": False,
+            "error": f"Invalid ElevenLabs key or connection error: {test_result.get('error')}"
+        }), 400
+
+    elevenlabs_service.set_runtime_api_key(api_key)
+    session["elevenlabs_configured"] = True
+
+    return jsonify({
+        "success": True,
+        "message": "ElevenLabs API key verified successfully! Realistic voice responses enabled.",
+        "details": test_result
+    })
+
+
+@ai_bp.route("/api/voice/tts", methods=["POST"])
+def api_voice_tts():
+    """Generate realistic spoken audio via ElevenLabs for medical guidance and accessibility."""
+    data = request.get_json() or {}
+    text = data.get("text", "").strip()
+    voice_id = data.get("voice_id", "21m00Tcm4TlvDq8ikWAM")
+
+    if not text:
+        return jsonify({"success": False, "error": "Text is required"}), 400
+
+    if not elevenlabs_service.is_configured():
+        return jsonify({
+            "success": False,
+            "fallback_to_browser": True,
+            "error": "ElevenLabs API key not configured. Using browser speech synthesis."
+        }), 200
+
+    audio_bytes, err = elevenlabs_service.text_to_speech(text, voice_id=voice_id)
+    if err or not audio_bytes:
+        return jsonify({
+            "success": False,
+            "fallback_to_browser": True,
+            "error": f"ElevenLabs synthesis error: {err}. Falling back to browser voice."
+        }), 200
+
+    return Response(audio_bytes, mimetype="audio/mpeg", headers={
+        "Content-Disposition": "inline; filename=speech.mp3",
+        "X-Voice-Engine": "ElevenLabs",
+        "Cache-Control": "public, max-age=3600"
+    })
+

@@ -47,11 +47,49 @@ AarogyaSahay is deeply powered by the official **Google GenAI SDK (`google-genai
   echo "GEMINI_API_KEY=your-gemini-api-key" >> lakshya/.env
   ```
 
+---
+
+## 🎙️ ElevenLabs Lifelike Voice Integration & Healthcare Accessibility
+
+**AarogyaSahay** deeply integrates **ElevenLabs** to make healthcare fundamentally more accessible through natural, human-like voice interaction. 
+
+### Why Voice-Based Interaction in Healthcare?
+- **Universal Accessibility:** Overcomes barriers for users with low literacy, elderly patients, or visual impairments who cannot read small medical text or prescription jargon.
+- **Conversational Comfort:** Hearing advice in a calm, empathetic, and culturally tuned voice relieves anxiety for rural mothers, expectant parents, and caregivers.
+- **Hands-Free Frontline Efficiency:** Frontline ASHA workers can listen to triage recommendations and medication advisories while actively attending to patients.
+
+### Key Capabilities:
+1. **Flagship Multilingual Model (`eleven_multilingual_v2`):** Generates realistic conversational speech across Hindi, English, and regional cadences.
+2. **Curated Healthcare Personas:**
+   - **Rachel (21m00Tcm4TlvDq8ikWAM):** Calm & empathetic — ideal for patient guidance.
+   - **Sarah (EXAVITQu4vr4xnSDxMaL):** Warm & gentle maternal caregiver.
+   - **Antoni (ErXwobaYiN019PkySvjV):** Reassuring & trustworthy clinical doctor.
+   - **Daniel (onwK4e9ZLuTAKqWW03F9):** Authoritative public health advisor.
+3. **Omnipresent Voice Support:**
+   - **`/ai-assistant`:** Read aloud answers, symptom guidance, and lab explanations.
+   - **Floating Copilot Drawer:** 1-click audio playback on all pages.
+   - **`/records`:** Vernacular Explainer reads simplified diagnoses and medicine schedules.
+4. **Zero-Failure Architecture:** If no ElevenLabs key is configured or when offline, AarogyaSahay automatically falls back to local browser speech synthesis (`hi-IN` / `en-IN`), guaranteeing uninterrupted audio.
+
+### How to Configure ElevenLabs API Key:
+- **Option 1 (Web UI Modal):** Click **🎙️ ElevenLabs Voice** in the navigation or on `/ai-assistant` and enter your key.
+- **Option 2 (Terminal/Environment):**
+  ```bash
+  export ELEVENLABS_API_KEY="your-elevenlabs-api-key"
+  ```
+- **Option 3 (`.env` file):**
+  ```bash
+  echo "ELEVENLABS_API_KEY=your-elevenlabs-api-key" >> lakshya/.env
+  ```
+
+---
+
+## 🚀 Running Locally
 
 From your terminal in the workspace:
 
 ```bash
-cd /Users/lakshyaparakh/Documents/Team-Apex-hackbios-/lakshya
+cd lakshya
 python3 app.py
 ```
 

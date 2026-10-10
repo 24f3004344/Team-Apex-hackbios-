@@ -197,7 +197,16 @@ function appendDrawerMsg(role, text) {
     if (role === 'user') {
         msgDiv.innerHTML = `<div class="msg-bubble">${formatted}</div>`;
     } else {
-        msgDiv.innerHTML = `<span class="bot-icon">✨</span><div class="msg-bubble">${formatted}</div>`;
+        msgDiv.innerHTML = `
+            <span class="bot-icon">✨</span>
+            <div class="msg-bubble">
+                ${formatted}
+                <div style="margin-top:6px; display:flex; justify-content:flex-end;">
+                    <button type="button" class="drawer-voice-btn" onclick="playAccessibleVoice(this.closest('.msg-bubble').innerText.replace('🔊 Listen', '').replace('Speaking...', '').trim(), this)" title="Listen to response (ElevenLabs Voice)">
+                        🔊 Listen
+                    </button>
+                </div>
+            </div>`;
     }
 
     stream.appendChild(msgDiv);
@@ -562,7 +571,7 @@ function renderVernacularExplainerModal(r) {
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline btn-sm" onclick="readVernacularAloud()">🔊 बोलकर सुनाएं (Listen Aloud)</button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="readVernacularAloud(this)">🔊 बोलकर सुनाएं (Listen Aloud)</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('vernacularModal').style.display='none'">समझ गया / Close</button>
             </div>
         </div>
@@ -571,15 +580,10 @@ function renderVernacularExplainerModal(r) {
     modal.style.display = 'flex';
 }
 
-function readVernacularAloud() {
+function readVernacularAloud(btn) {
     const summary = document.querySelector('.summary-box p')?.innerText || '';
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(summary);
-        utterance.lang = 'hi-IN';
-        utterance.rate = 0.9;
-        window.speechSynthesis.speak(utterance);
-        if (window.showToast) showToast('Reading explanation aloud in Hindi...');
+    if (summary) {
+        playAccessibleVoice(summary, btn);
     }
 }
 
@@ -678,3 +682,194 @@ function renderHighRiskPlanModal(patientName, r) {
 
     modal.style.display = 'flex';
 }
+
+/**
+ * =====================================================================
+ * ELEVENLABS REALISTIC ACCESSIBLE VOICE PLAYER ENGINE
+ * =====================================================================
+ */
+window.voiceState = {
+    audioPlayer: null,
+    isPlaying: false,
+    currentBtn: null,
+    originalHtml: '',
+    elevenLabsConfigured: false,
+    selectedVoiceId: "21m00Tcm4TlvDq8ikWAM"
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    checkVoiceStatus();
+});
+
+async function checkVoiceStatus() {
+    try {
+        const res = await fetch('/api/voice/status');
+        const data = await res.json();
+        window.voiceState.elevenLabsConfigured = data.configured;
+        const voiceBadge = document.getElementById('elevenLabsBadge');
+        if (voiceBadge) {
+            voiceBadge.innerText = data.configured ? '🎙️ ElevenLabs Lifelike Voice' : '🎙️ Voice Active';
+            if (data.configured) voiceBadge.classList.add('badge-eleven-active');
+        }
+    } catch (e) {
+        console.warn('Voice status check failed:', e);
+    }
+}
+
+async function playAccessibleVoice(text, btnElement, voiceId) {
+    if (!text) return;
+
+    // Toggle: if currently playing, stop it
+    if (window.voiceState.isPlaying) {
+        stopAccessibleVoice();
+        if (btnElement && btnElement === window.voiceState.currentBtn) {
+            return;
+        }
+    }
+
+    const originalHtml = btnElement ? btnElement.innerHTML : '';
+    if (btnElement) {
+        btnElement.innerHTML = '<span class="voice-wave-anim">🎙️</span> <strong>Speaking...</strong>';
+        btnElement.classList.add('btn-speaking');
+        window.voiceState.currentBtn = btnElement;
+        window.voiceState.originalHtml = originalHtml;
+    }
+
+    try {
+        // Attempt ElevenLabs realistic voice TTS first
+        const vid = voiceId || window.voiceState.selectedVoiceId;
+        const res = await fetch('/api/voice/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text, voice_id: vid })
+        });
+
+        const contentType = res.headers.get('content-type') || '';
+        if (res.ok && contentType.includes('audio/mpeg')) {
+            const blob = await res.blob();
+            const audioUrl = URL.createObjectURL(blob);
+            const audio = new Audio(audioUrl);
+            window.voiceState.audioPlayer = audio;
+            window.voiceState.isPlaying = true;
+
+            audio.onended = () => stopAccessibleVoice();
+            audio.onerror = () => {
+                fallbackToBrowserSpeech(text);
+            };
+
+            await audio.play();
+            if (window.showToast) showToast('Playing lifelike ElevenLabs voice...', 'info');
+            return;
+        }
+    } catch (err) {
+        console.warn('ElevenLabs API request failed, using browser speech fallback:', err);
+    }
+
+    // Fallback: browser SpeechSynthesis
+    fallbackToBrowserSpeech(text);
+}
+
+function stopAccessibleVoice() {
+    if (window.voiceState.audioPlayer) {
+        window.voiceState.audioPlayer.pause();
+        window.voiceState.audioPlayer = null;
+    }
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+    window.voiceState.isPlaying = false;
+    if (window.voiceState.currentBtn && window.voiceState.originalHtml) {
+        window.voiceState.currentBtn.innerHTML = window.voiceState.originalHtml;
+        window.voiceState.currentBtn.classList.remove('btn-speaking');
+        window.voiceState.currentBtn = null;
+    }
+}
+
+function fallbackToBrowserSpeech(text) {
+    if (!('speechSynthesis' in window)) {
+        if (window.showToast) showToast('Speech not supported on this browser.');
+        stopAccessibleVoice();
+        return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const lang = localStorage.getItem('aarogya_lang') || 'en';
+    utterance.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
+    utterance.rate = 0.92;
+
+    utterance.onend = () => stopAccessibleVoice();
+    utterance.onerror = () => stopAccessibleVoice();
+
+    window.voiceState.isPlaying = true;
+    window.speechSynthesis.speak(utterance);
+}
+
+function openVoiceSettingsModal() {
+    let modal = document.getElementById('voiceSettingsModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeVoiceSettingsModal() {
+    let modal = document.getElementById('voiceSettingsModal');
+    if (modal) modal.style.display = 'none';
+}
+
+async function saveElevenLabsKey() {
+    const input = document.getElementById('inputElevenKey');
+    const feedback = document.getElementById('voiceKeyFeedback');
+    const saveBtn = document.getElementById('saveElevenBtn');
+    const key = input ? input.value.trim() : '';
+
+    if (!key) {
+        if (feedback) {
+            feedback.style.display = 'block';
+            feedback.className = 'key-test-feedback error';
+            feedback.innerText = 'Please enter a valid ElevenLabs API key.';
+        }
+        return;
+    }
+
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerText = 'Verifying ElevenLabs...';
+    }
+    if (feedback) {
+        feedback.style.display = 'block';
+        feedback.className = 'key-test-feedback info';
+        feedback.innerText = 'Testing key with ElevenLabs API...';
+    }
+
+    try {
+        const res = await fetch('/api/voice/set-key', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api_key: key })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            feedback.className = 'key-test-feedback success';
+            feedback.innerText = data.message;
+            if (window.showToast) showToast('ElevenLabs voice engine activated!', 'success');
+            setTimeout(() => {
+                closeVoiceSettingsModal();
+                checkVoiceStatus();
+            }, 1200);
+        } else {
+            feedback.className = 'key-test-feedback error';
+            feedback.innerText = data.error || 'Failed to verify ElevenLabs key.';
+        }
+    } catch (e) {
+        if (feedback) {
+            feedback.className = 'key-test-feedback error';
+            feedback.innerText = 'Network error verifying key.';
+        }
+    } finally {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerText = 'Verify & Save Voice Key';
+        }
+    }
+}
+
